@@ -1359,22 +1359,6 @@
         </button>
       </div>
     </div>
-    <div id="client-chat">
-      <div id="chat-box">
-        <div id="chat-header">
-          <h3 id="chat-client-name">💬 Chat</h3>
-          <button id="chat-close">✕</button>
-        </div>
-        <div id="chat-messages"></div>
-        <div id="chat-input">
-          <textarea
-            id="chat-textarea"
-            placeholder="Napisz wiadomość..."
-          ></textarea>
-          <button id="chat-send">📤</button>
-        </div>
-      </div>
-    </div>
     <div id="scene-overlay">
       <canvas id="scene-canvas"></canvas>
       <div id="scene-ui">
@@ -2838,73 +2822,234 @@
       }
       function getClientResponse(c, msg) {
         var m = msg.toLowerCase();
+        // POZDROWIENIA
+        if (
+          m.indexOf("dzien dobry") >= 0 ||
+          m.indexOf("dzień dobry") >= 0 ||
+          m.indexOf("hej") >= 0 ||
+          m.indexOf("czesc") >= 0 ||
+          m.indexOf("cześć") >= 0 ||
+          m.indexOf("witam") >= 0 ||
+          m.indexOf("siema") >= 0 ||
+          m.indexOf("hello") >= 0
+        )
+          return "Dzień dobry! Dziękuję że Pan/Pani się zajmuje moją sprawą. Jak mogę pomóc?";
+        if (
+          m.indexOf("jak sie masz") >= 0 ||
+          m.indexOf("jak się masz") >= 0 ||
+          m.indexOf("co slychac") >= 0 ||
+          m.indexOf("co słychać") >= 0
+        )
+          return "Szczerze? Kiepsko... Ta sytuacja bardzo mnie stresuje. Ale dziękuję że Pan/Pani pyta.";
+        if (
+          m.indexOf("dobranoc") >= 0 ||
+          m.indexOf("do widzenia") >= 0 ||
+          m.indexOf("pa") >= 0 ||
+          m.indexOf("nara") >= 0
+        )
+          return "Do widzenia! Proszę dać znać jak będą jakieś postępy w sprawie.";
+        // SCREENY
         var wantsScreens =
           m.indexOf("screen") >= 0 ||
-          (m.indexOf("dowod") >= 0 && m.indexOf("wiecej") >= 0) ||
-          (m.indexOf("wyslij") >= 0 && m.indexOf("wiecej") >= 0) ||
+          m.indexOf("zdj") >= 0 ||
+          m.indexOf("foto") >= 0 ||
+          m.indexOf("dowod") >= 0 ||
+          m.indexOf("dowód") >= 0 ||
+          m.indexOf("wyslij") >= 0 ||
+          m.indexOf("wyślij") >= 0 ||
           m.indexOf("przeslij") >= 0 ||
-          (m.indexOf("pokaz") >= 0 && m.indexOf("wiecej") >= 0) ||
-          (m.indexOf("jeszcze") >= 0 &&
-            (m.indexOf("dowod") >= 0 || m.indexOf("screen") >= 0));
+          m.indexOf("prześlij") >= 0 ||
+          m.indexOf("pokaz") >= 0 ||
+          m.indexOf("pokaż") >= 0 ||
+          m.indexOf("wiecej") >= 0 ||
+          m.indexOf("więcej") >= 0 ||
+          m.indexOf("jeszcze") >= 0;
         if (wantsScreens) {
           if (!c.extraScreensSent) c.extraScreensSent = 0;
           if (c.extraScreensSent >= 3)
             return (
-              "Niestety, to wszystkie screeny jakie mam. Te " +
+              "To już wszystko co mam. Wysłałem/am już " +
               c.evidence.length +
-              " dowody to wszystko co posiadam. Więcej nie mam."
+              " screenów - więcej nie posiadam. Przepraszam!"
             );
           c.extraScreensSent++;
           var baseEv = c.evidence[0];
-          var extraTexts = [
-            "To kolejna wiadomość od sprawcy...",
-            "Mam jeszcze ten screen...",
-            "I jeszcze to znalazłem/am...",
-          ];
-          var extraTxt =
-            extraTexts[Math.min(c.extraScreensSent - 1, extraTexts.length - 1)];
+          var isFake = baseEv.fake;
+          var screenTexts = {
+            STALKING: [
+              "Widziałem cię dzisiaj w Żabce o 17:23. Kupiłaś mleko i bułki.",
+              "Ładna ta czerwona kurtka. Pasuje ci.",
+              "Twoja koleżanka z pracy ma na imię Asia, prawda? Często razem jecie lunch.",
+              "Wczoraj wróciłaś do domu o 21:37. Późno.",
+              "Wiem że byłaś u fryzjera. Nowa fryzura ci pasuje.",
+              "Twój samochód stał dzisiaj pod galerią handlową od 14:00 do 16:30.",
+              "Widziałem jak rozmawiałaś z tym facetem. Kto to był?",
+              "Nie ignoruj mnie. Wiem gdzie jesteś.",
+              "Dlaczego nie odpisujesz? Widzę że czytasz.",
+              "Twoje okno było otwarte wczoraj w nocy. Niebezpiecznie.",
+              "Ten facet co cię odwiedził w sobotę - to twój brat czy ktoś inny?",
+              "Lubisz tę kawiarnię przy rynku, prawda? Często tam chodzisz.",
+              "Widziałem cię na siłowni. Ćwiczysz w poniedziałki i środy.",
+              "Ślicznie wyglądasz w tej niebieskiej sukience.",
+              "Zauważyłem że zmieniłaś trasę do pracy. Dlaczego?",
+            ],
+            GROŹBY: [
+              "Znajdę cię i pożałujesz że się urodziłeś.",
+              "Wiem gdzie mieszkasz. Wiem gdzie pracujesz. Uważaj.",
+              "Ty i twoja rodzina zapłacicie za to co zrobiłeś.",
+              "Lepiej oglądaj się za siebie jak wychodzisz z domu.",
+              "To ostrzeżenie. Następnym razem nie będę taki miły.",
+              "Zniszczę ci życie. Pożałujesz.",
+              "Masz 24h żeby przeprosić. Potem będzie źle.",
+              "Wiem gdzie chodzi twoje dziecko do szkoły.",
+              "Twój samochód ładnie wygląda. Szkoda jakby mu się coś stało.",
+              "Nie śpij spokojnie. Nigdy nie wiesz kiedy przyjdę.",
+              "Zabiję cię sk***synu. To nie jest groźba, to obietnica.",
+              "Lepiej się wyprowadź z miasta. Dla twojego dobra.",
+              "Mam znajomych którzy chętnie cię odwiedzą.",
+              "Pamiętaj - zawsze cię znajdę.",
+              "To dopiero początek. Będzie gorzej.",
+            ],
+            ZNIESŁAWIENIE: [
+              "UWAGA! Ta osoba to oszust! Nie róbcie z nią interesów!",
+              "Oficjalnie informuję że [imię] kradnie pieniądze klientom.",
+              "Mam dowody że ta osoba jest pedofilem. Udostępniajcie!",
+              "[imię] zdradza żonę/męża z wieloma osobami. Mam zdjęcia.",
+              "Ta osoba rozprowadza narkotyki. Każdy w mieście wie.",
+              "SKANDAL! [imię] brał łapówki gdy pracował w urzędzie!",
+              "Ostrzegam wszystkich - ta osoba ma AIDS i tego nie mówi.",
+              "[imię] to złodziej! Ukradł mi 10000 zł! Uwaga na niego!",
+              "Mam nagranie jak [imię] bije swoją żonę. Potwór!",
+              "Ta osoba była w więzieniu za gwałt. Sprawdźcie sami.",
+              "[imię] oszukuje na wadze produktów w swoim sklepie!",
+              "UWAGA NA OSZUSTA! Sprzedaje podróbki jako oryginały!",
+              "Ta osoba to alkoholik który bije swoje dzieci.",
+              "[imię] wyłudza pieniądze od starszych osób! Przekręt!",
+              "Mam dowody na defraudację w firmie [imię]. Złodziej!",
+            ],
+            OSZUSTWO: [
+              "Przelej 500 zł na weryfikację konta, potem zwrócę 5000 zł.",
+              "Gratulacje! Wygrałeś iPhone! Wpłać tylko 99 zł za wysyłkę.",
+              "Jestem z banku, proszę podać kod BLIK do weryfikacji.",
+              "Sprzedam tanio - PlayStation 5 za 800 zł, nowe w folii!",
+              "Mama, zgubiłam telefon, to mój nowy numer. Pożycz 2000 zł pilnie.",
+              "Twoja paczka czeka, dopłać 12 zł cła klikając w link.",
+              "Pilne! Twoje konto zostanie zablokowane. Zaloguj się tutaj.",
+              "Oferuję pracę zdalną - 500 zł dziennie! Wpłać 200 zł na start.",
+              "Sprzedam samochód, wyjazd za granicę, cena do negocjacji.",
+              "Zainwestuj 1000 zł, zarobisz 10000 zł w tydzień! Gwarancja!",
+              "Kup kryptowalutę XYZ zanim eksploduje! Zostaw mi pieniądze.",
+              "Loteria wybrała twój numer! Wpłać podatek 300 zł po odbiór.",
+              "Sprzedam bilety na koncert - tańsze niż w kasie!",
+              "Twój komputer ma wirusa! Zadzwoń pod ten numer natychmiast.",
+              "Jestem prawnikiem, masz spadek do odebrania. Opłata 500 zł.",
+            ],
+            HACKING: [
+              "Mamy dostęp do twojego konta. Wpłać 2 BTC lub wszystko ujawnimy.",
+              "Twoje hasło to [hasło]. Widzimy wszystko co robisz.",
+              "Nagraliśmy cię przez kamerkę. Mamy wszystko. Płać albo publikujemy.",
+              "Włamaliśmy się na twoje social media. Wszystkie hasła mamy.",
+              "Twoje zdjęcia i dokumenty są nasze. Szyfrujemy dysk.",
+              "Zmieniliśmy ci hasła wszędzie. Chcesz odzyskać dostęp? Płać.",
+              "Mamy twoje dane bankowe. Współpracuj albo je wykorzystamy.",
+              "Właśnie przelaliśmy 5000 zł z twojego konta. Dzięki za hasło.",
+              "Twoja poczta należy teraz do nas. Widzimy wszystkie maile.",
+              "Admin panel twojej strony jest nasz. Płać albo kasujemy.",
+              "Wykradliśmy bazę danych klientów. Masz 48h.",
+              "Twój telefon jest zhakowany. Widzimy wszystko w czasie rzeczywistym.",
+              "Mamy dostęp do twojego dysku Google. Wszystkie pliki nasze.",
+              "Keylogger zainstalowany. Widzimy każde naciśnięcie klawisza.",
+              "Twoja sieć WiFi jest nasza. Monitorujemy cały ruch.",
+            ],
+            SZANTAŻ: [
+              "Mam twoje prywatne zdjęcia. Wpłać 5000 zł albo wyślę wszystkim.",
+              "Nagrałem naszą rozmowę wideo. Chcesz żeby rodzina zobaczyła?",
+              "Wiem o twojej zdradzie. Mam dowody. Płać albo żona się dowie.",
+              "Znam twój sekret. 3000 zł i zapomnę o wszystkim.",
+              "Mam screeny twoich rozmów. Wyobraź sobie co powiedzą w pracy.",
+              "Twoje prywatne filmy są bezpieczne. Na razie. Płać co miesiąc.",
+              "Opublikuję wszystko na Facebooku jeśli nie prześlesz pieniędzy.",
+              "Mam zdjęcia których nie chcesz żeby ktoś zobaczył. Dogadajmy się.",
+              "Twoi znajomi na FB dostaną ciekawy materiał. Chyba że...",
+              "Wiem gdzie pracujesz. Szef na pewno chciałby to zobaczyć.",
+              "Mam nagranie z kamery. Wiesz o czym mówię. 10000 zł.",
+              "Wszystkie twoje sekrety mogą wyjść na jaw. Cena: 8000 zł.",
+              "To byłaby szkoda gdyby dzieci zobaczyły te zdjęcia mamy/taty.",
+              "Media społecznościowe to potężna broń. Mam amunicję.",
+              "Możemy to załatwić po cichu. Albo wszyscy się dowiedzą.",
+            ],
+            PODSZYWANIE: [
+              "[Fałszywy profil] Sprzedaję oryginalne produkty Apple 50% taniej!",
+              "[Fałszywy profil] Polacy to najgorszy naród! Won z imigrantami!",
+              "[Fałszywy profil] Oszukuję klientów od lat i nic mi nie zrobicie.",
+              "[Fałszywy profil] Moja firma to ściema, nie kupujcie u mnie.",
+              "[Fałszywy profil] Zdradzam partnera z wieloma osobami hehe.",
+              "[Fałszywy profil] Jestem za legalizacją wszystkich narkotyków!",
+              "[Fałszywy profil] Nienawidzę swojej pracy i klientów.",
+              "[Fałszywy profil] Kradnę pomysły od innych i podaję jako swoje.",
+              "[Fałszywy profil] Moje produkty są podrabiane ale sprzedaję drogo.",
+              "[Fałszywy profil] Głosowałem na [kontrowersyjna partia] i jestem dumny!",
+              "[Fałszywy profil] Płacę pracownikom grosze a sam mam Porsche.",
+              "[Fałszywy profil] Wyrzuciłem pracownika bo mi się nie podobał.",
+              "[Fałszywy profil] Kłamię w CV i oszukuję pracodawców od lat.",
+              "[Fałszywy profil] Moja firma nie płaci podatków. I co mi zrobicie?",
+              "[Fałszywy profil] Zaczynam nowy biznes - piramida finansowa!",
+            ],
+          };
+          var typeKey = c.type;
+          var textsForType = screenTexts[typeKey] || screenTexts["GROŹBY"];
+          if (!c.usedScreenTexts) c.usedScreenTexts = [];
+          var availableTexts = textsForType.filter(function (t) {
+            return c.usedScreenTexts.indexOf(t) < 0;
+          });
+          if (availableTexts.length == 0) availableTexts = textsForType;
+          var randomText =
+            availableTexts[Math.floor(Math.random() * availableTexts.length)];
+          c.usedScreenTexts.push(randomText);
           var newEv = {
             id: "e" + c.id + "_" + c.extraScreensSent,
             tp: baseEv.tp + " #" + (c.evidence.length + 1),
-            fake: baseEv.fake,
-            txt: extraTxt + " " + baseEv.txt.substring(0, 25) + "...",
+            fake: isFake,
+            txt: randomText,
             verified: false,
             verdict: null,
             ind: {
               meta: {
-                s: baseEv.fake ? 1 : 0,
-                i: baseEv.fake
-                  ? "Edytowany - " +
-                    ["GIMP", "Photoshop", "Paint.NET"][c.extraScreensSent % 3]
-                  : "Oryginalny plik",
+                s: isFake ? 1 : 0,
+                i: isFake
+                  ? "Plik edytowany w " +
+                    ["Photoshop", "GIMP", "Paint.NET", "Canva", "Pixlr"][
+                      Math.floor(Math.random() * 5)
+                    ]
+                  : "Oryginalny plik - brak edycji",
               },
               ela: {
-                s: baseEv.fake ? 1 : 0,
-                i: baseEv.fake
-                  ? "Widoczne ślady edycji"
+                s: isFake ? 1 : 0,
+                i: isFake
+                  ? "Wykryto ślady manipulacji pikseli"
                   : "Brak śladów manipulacji",
               },
               font: {
-                s: baseEv.fake ? 1 : 0,
-                i: baseEv.fake
-                  ? "Czcionka niezgodna z aplikacją"
-                  : "Czcionka prawidłowa",
+                s: isFake ? 1 : 0,
+                i: isFake
+                  ? "Czcionka niezgodna z aplikacją " + baseEv.tp
+                  : "Czcionka zgodna z " + baseEv.tp,
               },
               time: {
-                s: baseEv.fake ? 1 : 0,
-                i: baseEv.fake
-                  ? "Timestamp podejrzany"
-                  : "Znaczniki czasowe spójne",
+                s: isFake ? 1 : 0,
+                i: isFake
+                  ? "Znacznik czasu podejrzany/niemożliwy"
+                  : "Znaczniki czasowe prawidłowe",
               },
               ai: {
-                s: baseEv.fake ? 1 : 0,
-                i: baseEv.fake
-                  ? 80 +
-                    Math.floor(Math.random() * 15) +
-                    "% - prawdopodobnie sfałszowany"
-                  : 2 +
-                    Math.floor(Math.random() * 8) +
-                    "% - wygląda autentycznie",
+                s: isFake ? 1 : 0,
+                i: isFake
+                  ? 78 +
+                    Math.floor(Math.random() * 18) +
+                    "% - prawdopodobnie fałszywy"
+                  : 1 +
+                    Math.floor(Math.random() * 9) +
+                    "% - wygląda na autentyczny",
               },
             },
           };
@@ -2914,45 +3059,253 @@
           G.results[c.id][newEv.id] = {};
           saveGame();
           setTimeout(function () {
-            notify("📎 Nowy dowód!", "Dodano screen #" + c.evidence.length);
-          }, 500);
+            notify(
+              "📎 Nowy dowód!",
+              "Screen #" + c.evidence.length + " dodany!"
+            );
+            renderPanel("case");
+          }, 300);
           return (
             "__IMG__" +
             newEv.img +
-            "__ENDIMG__📎 Wysylam screen #" +
+            "__ENDIMG__Wysyłam screen #" +
             c.evidence.length +
-            "! Zostalo " +
+            "! Mam jeszcze " +
             (3 - c.extraScreensSent) +
-            ". Znajdziesz go w SPRAWY - DOWODY."
+            ". Sprawdź w zakładce SPRAWY."
           );
         }
+        // STALKING
         if (c.type == "STALKING") {
-          if (m.indexOf("ile") >= 0 && m.indexOf("wiadomo") >= 0)
-            return "Dostaje kilkanascie wiadomosci dziennie.";
-          if (m.indexOf("gdzie") >= 0)
-            return "W kawiarni, przy pracy, wszedzie mnie sledzi.";
-          if (m.indexOf("blokow") >= 0)
-            return "Blokowalam go ale zaklada nowe konta.";
+          if (
+            m.indexOf("ile") >= 0 &&
+            (m.indexOf("wiadom") >= 0 || m.indexOf("razy") >= 0)
+          )
+            return "Dostaję po 10-20 wiadomości dziennie. Czasem więcej. To nie ustaje od tygodni.";
+          if (
+            m.indexOf("gdzie") >= 0 &&
+            (m.indexOf("widzi") >= 0 ||
+              m.indexOf("śledzi") >= 0 ||
+              m.indexOf("sledzi") >= 0)
+          )
+            return "Widział mnie w kawiarni, pod pracą, w sklepie, na siłowni... Dosłownie wszędzie!";
+          if (m.indexOf("blokow") >= 0 || m.indexOf("zablokowac") >= 0)
+            return "Blokowałam go już z 10 razy! Ale ciągle zakłada nowe konta i pisze dalej.";
+          if (
+            m.indexOf("od kiedy") >= 0 ||
+            m.indexOf("jak dlugo") >= 0 ||
+            m.indexOf("jak długo") >= 0
+          )
+            return "To trwa już prawie 3 miesiące, od naszego rozstania. Nie odpuszcza.";
+          if (
+            m.indexOf("boisz") >= 0 ||
+            m.indexOf("strach") >= 0 ||
+            m.indexOf("bezpiecz") >= 0
+          )
+            return "Tak, bardzo się boję! Nie wychodzę sama z domu. Czuję się obserwowana 24/7.";
+          if (m.indexOf("policj") >= 0)
+            return "Byłam na policji ale powiedzieli że to za mało dowodów. Dlatego do Pana/Pani przyszłam.";
+          if (m.indexOf("numer") >= 0 || m.indexOf("telefon") >= 0)
+            return "Pisze z różnych numerów. Blokuję jeden, pojawia się następny.";
         }
-        if (c.type == "GROZY") {
-          if (m.indexOf("ile") >= 0) return "Kilkanascie grozb juz dostalem.";
-          if (m.indexOf("grupa") >= 0) return "To 5-6 osob w grupie.";
+        // GROŹBY
+        if (c.type == "GROŹBY") {
+          if (
+            m.indexOf("ile") >= 0 &&
+            (m.indexOf("wiadom") >= 0 ||
+              m.indexOf("groz") >= 0 ||
+              m.indexOf("groź") >= 0 ||
+              m.indexOf("razy") >= 0)
+          )
+            return "Dostałem/am już ponad 20 takich wiadomości. Każda gorsza od poprzedniej!";
+          if (
+            m.indexOf("grupa") >= 0 ||
+            m.indexOf("ile osob") >= 0 ||
+            m.indexOf("ile osób") >= 0
+          )
+            return "To chyba 4-5 osób w grupie. Piszą z różnych kont ale styl podobny.";
+          if (m.indexOf("policj") >= 0)
+            return "Zgłosiłem/am na policję ale powiedzieli że potrzebują więcej dowodów.";
+          if (m.indexOf("boisz") >= 0 || m.indexOf("strach") >= 0)
+            return "Tak, boję się o siebie i rodzinę! Grożą że wiedzą gdzie mieszkam!";
+          if (
+            m.indexOf("skad") >= 0 ||
+            m.indexOf("skąd") >= 0 ||
+            m.indexOf("dlaczego") >= 0
+          )
+            return "Nie wiem skąd ta nienawiść... Może to przez konflikt w pracy/szkole.";
+          if (m.indexOf("anonimow") >= 0)
+            return "Tak, piszą z anonimowych kont. Nie mogę ustalić kim są.";
         }
-        if (m.indexOf("policj") >= 0)
-          return "Sprawa idzie do policji? Co mam robic?";
-        if (m.indexOf("sad") >= 0) return "Sad? Bede musial zeznawac?";
-        if (m.indexOf("falsz") >= 0) return "To bylo podrobione! Moge wygrac?";
-        if (m.indexOf("prawdzi") >= 0) return "Dowody sa prawdziwe?";
-        if (m.indexOf("dziek") >= 0) return "Dziekuje za pomoc!";
-        if (m.indexOf("podejrzew") >= 0)
-          return c.suspect ? "Podejrzewam: " + c.suspect : "Nie wiem kto to.";
+        // ZNIESŁAWIENIE
+        if (c.type == "ZNIESŁAWIENIE") {
+          if (
+            m.indexOf("gdzie") >= 0 &&
+            (m.indexOf("opublik") >= 0 || m.indexOf("post") >= 0)
+          )
+            return "To było na Facebooku i jakimś forum lokalnym. Post był udostępniany setki razy!";
+          if (
+            m.indexOf("ile") >= 0 &&
+            (m.indexOf("osob") >= 0 ||
+              m.indexOf("osób") >= 0 ||
+              m.indexOf("ludzi") >= 0)
+          )
+            return "Widziało to setki osób! Niektórzy nawet mi to wysyłali z pytaniem czy to prawda.";
+          if (m.indexOf("usun") >= 0 || m.indexOf("skasow") >= 0)
+            return "Zgłaszałem/am do usunięcia ale platforma nie reaguje. Dalej tam wisi!";
+          if (m.indexOf("strac") >= 0 || m.indexOf("szkod") >= 0)
+            return "Straciłem/am klientów, znajomych się odsunęło, w pracy patrzą dziwnie...";
+          if (
+            m.indexOf("prawda") >= 0 ||
+            m.indexOf("klamstw") >= 0 ||
+            m.indexOf("kłamstw") >= 0
+          )
+            return "To totalne kłamstwa! Nigdy czegoś takiego nie zrobiłem/am!";
+        }
+        // OSZUSTWO
+        if (c.type == "OSZUSTWO") {
+          if (
+            m.indexOf("ile") >= 0 &&
+            (m.indexOf("pieniedz") >= 0 ||
+              m.indexOf("pieniędz") >= 0 ||
+              m.indexOf("zl") >= 0 ||
+              m.indexOf("strac") >= 0)
+          )
+            return "Straciłem/am kilka tysięcy złotych. Całe oszczędności życia!";
+          if (m.indexOf("przelew") >= 0 || m.indexOf("bank") >= 0)
+            return "Mam potwierdzenie przelewu. Pieniądze poszły i przepadły.";
+          if (m.indexOf("kontakt") >= 0 || m.indexOf("odpis") >= 0)
+            return "Próbowałem/am się kontaktować ale oszust zniknął. Konto usunięte, telefon martwy.";
+          if (m.indexOf("jak") >= 0 && m.indexOf("oszuk") >= 0)
+            return "Udawał że sprzedaje coś tanio. Zapłaciłem/am i nigdy nie dostałem towaru.";
+          if (m.indexOf("policj") >= 0)
+            return "Policja mówi że trudno namierzyć bo konta fake. Dlatego potrzebuję pomocy!";
+        }
+        // HACKING
+        if (c.type == "HACKING") {
+          if (m.indexOf("haslo") >= 0 || m.indexOf("hasło") >= 0)
+            return "Moje hasło było silne... ale chyba wyciekło gdzieś z bazy danych.";
+          if (
+            m.indexOf("ile") >= 0 &&
+            (m.indexOf("pieniedz") >= 0 || m.indexOf("pieniędz") >= 0)
+          )
+            return "Ukradli mi kilkanaście tysięcy złotych z konta!";
+          if (
+            m.indexOf("phishing") >= 0 ||
+            m.indexOf("link") >= 0 ||
+            m.indexOf("mail") >= 0
+          )
+            return "Tak, kliknąłem w jakiś link... Głupia pomyłka. Strona wyglądała jak bank.";
+          if (m.indexOf("konto") >= 0)
+            return "Włamali się na moje konto bankowe i do social media!";
+        }
+        // SZANTAŻ
+        if (c.type == "SZANTAŻ") {
+          if (
+            m.indexOf("ile") >= 0 &&
+            (m.indexOf("zada") >= 0 ||
+              m.indexOf("żąda") >= 0 ||
+              m.indexOf("chce") >= 0)
+          )
+            return "Żądają ode mnie kilku tysięcy złotych! To szaleństwo!";
+          if (
+            m.indexOf("zaplac") >= 0 ||
+            m.indexOf("zapłac") >= 0 ||
+            m.indexOf("placic") >= 0 ||
+            m.indexOf("płacic") >= 0
+          )
+            return "Nie chcę płacić! Boję się że i tak opublikują. Szukam innego wyjścia.";
+          if (
+            m.indexOf("zdjec") >= 0 ||
+            m.indexOf("zdjęc") >= 0 ||
+            m.indexOf("material") >= 0 ||
+            m.indexOf("materiał") >= 0
+          )
+            return "To... prywatne materiały. Bardzo się wstydzę że dałem się w to wmanewrować.";
+          if (m.indexOf("skad") >= 0 || m.indexOf("skąd") >= 0)
+            return "Poznaliśmy się na randkowym portalu. Potem zaczął szantażować.";
+        }
+        // PODSZYWANIE
+        if (c.type == "PODSZYWANIE") {
+          if (m.indexOf("zdjec") >= 0 || m.indexOf("zdjęc") >= 0)
+            return "Tak, używają mojego zdjęcia! Ukradli je z mojego profilu!";
+          if (m.indexOf("zglos") >= 0 || m.indexOf("zgłos") >= 0)
+            return "Zgłaszałem do platformy ale ignorują moje zgłoszenia od tygodni.";
+          if (m.indexOf("szkod") >= 0 || m.indexOf("strac") >= 0)
+            return "Straciłem przez to klientów i kontrakty. Ludzie myślą że to ja piszę te rzeczy!";
+        }
+        // UNIWERSALNE
+        if (
+          m.indexOf("podejrzew") >= 0 ||
+          m.indexOf("kto to") >= 0 ||
+          m.indexOf("sprawca") >= 0
+        )
+          return c.suspect
+            ? "Podejrzewam że to: " + c.suspect + ". Ale nie mam 100% pewności."
+            : "Nie wiem dokładnie kto za tym stoi. Dlatego potrzebuję pomocy!";
+        if (
+          m.indexOf("policj") >= 0 ||
+          m.indexOf("zglosi") >= 0 ||
+          m.indexOf("zgłosi") >= 0
+        )
+          return "Sprawa idzie do policji? Proszę mi powiedzieć co mam robić!";
+        if (
+          m.indexOf("sad") >= 0 ||
+          m.indexOf("sąd") >= 0 ||
+          m.indexOf("rozpraw") >= 0
+        )
+          return "Sąd? Będę musiał/a zeznawać? Trochę się boję ale zrobię co trzeba.";
+        if (
+          m.indexOf("falsz") >= 0 ||
+          m.indexOf("fałsz") >= 0 ||
+          m.indexOf("fake") >= 0 ||
+          m.indexOf("podrobion") >= 0
+        )
+          return "Uważa Pan/Pani że to sfałszowane? Co mam teraz robić?";
+        if (
+          m.indexOf("prawdzi") >= 0 ||
+          m.indexOf("autentycz") >= 0 ||
+          m.indexOf("oryginal") >= 0
+        )
+          return "Te dowody są prawdziwe? To dobrze czy źle dla mojej sprawy?";
+        if (
+          m.indexOf("dziek") >= 0 ||
+          m.indexOf("dzięk") >= 0 ||
+          m.indexOf("super") >= 0 ||
+          m.indexOf("swietnie") >= 0 ||
+          m.indexOf("świetnie") >= 0
+        )
+          return "To ja dziękuję! Bardzo się cieszę że ktoś wreszcie mi pomaga!";
+        if (m.indexOf("spokojnie") >= 0 || m.indexOf("nie martw") >= 0)
+          return "Dziękuję... Staram się nie panikować ale to naprawdę stresująca sytuacja.";
+        if (m.indexOf("pomog") >= 0 || m.indexOf("zajm") >= 0)
+          return "Dziękuję bardzo! Liczę na Pana/Panią. Ta sprawa jest dla mnie bardzo ważna.";
+        if (
+          m.indexOf("opowiedz") >= 0 ||
+          m.indexOf("od poczatku") >= 0 ||
+          m.indexOf("od początku") >= 0 ||
+          m.indexOf("historia") >= 0
+        )
+          return c.fullStory;
+        if (
+          m.indexOf("termin") >= 0 ||
+          m.indexOf("czas") >= 0 ||
+          m.indexOf("kiedy") >= 0
+        )
+          return "Im szybciej tym lepiej... Ta sytuacja mnie wykańcza psychicznie.";
+        if (m.indexOf("?") >= 0)
+          return (
+            "Hmm, dobre pytanie. Powiem co wiem: " +
+            c.fullStory.substring(0, 100) +
+            "..."
+          );
         return (
-          "Rozumiem. Mam jeszcze " +
+          "Rozumiem. Jeśli potrzebujesz więcej screenów - mam jeszcze " +
           (3 - (c.extraScreensSent || 0)) +
-          " screenow jesli potrzeba."
+          ". Wystarczy napisać!"
         );
       }
-      document.getElementById("chat-close").onclick = function () {
+      document.getElementById("close-chat").onclick = function () {
         document.getElementById("client-chat").style.display = "none";
         chatCaseIdx = null;
       };
@@ -2960,12 +3313,12 @@
         "chat-send"
       ).ontouchend = function (e) {
         e.preventDefault();
-        var txt = document.getElementById("chat-textarea").value.trim();
+        var txt = document.getElementById("chat-input").value.trim();
         if (!txt || chatCaseIdx === null) return;
         var c = G.activeCases[chatCaseIdx];
         if (!c.chatHistory) c.chatHistory = [];
         c.chatHistory.push({ from: "you", text: txt });
-        document.getElementById("chat-textarea").value = "";
+        document.getElementById("chat-input").value = "";
         renderChatMessages(c);
         setTimeout(function () {
           var resp = getClientResponse(c, txt);

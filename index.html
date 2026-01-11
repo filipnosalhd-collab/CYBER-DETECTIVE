@@ -13,7 +13,7 @@
       href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a12' width='100' height='100' rx='20'/><circle cx='40' cy='40' r='20' fill='none' stroke='%2300ffff' stroke-width='6'/><line x1='55' y1='55' x2='75' y2='75' stroke='%2300ffff' stroke-width='6' stroke-linecap='round'/><circle cx='70' cy='30' r='8' fill='%23ff3366'/><path d='M65 30 h10 M70 25 v10' stroke='white' stroke-width='2'/></svg>"
     />
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap");
       * {
         margin: 0;
         padding: 0;
@@ -22,13 +22,19 @@
       body {
         background: #000;
         overflow: hidden;
-        font-family: "Segoe UI", sans-serif;
+        font-family: "Rajdhani", "Segoe UI", sans-serif;
       }
+      /* ZAAWANSOWANY LOADER */
       #loader,
       #suspended {
         position: fixed;
         inset: 0;
-        background: linear-gradient(135deg, #0a0a12, #1a1a2e);
+        background: linear-gradient(
+          135deg,
+          #050510 0%,
+          #0a1020 50%,
+          #0a0a15 100%
+        );
         z-index: 3000;
         display: flex;
         flex-direction: column;
@@ -37,61 +43,135 @@
         padding: 20px;
         text-align: center;
       }
+      #loader::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23n)'/%3E%3C/svg%3E");
+        opacity: 0.03;
+      }
       #loader-logo {
-        width: 120px;
-        height: 120px;
+        width: 150px;
+        height: 150px;
         margin-bottom: 30px;
-        animation: pulse-logo 2s ease-in-out infinite;
+        animation: pulse-logo 2s ease-in-out infinite,
+          rotate-glow 10s linear infinite;
+        filter: drop-shadow(0 0 30px #0ff);
       }
       @keyframes pulse-logo {
         0%,
         100% {
+          transform: scale(1);
           filter: drop-shadow(0 0 20px #0ff);
         }
         50% {
-          filter: drop-shadow(0 0 40px #0ff);
+          transform: scale(1.05);
+          filter: drop-shadow(0 0 50px #0ff);
+        }
+      }
+      @keyframes rotate-glow {
+        0% {
+          filter: drop-shadow(0 0 20px #0ff) hue-rotate(0deg);
+        }
+        100% {
+          filter: drop-shadow(0 0 20px #0ff) hue-rotate(360deg);
         }
       }
       #loader h1 {
         font-family: "Orbitron";
-        font-size: clamp(20px, 5vw, 32px);
-        color: #0ff;
-        text-shadow: 0 0 30px #0ff;
+        font-size: clamp(24px, 6vw, 40px);
+        background: linear-gradient(90deg, #0ff, #0f8, #ff0, #0ff);
+        background-size: 300% 100%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: gradient-shift 3s ease infinite;
+        text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
         margin-bottom: 30px;
+      }
+      @keyframes gradient-shift {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
       }
       #loader-bar-container {
         width: 80%;
         max-width: 400px;
-        height: 20px;
-        background: #1a1a2e;
+        height: 25px;
+        background: linear-gradient(180deg, #0a0a15, #1a1a2e);
         border: 2px solid #0ff;
-        border-radius: 10px;
+        border-radius: 15px;
         overflow: hidden;
         margin-bottom: 15px;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3),
+          inset 0 2px 10px rgba(0, 0, 0, 0.5);
       }
       #loader-bar {
         width: 0%;
         height: 100%;
-        background: linear-gradient(90deg, #0ff, #0f8);
-        border-radius: 8px;
+        background: linear-gradient(90deg, #0ff, #0f8, #0ff);
+        background-size: 200% 100%;
+        border-radius: 12px;
         transition: width 0.3s ease;
+        animation: bar-glow 1s ease infinite;
+        box-shadow: 0 0 20px #0ff;
+      }
+      @keyframes bar-glow {
+        0%,
+        100% {
+          box-shadow: 0 0 10px #0ff;
+        }
+        50% {
+          box-shadow: 0 0 25px #0ff, 0 0 40px #0f8;
+        }
       }
       #loader-percent {
         font-family: "Orbitron";
-        font-size: 24px;
+        font-size: 28px;
         color: #0ff;
         margin-bottom: 10px;
+        text-shadow: 0 0 20px #0ff;
       }
       #loader-text {
         font-family: "Share Tech Mono";
         font-size: 14px;
-        color: #888;
+        color: #0f8;
+        animation: blink-text 0.5s ease infinite;
       }
+      @keyframes blink-text {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+      /* SUSPENDED */
       #suspended h1 {
         font-family: "Orbitron";
         color: #f36;
-        font-size: 28px;
+        font-size: 32px;
         margin-bottom: 20px;
+        text-shadow: 0 0 30px #f36;
+        animation: shake 0.5s ease infinite;
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
       }
       #suspended p {
         color: #aaa;
@@ -100,13 +180,15 @@
       #suspended .time {
         font-family: "Orbitron";
         color: #fc0;
-        font-size: 36px;
+        font-size: 42px;
         margin: 20px 0;
+        text-shadow: 0 0 30px #fc0;
       }
+      /* INTRO */
       #intro {
         position: fixed;
         inset: 0;
-        background: linear-gradient(135deg, #0a0a12, #1a1a2e);
+        background: linear-gradient(135deg, #050510, #0a1a2a, #0a0a15);
         z-index: 2000;
         display: none;
         flex-direction: column;
@@ -115,25 +197,83 @@
         padding: 20px;
         text-align: center;
       }
+      #intro::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+            circle at 30% 30%,
+            rgba(0, 255, 255, 0.1) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 70% 70%,
+            rgba(255, 0, 255, 0.1) 0%,
+            transparent 50%
+          );
+      }
       #intro h1 {
         font-family: "Orbitron";
-        font-size: clamp(28px, 8vw, 50px);
-        color: #0ff;
-        text-shadow: 0 0 50px #0ff;
+        font-size: clamp(32px, 10vw, 60px);
+        background: linear-gradient(135deg, #0ff, #0f8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 60px rgba(0, 255, 255, 0.8);
         margin-bottom: 15px;
+        animation: title-glow 2s ease infinite;
+      }
+      @keyframes title-glow {
+        0%,
+        100% {
+          filter: drop-shadow(0 0 20px #0ff);
+        }
+        50% {
+          filter: drop-shadow(0 0 40px #0ff);
+        }
       }
       #intro p {
         color: #888;
         margin-bottom: 40px;
+        font-size: 18px;
       }
       #intro button {
-        background: transparent;
+        background: linear-gradient(
+          135deg,
+          transparent,
+          rgba(0, 255, 255, 0.1)
+        );
         border: 2px solid #0ff;
         color: #0ff;
-        padding: 15px 50px;
+        padding: 18px 60px;
         font-family: "Orbitron";
+        font-size: 18px;
         cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
       }
+      #intro button::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 255, 255, 0.3),
+          transparent
+        );
+        transform: translateX(-100%);
+        transition: transform 0.5s ease;
+      }
+      #intro button:hover {
+        background: rgba(0, 255, 255, 0.2);
+        box-shadow: 0 0 30px #0ff, inset 0 0 30px rgba(0, 255, 255, 0.2);
+        transform: scale(1.05);
+      }
+      #intro button:hover::before {
+        transform: translateX(100%);
+      }
+      /* CANVAS & CROSSHAIR */
       canvas {
         display: block;
       }
@@ -142,8 +282,8 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 20px;
-        height: 20px;
+        width: 30px;
+        height: 30px;
         pointer-events: none;
         z-index: 100;
       }
@@ -152,6 +292,7 @@
         content: "";
         position: absolute;
         background: #0ff;
+        box-shadow: 0 0 10px #0ff;
       }
       #crosshair::before {
         width: 2px;
@@ -172,12 +313,17 @@
         transform: translateX(-50%);
         color: #0ff;
         font-family: "Share Tech Mono";
-        background: rgba(0, 20, 30, 0.9);
-        padding: 12px 24px;
+        background: linear-gradient(
+          135deg,
+          rgba(0, 20, 30, 0.95),
+          rgba(0, 10, 20, 0.95)
+        );
+        padding: 15px 30px;
         border: 2px solid #0ff;
-        border-radius: 8px;
+        border-radius: 12px;
         opacity: 0;
         z-index: 100;
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
       }
       #touch-btn {
         display: none;
@@ -189,26 +335,47 @@
         color: #000;
         font-family: "Orbitron", sans-serif;
         font-weight: bold;
-        padding: 18px 40px;
-        border-radius: 30px;
-        font-size: 16px;
+        padding: 20px 50px;
+        border-radius: 35px;
+        font-size: 18px;
         z-index: 100;
         cursor: pointer;
+        box-shadow: 0 5px 30px rgba(0, 255, 255, 0.5);
+        transition: all 0.3s ease;
       }
+      #touch-btn:active {
+        transform: translateX(-50%) scale(0.95);
+        box-shadow: 0 2px 15px rgba(0, 255, 255, 0.5);
+      }
+      /* HUD */
       #hud {
         position: fixed;
         top: 10px;
         left: 10px;
         color: #0ff;
         font-family: "Share Tech Mono";
-        font-size: 13px;
+        font-size: 14px;
         z-index: 100;
       }
       #hud div {
-        margin-bottom: 4px;
-        padding: 5px 10px;
-        background: rgba(0, 255, 255, 0.15);
+        margin-bottom: 6px;
+        padding: 8px 15px;
+        background: linear-gradient(
+          90deg,
+          rgba(0, 255, 255, 0.15),
+          transparent
+        );
         border-left: 3px solid #0ff;
+        backdrop-filter: blur(5px);
+        transition: all 0.3s ease;
+      }
+      #hud div:hover {
+        background: linear-gradient(
+          90deg,
+          rgba(0, 255, 255, 0.25),
+          transparent
+        );
+        padding-left: 20px;
       }
       #computer {
         position: fixed;
@@ -1198,6 +1365,57 @@
         </div>
       </div>
     </div>
+    <div
+      id="wrong-place"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 800;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          background: #1a1a2e;
+          border: 3px solid #f36;
+          border-radius: 15px;
+          padding: 30px;
+          text-align: center;
+          max-width: 400px;
+        "
+      >
+        <div style="font-size: 50px; margin-bottom: 15px">❌</div>
+        <h2 style="color: #f36; margin-bottom: 15px">ZŁEY ADRESAT!</h2>
+        <p
+          id="wrong-place-msg"
+          style="color: #fff; font-size: 14px; margin-bottom: 15px"
+        ></p>
+        <p style="color: #f90; font-size: 16px; margin-bottom: 20px">
+          Kara: -50💰
+        </p>
+        <p style="color: #888; font-size: 12px; margin-bottom: 20px">
+          Sprawa nie została usunięta - wyślij ją we właściwe miejsce.
+        </p>
+        <button
+          onclick="document.getElementById('wrong-place').style.display='none'"
+          style="
+            background: #0ff;
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-family: Orbitron;
+            cursor: pointer;
+            font-size: 14px;
+          "
+        >
+          ROZUMIEM
+        </button>
+      </div>
+    </div>
     <div id="result">
       <div id="result-box">
         <div id="result-icon">✓</div>
@@ -2061,113 +2279,359 @@
       }
       function genImg(e) {
         var c = document.createElement("canvas");
-        c.width = 300;
-        c.height = 150;
+        c.width = 400;
+        c.height = 280;
         var x = c.getContext("2d");
-        x.fillStyle = "#1a1a2e";
-        x.fillRect(0, 0, 300, 150);
-        x.fillStyle = "#0ff";
-        x.font = "bold 11px Arial";
-        x.fillText(e.tp, 10, 18);
+        var appType = e.tp.split(" ")[0].split("#")[0].trim();
+        var apps = {
+          MESSENGER: {
+            bg1: "#0084ff",
+            bg2: "#00a6ff",
+            headerH: 50,
+            msgBg: "#e4e6eb",
+            msgColor: "#050505",
+            bubbleBg: "#0084ff",
+            bubbleColor: "#fff",
+            font: "Helvetica",
+            icon: "💬",
+            statusBar: "#006acc",
+          },
+          WHATSAPP: {
+            bg1: "#075e54",
+            bg2: "#128c7e",
+            headerH: 50,
+            msgBg: "#dcf8c6",
+            msgColor: "#000",
+            bubbleBg: "#dcf8c6",
+            bubbleColor: "#000",
+            font: "Segoe UI",
+            icon: "📱",
+            statusBar: "#054d44",
+          },
+          SMS: {
+            bg1: "#2d2d3a",
+            bg2: "#3d3d4a",
+            headerH: 45,
+            msgBg: "#3a3a5e",
+            msgColor: "#fff",
+            bubbleBg: "#0b93f6",
+            bubbleColor: "#fff",
+            font: "Roboto",
+            icon: "💬",
+            statusBar: "#1a1a2a",
+          },
+          TWITTER: {
+            bg1: "#1da1f2",
+            bg2: "#1a91da",
+            headerH: 48,
+            msgBg: "#192734",
+            msgColor: "#fff",
+            bubbleBg: "#192734",
+            bubbleColor: "#fff",
+            font: "Arial",
+            icon: "🐦",
+            statusBar: "#0d7cc0",
+          },
+          INSTAGRAM: {
+            bg1: "#833ab4",
+            bg2: "#fd1d1d",
+            headerH: 50,
+            msgBg: "#262626",
+            msgColor: "#fff",
+            bubbleBg: "#3797f0",
+            bubbleColor: "#fff",
+            font: "Arial",
+            icon: "📷",
+            statusBar: "#5b2a82",
+          },
+          EMAIL: {
+            bg1: "#c71610",
+            bg2: "#ea4335",
+            headerH: 55,
+            msgBg: "#fff",
+            msgColor: "#202124",
+            bubbleBg: "#f1f3f4",
+            bubbleColor: "#202124",
+            font: "Arial",
+            icon: "📧",
+            statusBar: "#a50e0a",
+          },
+          FACEBOOK: {
+            bg1: "#1877f2",
+            bg2: "#4293f5",
+            headerH: 48,
+            msgBg: "#f0f2f5",
+            msgColor: "#050505",
+            bubbleBg: "#0084ff",
+            bubbleColor: "#fff",
+            font: "Helvetica",
+            icon: "👤",
+            statusBar: "#1466cc",
+          },
+          SNAPCHAT: {
+            bg1: "#fffc00",
+            bg2: "#ffeb3b",
+            headerH: 45,
+            msgBg: "#fff",
+            msgColor: "#000",
+            bubbleBg: "#fff",
+            bubbleColor: "#000",
+            font: "Avenir",
+            icon: "👻",
+            statusBar: "#e6e300",
+          },
+          FORUM: {
+            bg1: "#2a2a4e",
+            bg2: "#3a3a6e",
+            headerH: 50,
+            msgBg: "#1a1a2e",
+            msgColor: "#ccc",
+            bubbleBg: "#2a2a4e",
+            bubbleColor: "#fff",
+            font: "Verdana",
+            icon: "💻",
+            statusBar: "#1a1a3e",
+          },
+        };
+        var app = apps[appType] || apps["SMS"];
+        // Status bar
+        x.fillStyle = app.statusBar;
+        x.fillRect(0, 0, 400, 22);
         x.fillStyle = "#fff";
-        x.font = "11px Arial";
-        var w = e.txt.split(" "),
-          l = "",
-          y = 40;
-        for (var i = 0; i < w.length; i++) {
-          if ((l + w[i]).length > 38) {
-            x.fillText(l, 10, y);
-            y += 14;
-            l = "";
+        x.font = "bold 11px Arial";
+        x.fillText("⚡", 10, 15);
+        x.fillText("9:41", 180, 15);
+        x.fillText("📶 100%", 340, 15);
+        // Header gradient
+        var grad = x.createLinearGradient(0, 22, 0, 22 + app.headerH);
+        grad.addColorStop(0, app.bg1);
+        grad.addColorStop(1, app.bg2);
+        x.fillStyle = grad;
+        x.fillRect(0, 22, 400, app.headerH);
+        // Header content
+        x.fillStyle = "#fff";
+        x.font = "bold 16px " + app.font;
+        x.fillText(app.icon + " " + appType, 15, 22 + app.headerH / 2 + 6);
+        x.font = "11px " + app.font;
+        x.fillText("online", 15, 22 + app.headerH - 8);
+        // Back arrow
+        x.fillStyle = "rgba(255,255,255,0.8)";
+        x.font = "20px Arial";
+        x.fillText("←", 360, 22 + app.headerH / 2 + 6);
+        // Chat area
+        var chatY = 22 + app.headerH;
+        x.fillStyle = "#0a0a15";
+        x.fillRect(0, chatY, 400, 280 - chatY - 50);
+        // Message bubble with shadow
+        var bubbleY = chatY + 20;
+        x.shadowColor = "rgba(0,0,0,0.3)";
+        x.shadowBlur = 8;
+        x.shadowOffsetY = 2;
+        x.fillStyle = app.bubbleBg;
+        x.beginPath();
+        x.roundRect(15, bubbleY, 320, 100, 12);
+        x.fill();
+        x.shadowBlur = 0;
+        // Message text
+        x.fillStyle = app.bubbleColor;
+        x.font = "13px " + app.font;
+        var words = e.txt.split(" "),
+          line = "",
+          y = bubbleY + 22;
+        for (var i = 0; i < words.length; i++) {
+          if ((line + words[i]).length > 42) {
+            x.fillText(line, 25, y);
+            y += 18;
+            line = "";
           }
-          l += w[i] + " ";
+          line += words[i] + " ";
         }
-        x.fillText(l, 10, y);
+        x.fillText(line, 25, y);
+        // Timestamp
+        x.fillStyle = "rgba(255,255,255,0.5)";
+        x.font = "10px " + app.font;
+        var hours = [
+          "08",
+          "09",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+        ];
+        var mins = ["00", "05", "12", "23", "34", "45", "47", "52", "58"];
+        x.fillText(
+          hours[Math.floor(Math.random() * hours.length)] +
+            ":" +
+            mins[Math.floor(Math.random() * mins.length)],
+          290,
+          bubbleY + 90
+        );
+        // Read indicator
+        if (Math.random() > 0.5) {
+          x.fillText("✓✓", 320, bubbleY + 90);
+        }
+        // Type indicator
+        x.fillStyle = e.fake ? "#f36" : "#0f8";
+        x.font = "bold 10px Arial";
+        x.fillText(e.fake ? "⚠️ PODEJRZANY" : "📎 DOWÓD", 15, chatY + 135);
+        // Bottom bar
+        x.fillStyle = "#1a1a2e";
+        x.fillRect(0, 230, 400, 50);
+        x.fillStyle = "#3a3a5e";
+        x.beginPath();
+        x.roundRect(15, 240, 300, 30, 15);
+        x.fill();
+        x.fillStyle = "#888";
+        x.font = "12px " + app.font;
+        x.fillText("Aa  Napisz wiadomość...", 30, 260);
+        x.fillStyle = "#0084ff";
+        x.font = "20px Arial";
+        x.fillText("📷", 330, 260);
+        x.fillText("🎤", 360, 260);
+        // Noise/grain effect for realism
+        var imgData = x.getImageData(0, 0, 400, 280);
+        for (var i = 0; i < imgData.data.length; i += 4) {
+          var noise = (Math.random() - 0.5) * 8;
+          imgData.data[i] += noise;
+          imgData.data[i + 1] += noise;
+          imgData.data[i + 2] += noise;
+        }
+        x.putImageData(imgData, 0, 0);
         return c.toDataURL();
       }
       function genCompareImg(appType) {
         var c = document.createElement("canvas");
-        c.width = 300;
-        c.height = 150;
+        c.width = 400;
+        c.height = 280;
         var x = c.getContext("2d");
         var apps = {
           MESSENGER: {
-            bg: "#0084ff",
-            header: "Messenger",
+            bg1: "#0084ff",
+            bg2: "#00a6ff",
+            headerH: 50,
             font: "Helvetica",
-            headerH: 30,
-            msgBg: "#e4e6eb",
-            msgColor: "#000",
+            icon: "💬",
           },
           WHATSAPP: {
-            bg: "#075e54",
-            header: "WhatsApp",
+            bg1: "#075e54",
+            bg2: "#128c7e",
+            headerH: 50,
             font: "Segoe UI",
-            headerH: 28,
-            msgBg: "#dcf8c6",
-            msgColor: "#000",
+            icon: "📱",
           },
           SMS: {
-            bg: "#2a2a4e",
-            header: "Wiadomości SMS",
+            bg1: "#2d2d3a",
+            bg2: "#3d3d4a",
+            headerH: 45,
             font: "Roboto",
-            headerH: 25,
-            msgBg: "#3a3a5e",
-            msgColor: "#fff",
+            icon: "💬",
           },
           TWITTER: {
-            bg: "#1da1f2",
-            header: "X (Twitter)",
-            font: "Chirp",
-            headerH: 30,
-            msgBg: "#192734",
-            msgColor: "#fff",
+            bg1: "#1da1f2",
+            bg2: "#1a91da",
+            headerH: 48,
+            font: "Arial",
+            icon: "🐦",
           },
-          "INSTAGRAM DM": {
-            bg: "linear-gradient",
-            header: "Instagram",
-            font: "Proxima Nova",
-            headerH: 30,
-            msgBg: "#262626",
-            msgColor: "#fff",
+          INSTAGRAM: {
+            bg1: "#833ab4",
+            bg2: "#fd1d1d",
+            headerH: 50,
+            font: "Arial",
+            icon: "📷",
           },
           EMAIL: {
-            bg: "#c71610",
-            header: "Gmail",
-            font: "Google Sans",
-            headerH: 35,
-            msgBg: "#fff",
-            msgColor: "#000",
+            bg1: "#c71610",
+            bg2: "#ea4335",
+            headerH: 55,
+            font: "Arial",
+            icon: "📧",
           },
           FACEBOOK: {
-            bg: "#1877f2",
-            header: "Facebook",
+            bg1: "#1877f2",
+            bg2: "#4293f5",
+            headerH: 48,
             font: "Helvetica",
-            headerH: 30,
-            msgBg: "#f0f2f5",
-            msgColor: "#000",
+            icon: "👤",
+          },
+          SNAPCHAT: {
+            bg1: "#fffc00",
+            bg2: "#ffeb3b",
+            headerH: 45,
+            font: "Avenir",
+            icon: "👻",
+          },
+          FORUM: {
+            bg1: "#2a2a4e",
+            bg2: "#3a3a6e",
+            headerH: 50,
+            font: "Verdana",
+            icon: "💻",
           },
         };
         var app = apps[appType] || apps["SMS"];
-        x.fillStyle = app.bg == "linear-gradient" ? "#833ab4" : app.bg;
-        x.fillRect(0, 0, 300, app.headerH);
+        // Status bar
+        x.fillStyle = "#1a1a2a";
+        x.fillRect(0, 0, 400, 22);
         x.fillStyle = "#fff";
-        x.font = "bold 12px " + app.font + ", Arial";
-        x.fillText(app.header, 10, app.headerH - 8);
+        x.font = "bold 11px Arial";
+        x.fillText("⚡", 10, 15);
+        x.fillText("9:41", 180, 15);
+        x.fillText("📶 100%", 340, 15);
+        // Header
+        var grad = x.createLinearGradient(0, 22, 0, 22 + app.headerH);
+        grad.addColorStop(0, app.bg1);
+        grad.addColorStop(1, app.bg2);
+        x.fillStyle = grad;
+        x.fillRect(0, 22, 400, app.headerH);
+        x.fillStyle = "#fff";
+        x.font = "bold 16px " + app.font;
+        x.fillText(
+          app.icon + " " + appType + " - ORYGINAŁ",
+          15,
+          22 + app.headerH / 2 + 6
+        );
+        // Chat area
+        var chatY = 22 + app.headerH;
         x.fillStyle = "#0a0a15";
-        x.fillRect(0, app.headerH, 300, 150 - app.headerH);
-        x.fillStyle = app.msgBg;
+        x.fillRect(0, chatY, 400, 280 - chatY);
+        // Example bubble
+        x.fillStyle = "#0084ff";
         x.beginPath();
-        x.roundRect(10, app.headerH + 10, 200, 60, 8);
+        x.roundRect(15, chatY + 20, 280, 70, 12);
         x.fill();
-        x.fillStyle = app.msgColor;
-        x.font = "12px " + app.font + ", Arial";
-        x.fillText("Przykładowa wiadomość w", 20, app.headerH + 30);
-        x.fillText("oryginalnym formacie " + app.header, 20, app.headerH + 45);
-        x.fillStyle = "#888";
-        x.font = "9px Arial";
-        x.fillText("Czcionka: " + app.font, 20, app.headerH + 60);
-        x.fillText("⬆️ PORÓWNAJ z dowodem ⬆️", 10, 140);
+        x.fillStyle = "#fff";
+        x.font = "13px " + app.font;
+        x.fillText("To jest przykład prawidłowej", 25, chatY + 45);
+        x.fillText("wiadomości w aplikacji " + appType, 25, chatY + 63);
+        // Info box
+        x.fillStyle = "rgba(0,255,255,0.1)";
+        x.fillRect(15, chatY + 110, 370, 80);
+        x.strokeStyle = "#0ff";
+        x.lineWidth = 2;
+        x.strokeRect(15, chatY + 110, 370, 80);
+        x.fillStyle = "#0ff";
+        x.font = "bold 12px Arial";
+        x.fillText("📋 SPRAWDŹ:", 25, chatY + 130);
+        x.fillStyle = "#fff";
+        x.font = "11px Arial";
+        x.fillText("• Czcionka: " + app.font, 25, chatY + 148);
+        x.fillText("• Kolor nagłówka: prawidłowy gradient", 25, chatY + 163);
+        x.fillText(
+          "• Układ elementów: standardowy dla " + appType,
+          25,
+          chatY + 178
+        );
         return c.toDataURL();
       }
       function saveGame() {
@@ -2304,7 +2768,8 @@
         lookAt = null;
       function init3D() {
         scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0a15);
+        scene.background = new THREE.Color(0x050510);
+        scene.fog = new THREE.Fog(0x050510, 3, 15);
         camera = new THREE.PerspectiveCamera(
           70,
           innerWidth / innerHeight,
@@ -2317,29 +2782,347 @@
           antialias: true,
         });
         renderer.setSize(innerWidth, innerHeight);
-        scene.add(new THREE.AmbientLight(0x1a2a4a, 0.5));
-        var fl = new THREE.Mesh(
-          new THREE.PlaneGeometry(10, 10),
-          new THREE.MeshBasicMaterial({ color: 0x2a1810 })
+        renderer.shadowMap.enabled = true;
+        // Oświetlenie
+        scene.add(new THREE.AmbientLight(0x1a2a4a, 0.3));
+        var mainLight = new THREE.PointLight(0x4080ff, 1, 20);
+        mainLight.position.set(0, 3, 0);
+        mainLight.castShadow = true;
+        scene.add(mainLight);
+        var neonLight1 = new THREE.PointLight(0x00ffff, 0.5, 8);
+        neonLight1.position.set(-3, 2.5, 0);
+        scene.add(neonLight1);
+        var neonLight2 = new THREE.PointLight(0xff00ff, 0.3, 8);
+        neonLight2.position.set(3, 2.5, -2);
+        scene.add(neonLight2);
+        var spotLight = new THREE.SpotLight(
+          0xffffff,
+          0.8,
+          15,
+          Math.PI / 6,
+          0.5
         );
+        spotLight.position.set(0, 4, -3);
+        spotLight.target.position.set(0, 1, -3);
+        scene.add(spotLight);
+        scene.add(spotLight.target);
+        // Podłoga - parkiet
+        var floorMat = new THREE.MeshStandardMaterial({
+          color: 0x2a1810,
+          roughness: 0.7,
+          metalness: 0.1,
+        });
+        var fl = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), floorMat);
         fl.rotation.x = -Math.PI / 2;
+        fl.receiveShadow = true;
         scene.add(fl);
-        var dr = new THREE.Mesh(
-          new THREE.BoxGeometry(2, 2.9, 0.1),
-          new THREE.MeshBasicMaterial({ color: 0x4a3020 })
+        // Linie na podłodze (parkiet)
+        for (var i = -5; i < 6; i++) {
+          var line = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.02, 12),
+            new THREE.MeshBasicMaterial({ color: 0x1a0a05 })
+          );
+          line.rotation.x = -Math.PI / 2;
+          line.position.set(i, 0.001, 0);
+          scene.add(line);
+        }
+        // Ściany
+        var wallMat = new THREE.MeshStandardMaterial({
+          color: 0x0a0a1a,
+          roughness: 0.9,
+        });
+        var backWall = new THREE.Mesh(new THREE.PlaneGeometry(12, 5), wallMat);
+        backWall.position.set(0, 2.5, -5);
+        scene.add(backWall);
+        var leftWall = new THREE.Mesh(new THREE.PlaneGeometry(12, 5), wallMat);
+        leftWall.position.set(-6, 2.5, 0);
+        leftWall.rotation.y = Math.PI / 2;
+        scene.add(leftWall);
+        var rightWall = new THREE.Mesh(new THREE.PlaneGeometry(12, 5), wallMat);
+        rightWall.position.set(6, 2.5, 0);
+        rightWall.rotation.y = -Math.PI / 2;
+        scene.add(rightWall);
+        // Sufit
+        var ceiling = new THREE.Mesh(
+          new THREE.PlaneGeometry(12, 12),
+          new THREE.MeshStandardMaterial({ color: 0x0a0a15 })
         );
-        dr.position.set(0, 1.45, 4.9);
+        ceiling.position.set(0, 4.5, 0);
+        ceiling.rotation.x = Math.PI / 2;
+        scene.add(ceiling);
+        // DRZWI - szczegółowe
+        var doorFrame = new THREE.Mesh(
+          new THREE.BoxGeometry(2.4, 3.2, 0.3),
+          new THREE.MeshStandardMaterial({ color: 0x2a1505, roughness: 0.5 })
+        );
+        doorFrame.position.set(0, 1.6, 5.85);
+        scene.add(doorFrame);
+        var dr = new THREE.Mesh(
+          new THREE.BoxGeometry(2, 2.9, 0.15),
+          new THREE.MeshStandardMaterial({ color: 0x4a3020, roughness: 0.4 })
+        );
+        dr.position.set(0, 1.45, 5.7);
+        dr.castShadow = true;
         dr.userData = { type: "door" };
         objs.push(dr);
         scene.add(dr);
-        var mn = new THREE.Mesh(
-          new THREE.BoxGeometry(1.2, 0.7, 0.05),
+        // Klamka
+        var handle = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.05, 0.05, 0.3),
+          new THREE.MeshStandardMaterial({
+            color: 0xccaa00,
+            metalness: 0.9,
+            roughness: 0.2,
+          })
+        );
+        handle.position.set(0.7, 1.2, 5.6);
+        handle.rotation.z = Math.PI / 2;
+        scene.add(handle);
+        // Tabliczka na drzwiach
+        var sign = new THREE.Mesh(
+          new THREE.PlaneGeometry(0.8, 0.3),
           new THREE.MeshBasicMaterial({ color: 0x003355 })
         );
-        mn.position.set(0, 1.35, -3.2);
+        sign.position.set(0, 2.3, 5.65);
+        scene.add(sign);
+        // Szyba w drzwiach
+        // Neon CYBER DETECTIVE
+        var neonBack = new THREE.Mesh(
+          new THREE.PlaneGeometry(3.5, 0.8),
+          new THREE.MeshBasicMaterial({ color: 0x001020 })
+        );
+        neonBack.position.set(0, 3.5, -4.95);
+        scene.add(neonBack);
+        var neonGlow = new THREE.PointLight(0x00ffff, 1, 4);
+        neonGlow.position.set(0, 3.5, -4.5);
+        scene.add(neonGlow);
+        // KOMPUTER - szczegółowy
+        var deskMat = new THREE.MeshStandardMaterial({
+          color: 0x1a1a2a,
+          roughness: 0.5,
+          metalness: 0.2,
+        });
+        var desk = new THREE.Mesh(
+          new THREE.BoxGeometry(2.5, 0.1, 1.2),
+          deskMat
+        );
+        desk.position.set(0, 0.9, -3.5);
+        desk.castShadow = true;
+        scene.add(desk);
+        // Nogi biurka
+        for (var i = 0; i < 4; i++) {
+          var leg = new THREE.Mesh(
+            new THREE.BoxGeometry(0.1, 0.9, 0.1),
+            new THREE.MeshStandardMaterial({ color: 0x333344, metalness: 0.5 })
+          );
+          leg.position.set(
+            -1 + Math.floor(i / 2) * 2,
+            0.45,
+            -3.1 - (i % 2) * 0.8
+          );
+          scene.add(leg);
+        }
+        // Monitor główny
+        var monitorStand = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.15, 0.2, 0.3),
+          new THREE.MeshStandardMaterial({ color: 0x222233, metalness: 0.7 })
+        );
+        monitorStand.position.set(0, 1.1, -3.8);
+        scene.add(monitorStand);
+        var monitorArm = new THREE.Mesh(
+          new THREE.BoxGeometry(0.08, 0.4, 0.08),
+          new THREE.MeshStandardMaterial({ color: 0x333344, metalness: 0.8 })
+        );
+        monitorArm.position.set(0, 1.35, -3.8);
+        scene.add(monitorArm);
+        var mn = new THREE.Mesh(
+          new THREE.BoxGeometry(1.6, 1, 0.08),
+          new THREE.MeshStandardMaterial({ color: 0x111122, roughness: 0.3 })
+        );
+        mn.position.set(0, 1.75, -3.9);
+        mn.castShadow = true;
         mn.userData = { type: "pc" };
         objs.push(mn);
         scene.add(mn);
+        // Ekran monitora (świecący)
+        var screenMat = new THREE.MeshBasicMaterial({ color: 0x003355 });
+        var screen = new THREE.Mesh(
+          new THREE.PlaneGeometry(1.5, 0.9),
+          screenMat
+        );
+        screen.position.set(0, 1.75, -3.85);
+        scene.add(screen);
+        // Monitor boczny
+        var mn2 = new THREE.Mesh(
+          new THREE.BoxGeometry(1, 0.7, 0.06),
+          new THREE.MeshStandardMaterial({ color: 0x111122 })
+        );
+        mn2.position.set(-1.5, 1.55, -3.7);
+        mn2.rotation.y = 0.3;
+        scene.add(mn2);
+        var screen2 = new THREE.Mesh(
+          new THREE.PlaneGeometry(0.9, 0.6),
+          new THREE.MeshBasicMaterial({ color: 0x002244 })
+        );
+        screen2.position.set(-1.5, 1.55, -3.65);
+        screen2.rotation.y = 0.3;
+        scene.add(screen2);
+        // Klawiatura
+        var keyboard = new THREE.Mesh(
+          new THREE.BoxGeometry(0.6, 0.03, 0.2),
+          new THREE.MeshStandardMaterial({ color: 0x222233 })
+        );
+        keyboard.position.set(0, 0.96, -3.2);
+        scene.add(keyboard);
+        // Mysz
+        var mouse = new THREE.Mesh(
+          new THREE.BoxGeometry(0.1, 0.03, 0.15),
+          new THREE.MeshStandardMaterial({ color: 0x333344 })
+        );
+        mouse.position.set(0.5, 0.96, -3.2);
+        scene.add(mouse);
+        // Podkładka pod mysz (świecąca RGB)
+        var mousepad = new THREE.Mesh(
+          new THREE.PlaneGeometry(0.4, 0.35),
+          new THREE.MeshBasicMaterial({ color: 0x00ffff })
+        );
+        mousepad.position.set(0.5, 0.95, -3.2);
+        mousepad.rotation.x = -Math.PI / 2;
+        scene.add(mousepad);
+        // Kubek z kawą
+        var mug = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.05, 0.04, 0.1),
+          new THREE.MeshStandardMaterial({ color: 0x4444aa })
+        );
+        mug.position.set(1, 0.98, -3.3);
+        scene.add(mug);
+        // Książki/akta na biurku
+        var books = new THREE.Mesh(
+          new THREE.BoxGeometry(0.3, 0.15, 0.2),
+          new THREE.MeshStandardMaterial({ color: 0x8b4513 })
+        );
+        books.position.set(-0.8, 1.02, -3.3);
+        scene.add(books);
+        // Lampka LED na biurku
+        var lampBase = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.08, 0.1, 0.05),
+          new THREE.MeshStandardMaterial({ color: 0x333344 })
+        );
+        lampBase.position.set(1.1, 0.95, -3.6);
+        scene.add(lampBase);
+        var lampArm = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.02, 0.02, 0.5),
+          new THREE.MeshStandardMaterial({ color: 0x444455 })
+        );
+        lampArm.position.set(1.1, 1.2, -3.6);
+        scene.add(lampArm);
+        var lampHead = new THREE.Mesh(
+          new THREE.SphereGeometry(0.08),
+          new THREE.MeshBasicMaterial({ color: 0x00ff88 })
+        );
+        lampHead.position.set(1.1, 1.5, -3.6);
+        scene.add(lampHead);
+        var deskLight = new THREE.PointLight(0x00ff88, 0.5, 2);
+        deskLight.position.set(1.1, 1.4, -3.6);
+        scene.add(deskLight);
+        // REGAŁ Z KSIĄŻKAMI
+        var shelfMat = new THREE.MeshStandardMaterial({
+          color: 0x2a1a0a,
+          roughness: 0.6,
+        });
+        var shelf = new THREE.Mesh(new THREE.BoxGeometry(2, 3, 0.4), shelfMat);
+        shelf.position.set(-4, 1.5, -4);
+        scene.add(shelf);
+        // Półki
+        for (var i = 0; i < 4; i++) {
+          var shelfBoard = new THREE.Mesh(
+            new THREE.BoxGeometry(1.8, 0.05, 0.35),
+            new THREE.MeshStandardMaterial({ color: 0x3a2a1a })
+          );
+          shelfBoard.position.set(-4, 0.5 + i * 0.8, -4);
+          scene.add(shelfBoard);
+        }
+        // Książki na półkach
+        var bookColors = [
+          0x8b0000, 0x006400, 0x00008b, 0x8b008b, 0x8b4513, 0xffd700, 0x4169e1,
+        ];
+        for (var i = 0; i < 20; i++) {
+          var bookH = 0.2 + Math.random() * 0.15;
+          var book = new THREE.Mesh(
+            new THREE.BoxGeometry(0.08, bookH, 0.25),
+            new THREE.MeshStandardMaterial({
+              color: bookColors[Math.floor(Math.random() * bookColors.length)],
+            })
+          );
+          book.position.set(
+            -4.7 + i * 0.09,
+            0.5 + Math.floor(i / 7) * 0.8 + bookH / 2,
+            -4
+          );
+          scene.add(book);
+        }
+        // SKLEP - Witryna
+        // Roślina w doniczce
+        var pot = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.15, 0.1, 0.25),
+          new THREE.MeshStandardMaterial({ color: 0x8b4513 })
+        );
+        pot.position.set(3, 0.12, 2);
+        scene.add(pot);
+        var plant = new THREE.Mesh(
+          new THREE.ConeGeometry(0.25, 0.6, 8),
+          new THREE.MeshStandardMaterial({ color: 0x228b22 })
+        );
+        plant.position.set(3, 0.55, 2);
+        scene.add(plant);
+        // Fotel gracza przy biurku
+        var chairBase = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.3, 0.35, 0.1),
+          new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.8 })
+        );
+        chairBase.position.set(0, 0.15, -2);
+        scene.add(chairBase);
+        var chairPole = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.05, 0.05, 0.5),
+          new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.9 })
+        );
+        chairPole.position.set(0, 0.4, -2);
+        scene.add(chairPole);
+        var chairSeat = new THREE.Mesh(
+          new THREE.BoxGeometry(0.6, 0.1, 0.6),
+          new THREE.MeshStandardMaterial({ color: 0x1a1a2a })
+        );
+        chairSeat.position.set(0, 0.7, -2);
+        scene.add(chairSeat);
+        var chairBack = new THREE.Mesh(
+          new THREE.BoxGeometry(0.6, 0.8, 0.1),
+          new THREE.MeshStandardMaterial({ color: 0x1a1a2a })
+        );
+        chairBack.position.set(0, 1.1, -2.3);
+        scene.add(chairBack);
+        // Ramka z certyfikatem na ścianie
+        var frame = new THREE.Mesh(
+          new THREE.BoxGeometry(0.8, 0.6, 0.05),
+          new THREE.MeshStandardMaterial({ color: 0x8b4513 })
+        );
+        frame.position.set(3, 2.5, -4.95);
+        scene.add(frame);
+        var cert = new THREE.Mesh(
+          new THREE.PlaneGeometry(0.7, 0.5),
+          new THREE.MeshBasicMaterial({ color: 0xfffff0 })
+        );
+        cert.position.set(3, 2.5, -4.92);
+        scene.add(cert);
+        // Zegar cyfrowy
+        var clock = new THREE.Mesh(
+          new THREE.BoxGeometry(0.5, 0.2, 0.05),
+          new THREE.MeshBasicMaterial({ color: 0x001100 })
+        );
+        clock.position.set(-3, 3, -4.95);
+        scene.add(clock);
+        var clockGlow = new THREE.PointLight(0x00ff00, 0.2, 1);
+        clockGlow.position.set(-3, 3, -4.8);
+        scene.add(clockGlow);
         animate();
       }
       function animate() {
@@ -2928,18 +3711,20 @@
             notify(TOOLS[t].n, curEv.ind[t].s ? "⚠️ PODEJRZANE!" : "✓ OK");
           };
         }
-        document.getElementById("v-ok").onclick = document.getElementById(
-          "v-ok"
-        ).ontouchend = function (e) {
-          e.preventDefault();
-          verdict(false);
-        };
-        document.getElementById("v-fake").onclick = document.getElementById(
-          "v-fake"
-        ).ontouchend = function (e) {
-          e.preventDefault();
-          verdict(true);
-        };
+        var vok = document.getElementById("v-ok");
+        var vfake = document.getElementById("v-fake");
+        if (vok) {
+          vok.onclick = vok.ontouchend = function (e) {
+            e.preventDefault();
+            verdict(false);
+          };
+        }
+        if (vfake) {
+          vfake.onclick = vfake.ontouchend = function (e) {
+            e.preventDefault();
+            verdict(true);
+          };
+        }
       }
       function verdict(isFake) {
         curEv.verified = true;
@@ -3539,24 +4324,25 @@
         document.getElementById("client-chat").style.display = "none";
         chatCaseIdx = null;
       };
-      document.getElementById("chat-send").onclick = document.getElementById(
-        "chat-send"
-      ).ontouchend = function (e) {
-        e.preventDefault();
-        var txt = document.getElementById("chat-input").value.trim();
-        if (!txt || chatCaseIdx === null) return;
-        var c = G.activeCases[chatCaseIdx];
-        if (!c.chatHistory) c.chatHistory = [];
-        c.chatHistory.push({ from: "you", text: txt });
-        document.getElementById("chat-input").value = "";
-        renderChatMessages(c);
-        setTimeout(function () {
-          var resp = getClientResponse(c, txt);
-          c.chatHistory.push({ from: "client", text: resp });
+      var chatSendBtn = document.getElementById("chat-send");
+      if (chatSendBtn) {
+        chatSendBtn.onclick = chatSendBtn.ontouchend = function (e) {
+          e.preventDefault();
+          var txt = document.getElementById("chat-input").value.trim();
+          if (!txt || chatCaseIdx === null) return;
+          var c = G.activeCases[chatCaseIdx];
+          if (!c.chatHistory) c.chatHistory = [];
+          c.chatHistory.push({ from: "you", text: txt });
+          document.getElementById("chat-input").value = "";
           renderChatMessages(c);
-          saveGame();
-        }, 1000 + Math.random() * 1000);
-      };
+          setTimeout(function () {
+            var resp = getClientResponse(c, txt);
+            c.chatHistory.push({ from: "client", text: resp });
+            renderChatMessages(c);
+            saveGame();
+          }, 1000 + Math.random() * 1000);
+        };
+      }
       var currentVisitor = null;
       var agreedPrice = 0;
       function negotiatePrice(offered) {
@@ -3683,7 +4469,6 @@
       document.getElementById("btn-accept").onclick = function () {
         if (!currentVisitor || agreedPrice <= 0) return;
         var c = currentVisitor;
-        G.credits += agreedPrice;
         var nc = JSON.parse(JSON.stringify(c));
         nc.startDay = G.day;
         nc.agreedFee = agreedPrice;
@@ -3700,7 +4485,7 @@
         document.getElementById("visitor").style.display = "none";
         updateHUD();
         saveGame();
-        notify("Przyjęto!", "+" + nc.agreedFee + "💰");
+        notify("Przyjęto!", "Zapłata " + nc.agreedFee + "💰 po wykonaniu");
       };
       document.getElementById("btn-reject").onclick = function () {
         currentVisitor = null;
@@ -3708,17 +4493,44 @@
         document.getElementById("visitor").style.display = "none";
       };
       function finishCase(idx, to) {
-        var c = JSON.parse(JSON.stringify(G.activeCases[idx]));
-        var correct = c.evidence[0].verdict == c.evidence[0].fake;
+        var c = G.activeCases[idx];
+        // Mapowanie: które sprawy idą gdzie (bez polskich znaków!)
+        var correctPlace = {
+          GROŹBY: "Policja",
+          STALKING: "Policja",
+          HACKING: "Policja",
+          OSZUSTWO: "Policja",
+          SZANTAŻ: "Policja",
+          ZNIESŁAWIENIE: "Sad",
+          PODSZYWANIE: "Sad",
+        };
+        var shouldGo = correctPlace[c.type] || "Policja";
+        if (to != shouldGo) {
+          // Złe miejsce - kara i sprawa zostaje
+          G.credits = Math.max(0, G.credits - 50);
+          updateHUD();
+          saveGame();
+          document.getElementById("wrong-place-msg").textContent =
+            "Ta sprawa (" +
+            c.type +
+            ") powinna trafić do: " +
+            (shouldGo == "Sad" ? "SĄDU" : "POLICJI") +
+            "!";
+          document.getElementById("wrong-place").style.display = "flex";
+          return;
+        }
+        // Prawidłowe miejsce - kontynuuj
+        var cCopy = JSON.parse(JSON.stringify(c));
+        var allCorrect = true;
+        for (var i = 0; i < c.evidence.length; i++) {
+          if (c.evidence[i].verdict != c.evidence[i].fake) allCorrect = false;
+        }
         G.activeCases.splice(idx, 1);
         delete G.results[c.id];
         G.selectedCase = G.activeCases.length ? 0 : null;
         saveGame();
-        if (to == "Sąd" || to == "Policja") {
-          exitPC();
-          startScene(to, c, correct);
-          return;
-        }
+        exitPC();
+        startScene(to, cCopy, allCorrect);
       }
       function showResult(correct, rew, to) {
         document.getElementById("result-icon").textContent = correct
@@ -3750,66 +4562,415 @@
       function initScene3D(type) {
         var canvas = document.getElementById("scene-canvas");
         sceneScene = new THREE.Scene();
-        sceneScene.background = new THREE.Color(
-          type == "Sąd" ? 0x1a1208 : 0x0a1020
-        );
+        var isCourt = type == "Sad";
+        // Tło z gradientem
+        sceneScene.background = new THREE.Color(isCourt ? 0x1a1208 : 0x0a1020);
+        sceneScene.fog = new THREE.Fog(isCourt ? 0x1a1208 : 0x0a1020, 5, 25);
         sceneCamera = new THREE.PerspectiveCamera(
           60,
-          innerWidth / (innerHeight * 0.4),
+          innerWidth / (innerHeight * 0.45),
           0.1,
           100
         );
-        sceneCamera.position.set(0, 1.6, 3);
+        sceneCamera.position.set(0, 1.6, 4);
         sceneRenderer = new THREE.WebGLRenderer({
           canvas: canvas,
           antialias: true,
         });
-        sceneRenderer.setSize(innerWidth, innerHeight * 0.4);
+        sceneRenderer.setSize(innerWidth, innerHeight * 0.45);
+        sceneRenderer.shadowMap.enabled = true;
+        // Światła
         sceneScene.add(
-          new THREE.AmbientLight(type == "Sąd" ? 0xffd090 : 0x4060ff, 0.5)
+          new THREE.AmbientLight(isCourt ? 0xffd090 : 0x2040a0, 0.4)
         );
-        var light = new THREE.PointLight(
-          type == "Sąd" ? 0xffcc66 : 0x3366ff,
-          1,
-          20
+        var mainLight = new THREE.SpotLight(
+          isCourt ? 0xffcc66 : 0x4080ff,
+          1.5,
+          30,
+          Math.PI / 4,
+          0.5
         );
-        light.position.set(0, 4, 0);
-        sceneScene.add(light);
-        var floor = new THREE.Mesh(
-          new THREE.PlaneGeometry(20, 20),
-          new THREE.MeshBasicMaterial({
-            color: type == "Sąd" ? 0x2a1a0a : 0x1a1a2a,
-          })
+        mainLight.position.set(0, 6, 2);
+        mainLight.castShadow = true;
+        sceneScene.add(mainLight);
+        var fillLight = new THREE.PointLight(
+          isCourt ? 0xff9933 : 0x3366ff,
+          0.5,
+          15
         );
+        fillLight.position.set(-3, 3, 0);
+        sceneScene.add(fillLight);
+        var fillLight2 = new THREE.PointLight(
+          isCourt ? 0xffaa44 : 0x4488ff,
+          0.5,
+          15
+        );
+        fillLight2.position.set(3, 3, 0);
+        sceneScene.add(fillLight2);
+        // Podłoga z teksturą
+        var floorGeo = new THREE.PlaneGeometry(30, 30, 30, 30);
+        var floorMat = new THREE.MeshStandardMaterial({
+          color: isCourt ? 0x3a2815 : 0x151525,
+          roughness: 0.8,
+          metalness: 0.1,
+        });
+        var floor = new THREE.Mesh(floorGeo, floorMat);
         floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
         sceneScene.add(floor);
-        if (type == "Sąd") {
+        // Ściany
+        var wallMat = new THREE.MeshStandardMaterial({
+          color: isCourt ? 0x2a1a0a : 0x0a0a1a,
+          roughness: 0.9,
+        });
+        var backWall = new THREE.Mesh(new THREE.PlaneGeometry(20, 8), wallMat);
+        backWall.position.set(0, 4, -6);
+        sceneScene.add(backWall);
+        var leftWall = new THREE.Mesh(new THREE.PlaneGeometry(12, 8), wallMat);
+        leftWall.position.set(-10, 4, 0);
+        leftWall.rotation.y = Math.PI / 2;
+        sceneScene.add(leftWall);
+        var rightWall = new THREE.Mesh(new THREE.PlaneGeometry(12, 8), wallMat);
+        rightWall.position.set(10, 4, 0);
+        rightWall.rotation.y = -Math.PI / 2;
+        sceneScene.add(rightWall);
+        if (isCourt) {
+          // SĄD - SZCZEGÓŁOWY
+          // Podwyższenie sędziego
+          var platformMat = new THREE.MeshStandardMaterial({
+            color: 0x4a2a10,
+            roughness: 0.6,
+          });
+          var platform = new THREE.Mesh(
+            new THREE.BoxGeometry(6, 0.6, 3),
+            platformMat
+          );
+          platform.position.set(0, 0.3, -4);
+          platform.castShadow = true;
+          sceneScene.add(platform);
+          // Ława sędziowska
+          var benchMat = new THREE.MeshStandardMaterial({
+            color: 0x3a1a08,
+            roughness: 0.5,
+          });
           var bench = new THREE.Mesh(
-            new THREE.BoxGeometry(4, 1.5, 1),
-            new THREE.MeshBasicMaterial({ color: 0x4a2a10 })
+            new THREE.BoxGeometry(5, 1.2, 0.8),
+            benchMat
           );
-          bench.position.set(0, 0.75, -4);
+          bench.position.set(0, 1.2, -4.5);
+          bench.castShadow = true;
           sceneScene.add(bench);
+          // Panel na ławie
+          var panelMat = new THREE.MeshStandardMaterial({
+            color: 0x2a0a00,
+            roughness: 0.3,
+          });
+          var panel = new THREE.Mesh(
+            new THREE.BoxGeometry(4.5, 0.8, 0.1),
+            panelMat
+          );
+          panel.position.set(0, 1.5, -4.1);
+          sceneScene.add(panel);
+          // Godło
+          var emblemMat = new THREE.MeshStandardMaterial({
+            color: 0xffd700,
+            metalness: 0.8,
+            roughness: 0.2,
+            emissive: 0x332200,
+          });
           var emblem = new THREE.Mesh(
-            new THREE.CircleGeometry(0.5, 32),
-            new THREE.MeshBasicMaterial({ color: 0xffd700 })
+            new THREE.CircleGeometry(0.6, 32),
+            emblemMat
           );
-          emblem.position.set(0, 2.5, -4.5);
+          emblem.position.set(0, 3.5, -5.9);
           sceneScene.add(emblem);
+          var emblemRing = new THREE.Mesh(
+            new THREE.RingGeometry(0.55, 0.7, 32),
+            new THREE.MeshStandardMaterial({ color: 0xcc9900, metalness: 0.9 })
+          );
+          emblemRing.position.set(0, 3.5, -5.85);
+          sceneScene.add(emblemRing);
+          // Flagi
+          var flagPole1 = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.03, 0.03, 3),
+            new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.9 })
+          );
+          flagPole1.position.set(-2, 2.5, -5.5);
+          sceneScene.add(flagPole1);
+          var flag1 = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.8, 0.5),
+            new THREE.MeshBasicMaterial({
+              color: 0xdc143c,
+              side: THREE.DoubleSide,
+            })
+          );
+          flag1.position.set(-1.6, 3.5, -5.5);
+          sceneScene.add(flag1);
+          var flagPole2 = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.03, 0.03, 3),
+            new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.9 })
+          );
+          flagPole2.position.set(2, 2.5, -5.5);
+          sceneScene.add(flagPole2);
+          var flag2 = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.8, 0.5),
+            new THREE.MeshBasicMaterial({
+              color: 0xffffff,
+              side: THREE.DoubleSide,
+            })
+          );
+          flag2.position.set(1.6, 3.5, -5.5);
+          sceneScene.add(flag2);
+          // Młotek sędziowski
+          var gavel = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.08, 0.08, 0.3),
+            new THREE.MeshStandardMaterial({ color: 0x2a1500, roughness: 0.4 })
+          );
+          gavel.position.set(1.5, 1.85, -4.3);
+          gavel.rotation.z = Math.PI / 2;
+          sceneScene.add(gavel);
+          var gavelHead = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.12, 0.12, 0.2),
+            new THREE.MeshStandardMaterial({ color: 0x1a0a00, roughness: 0.3 })
+          );
+          gavelHead.position.set(1.65, 1.85, -4.3);
+          sceneScene.add(gavelHead);
+          // Ławy dla publiczności
+          for (var i = 0; i < 3; i++) {
+            var pew = new THREE.Mesh(
+              new THREE.BoxGeometry(3, 0.6, 0.5),
+              new THREE.MeshStandardMaterial({ color: 0x3a2010 })
+            );
+            pew.position.set(-4 + i * 4, 0.3, 2);
+            pew.castShadow = true;
+            sceneScene.add(pew);
+          }
+          // Świece/lampy
+          for (var i = 0; i < 4; i++) {
+            var candleBase = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.1, 0.15, 0.3),
+              new THREE.MeshStandardMaterial({
+                color: 0x888844,
+                metalness: 0.7,
+              })
+            );
+            candleBase.position.set(-3 + i * 2, 2.5, -5.8);
+            sceneScene.add(candleBase);
+            var flame = new THREE.Mesh(
+              new THREE.SphereGeometry(0.08),
+              new THREE.MeshBasicMaterial({ color: 0xffaa00 })
+            );
+            flame.position.set(-3 + i * 2, 2.7, -5.8);
+            sceneScene.add(flame);
+          }
+          // Okna
+          for (var i = 0; i < 2; i++) {
+            var windowFrame = new THREE.Mesh(
+              new THREE.BoxGeometry(1.5, 2.5, 0.1),
+              new THREE.MeshStandardMaterial({ color: 0x1a0a00 })
+            );
+            windowFrame.position.set(-5 + i * 10, 3, -5.9);
+            sceneScene.add(windowFrame);
+            var windowGlass = new THREE.Mesh(
+              new THREE.PlaneGeometry(1.2, 2.2),
+              new THREE.MeshBasicMaterial({
+                color: 0x87ceeb,
+                transparent: true,
+                opacity: 0.3,
+              })
+            );
+            windowGlass.position.set(-5 + i * 10, 3, -5.85);
+            sceneScene.add(windowGlass);
+          }
         } else {
-          var desk = new THREE.Mesh(
-            new THREE.BoxGeometry(3, 1, 1.5),
-            new THREE.MeshBasicMaterial({ color: 0x2a2a4a })
-          );
-          desk.position.set(0, 0.5, -3);
+          // POLICJA - SZCZEGÓŁOWA
+          // Biurko główne
+          var deskMat = new THREE.MeshStandardMaterial({
+            color: 0x2a3040,
+            roughness: 0.6,
+            metalness: 0.2,
+          });
+          var desk = new THREE.Mesh(new THREE.BoxGeometry(4, 0.8, 2), deskMat);
+          desk.position.set(0, 0.4, -3);
+          desk.castShadow = true;
           sceneScene.add(desk);
-          var lamp = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.1, 0.3, 0.4),
-            new THREE.MeshBasicMaterial({ color: 0x4080ff })
+          // Blat biurka
+          var deskTop = new THREE.Mesh(
+            new THREE.BoxGeometry(4.2, 0.1, 2.2),
+            new THREE.MeshStandardMaterial({ color: 0x3a4050, roughness: 0.4 })
           );
-          lamp.position.set(1, 1.2, -3);
-          sceneScene.add(lamp);
+          deskTop.position.set(0, 0.85, -3);
+          sceneScene.add(deskTop);
+          // Monitor
+          var monitorStand = new THREE.Mesh(
+            new THREE.BoxGeometry(0.3, 0.4, 0.3),
+            new THREE.MeshStandardMaterial({ color: 0x222222 })
+          );
+          monitorStand.position.set(-0.8, 1.05, -3.5);
+          sceneScene.add(monitorStand);
+          var monitor = new THREE.Mesh(
+            new THREE.BoxGeometry(1.2, 0.8, 0.08),
+            new THREE.MeshStandardMaterial({ color: 0x111111 })
+          );
+          monitor.position.set(-0.8, 1.65, -3.5);
+          sceneScene.add(monitor);
+          var screen = new THREE.Mesh(
+            new THREE.PlaneGeometry(1.1, 0.7),
+            new THREE.MeshBasicMaterial({ color: 0x003366 })
+          );
+          screen.position.set(-0.8, 1.65, -3.45);
+          sceneScene.add(screen);
+          // Klawiatura
+          var keyboard = new THREE.Mesh(
+            new THREE.BoxGeometry(0.6, 0.03, 0.2),
+            new THREE.MeshStandardMaterial({ color: 0x222222 })
+          );
+          keyboard.position.set(-0.8, 0.87, -3);
+          sceneScene.add(keyboard);
+          // Lampa biurkowa
+          var lampBase = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.15, 0.2, 0.1),
+            new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8 })
+          );
+          lampBase.position.set(1.2, 0.9, -3.3);
+          sceneScene.add(lampBase);
+          var lampArm = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.02, 0.02, 0.6),
+            new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.9 })
+          );
+          lampArm.position.set(1.2, 1.2, -3.3);
+          sceneScene.add(lampArm);
+          var lampHead = new THREE.Mesh(
+            new THREE.ConeGeometry(0.15, 0.2, 16),
+            new THREE.MeshStandardMaterial({ color: 0x2266aa, metalness: 0.5 })
+          );
+          lampHead.position.set(1.2, 1.55, -3.3);
+          lampHead.rotation.x = Math.PI;
+          sceneScene.add(lampHead);
+          var lampLight = new THREE.PointLight(0x4488ff, 0.8, 3);
+          lampLight.position.set(1.2, 1.4, -3.3);
+          sceneScene.add(lampLight);
+          // Dokumenty na biurku
+          var papers = new THREE.Mesh(
+            new THREE.BoxGeometry(0.4, 0.02, 0.5),
+            new THREE.MeshStandardMaterial({ color: 0xeeeeee })
+          );
+          papers.position.set(0.5, 0.87, -2.8);
+          papers.rotation.y = 0.2;
+          sceneScene.add(papers);
+          // Kubek
+          var mug = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.06, 0.05, 0.12),
+            new THREE.MeshStandardMaterial({ color: 0x4444aa })
+          );
+          mug.position.set(1.5, 0.93, -2.7);
+          sceneScene.add(mug);
+          // Szafki na akta
+          for (var i = 0; i < 3; i++) {
+            var cabinet = new THREE.Mesh(
+              new THREE.BoxGeometry(1, 2.5, 0.6),
+              new THREE.MeshStandardMaterial({
+                color: 0x3a3a4a,
+                metalness: 0.3,
+              })
+            );
+            cabinet.position.set(-4 + i * 0.5, 1.25, -5.5);
+            cabinet.castShadow = true;
+            sceneScene.add(cabinet);
+            var handle = new THREE.Mesh(
+              new THREE.BoxGeometry(0.3, 0.05, 0.05),
+              new THREE.MeshStandardMaterial({
+                color: 0x888888,
+                metalness: 0.9,
+              })
+            );
+            handle.position.set(-4 + i * 0.5, 1.5, -5.2);
+            sceneScene.add(handle);
+          }
+          // Tablica korkowa
+          var board = new THREE.Mesh(
+            new THREE.BoxGeometry(2, 1.5, 0.1),
+            new THREE.MeshStandardMaterial({ color: 0x8b6914 })
+          );
+          board.position.set(3, 2, -5.9);
+          sceneScene.add(board);
+          var boardFrame = new THREE.Mesh(
+            new THREE.BoxGeometry(2.2, 1.7, 0.05),
+            new THREE.MeshStandardMaterial({ color: 0x4a3010 })
+          );
+          boardFrame.position.set(3, 2, -5.95);
+          sceneScene.add(boardFrame);
+          // Pinezki na tablicy
+          for (var i = 0; i < 5; i++) {
+            var pin = new THREE.Mesh(
+              new THREE.SphereGeometry(0.03),
+              new THREE.MeshBasicMaterial({
+                color: [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff][i],
+              })
+            );
+            pin.position.set(
+              2.5 + Math.random() * 1,
+              1.5 + Math.random() * 0.8,
+              -5.85
+            );
+            sceneScene.add(pin);
+          }
+          // Krzesło dla gościa
+          var chairSeat = new THREE.Mesh(
+            new THREE.BoxGeometry(0.6, 0.08, 0.6),
+            new THREE.MeshStandardMaterial({ color: 0x333344 })
+          );
+          chairSeat.position.set(0, 0.5, 0);
+          sceneScene.add(chairSeat);
+          var chairBack = new THREE.Mesh(
+            new THREE.BoxGeometry(0.6, 0.8, 0.08),
+            new THREE.MeshStandardMaterial({ color: 0x333344 })
+          );
+          chairBack.position.set(0, 0.9, -0.25);
+          sceneScene.add(chairBack);
+          for (var i = 0; i < 4; i++) {
+            var leg = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.03, 0.03, 0.5),
+              new THREE.MeshStandardMaterial({
+                color: 0x666666,
+                metalness: 0.8,
+              })
+            );
+            leg.position.set(
+              -0.2 + Math.floor(i / 2) * 0.4,
+              0.25,
+              -0.2 + (i % 2) * 0.4
+            );
+            sceneScene.add(leg);
+          }
+          // Logo policji na ścianie
+          var logoBack = new THREE.Mesh(
+            new THREE.CircleGeometry(0.8, 32),
+            new THREE.MeshStandardMaterial({ color: 0x000066 })
+          );
+          logoBack.position.set(0, 3, -5.9);
+          sceneScene.add(logoBack);
+          var logoStar = new THREE.Mesh(
+            new THREE.CircleGeometry(0.5, 6),
+            new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.7 })
+          );
+          logoStar.position.set(0, 3, -5.85);
+          sceneScene.add(logoStar);
+          // Zegar
+          var clockFace = new THREE.Mesh(
+            new THREE.CircleGeometry(0.4, 32),
+            new THREE.MeshStandardMaterial({ color: 0xffffff })
+          );
+          clockFace.position.set(-3, 3, -5.9);
+          sceneScene.add(clockFace);
+          var clockFrame = new THREE.Mesh(
+            new THREE.RingGeometry(0.38, 0.45, 32),
+            new THREE.MeshStandardMaterial({ color: 0x222222 })
+          );
+          clockFrame.position.set(-3, 3, -5.88);
+          sceneScene.add(clockFrame);
         }
+        // Obsługa dotyku i myszy
         var stx = 0,
           sty = 0;
         canvas.ontouchstart = function (e) {
@@ -4297,7 +5458,7 @@
         var playerVerdict = c.evidence[0].verdict;
         var verdictWord = playerVerdict ? "FAŁSZYWY" : "PRAWDZIWY";
 
-        if (d.type == "Sąd") {
+        if (d.type == "Sad") {
           var phases = [
             {
               who: "judge",
@@ -4515,24 +5676,28 @@
           setTimeout(runScenePhase, 3000);
         }
       }
-      document.getElementById("scene-submit").onclick = document.getElementById(
-        "scene-submit"
-      ).ontouchend = function (e) {
-        e.preventDefault();
-        var txt = document
-          .getElementById("scene-textarea")
-          .value.toLowerCase()
-          .trim();
-        document.getElementById("scene-input").style.display = "none";
-        if (!sceneData.allTexts) sceneData.allTexts = "";
-        sceneData.allTexts += " " + txt;
-        document.getElementById("scene-text").textContent =
-          txt.length > 0
-            ? '"' + txt.substring(0, 80) + (txt.length > 80 ? "..." : "") + '"'
-            : '"(milczenie)"';
-        sceneData.phase++;
-        setTimeout(runScenePhase, 2000);
-      };
+      var sceneSubmitBtn = document.getElementById("scene-submit");
+      if (sceneSubmitBtn) {
+        sceneSubmitBtn.onclick = sceneSubmitBtn.ontouchend = function (e) {
+          e.preventDefault();
+          var txt = document
+            .getElementById("scene-textarea")
+            .value.toLowerCase()
+            .trim();
+          document.getElementById("scene-input").style.display = "none";
+          if (!sceneData.allTexts) sceneData.allTexts = "";
+          sceneData.allTexts += " " + txt;
+          document.getElementById("scene-text").textContent =
+            txt.length > 0
+              ? '"' +
+                txt.substring(0, 80) +
+                (txt.length > 80 ? "..." : "") +
+                '"'
+              : '"(milczenie)"';
+          sceneData.phase++;
+          setTimeout(runScenePhase, 2000);
+        };
+      }
       function showSceneVerdict() {
         document.getElementById("scene-dialogue").style.display = "none";
         var res = document.getElementById("scene-result");
@@ -4551,10 +5716,10 @@
             msg +
             '<br><br><span style="color:#f36">Licencja zawieszona na 2 godziny!</span>';
           speak_txt =
-            sceneData.type == "Sąd"
+            sceneData.type == "Sad"
               ? "Za fałszywe oskarżenie zawieszam Pana licencję!"
               : "Za fałszywe zgłoszenie nakładam zawieszenie!";
-          speak(speak_txt, sceneData.type == "Sąd" ? "judge" : "police");
+          speak(speak_txt, sceneData.type == "Sad" ? "judge" : "police");
           G.completed.push({
             id: sceneData.caseData.id,
             name: sceneData.caseData.name,
@@ -4574,17 +5739,17 @@
         }
         if (outcome.type == "full_win")
           speak_txt =
-            sceneData.type == "Sąd"
+            sceneData.type == "Sad"
               ? "Uznaję oskarżonego winnym! Doskonała praca!"
               : "Aresztujemy podejrzanego! Świetna robota!";
         else if (outcome.type == "win")
           speak_txt =
-            sceneData.type == "Sąd"
+            sceneData.type == "Sad"
               ? "Uznaję oskarżonego winnym."
               : "Wszczynamy postępowanie.";
         else if (outcome.type == "partial")
           speak_txt =
-            sceneData.type == "Sąd"
+            sceneData.type == "Sad"
               ? "Częściowo uznaję winę."
               : "Przyjmujemy zgłoszenie.";
         else if (outcome.type == "weak_win")
@@ -4595,7 +5760,7 @@
           speak_txt = "Nakładam grzywnę za błędne oskarżenie!";
         else if (outcome.type == "lose") speak_txt = "Odrzucam to zgłoszenie.";
         else speak_txt = "Sprawa rozpatrzona.";
-        speak(speak_txt, sceneData.type == "Sąd" ? "judge" : "police");
+        speak(speak_txt, sceneData.type == "Sad" ? "judge" : "police");
         title.textContent =
           rew > 0 ? "✅ SUKCES!" : rew == 0 ? "⚠️ UMORZONE" : "❌ PORAŻKA!";
         title.style.color = col;
@@ -4629,16 +5794,17 @@
         updateHUD();
         saveGame();
       }
-      document.getElementById("scene-exit").onclick = document.getElementById(
-        "scene-exit"
-      ).ontouchend = function (e) {
-        e.preventDefault();
-        document.getElementById("scene-overlay").style.display = "none";
-        G.day++;
-        updateHUD();
-        saveGame();
-        renderPanel("case");
-      };
+      var sceneExitBtn = document.getElementById("scene-exit");
+      if (sceneExitBtn) {
+        sceneExitBtn.onclick = sceneExitBtn.ontouchend = function (e) {
+          e.preventDefault();
+          document.getElementById("scene-overlay").style.display = "none";
+          G.day++;
+          updateHUD();
+          saveGame();
+          renderPanel("case");
+        };
+      }
       document.getElementById("start-btn").onclick = function () {
         document.getElementById("intro").style.display = "none";
         init3D();
@@ -4791,8 +5957,9 @@
       document.getElementById("close-mediator").onclick = function () {
         document.getElementById("mediator-chat").style.display = "none";
       };
-      document.getElementById("mediator-send").onclick =
-        document.getElementById("mediator-send").ontouchend = function (e) {
+      var medSendBtn = document.getElementById("mediator-send");
+      if (medSendBtn) {
+        medSendBtn.onclick = medSendBtn.ontouchend = function (e) {
           e.preventDefault();
           var input = document.getElementById("mediator-input");
           var txt = input.value.trim();
@@ -4806,6 +5973,7 @@
           input.value = "";
           renderMediatorMessages();
         };
+      }
     </script>
   </body>
 </html>

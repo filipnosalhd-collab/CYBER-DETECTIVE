@@ -1,0 +1,4087 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"
+    />
+    <title>Cyber Detective</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a12' width='100' height='100' rx='20'/><circle cx='40' cy='40' r='20' fill='none' stroke='%2300ffff' stroke-width='6'/><line x1='55' y1='55' x2='75' y2='75' stroke='%2300ffff' stroke-width='6' stroke-linecap='round'/><circle cx='70' cy='30' r='8' fill='%23ff3366'/><path d='M65 30 h10 M70 25 v10' stroke='white' stroke-width='2'/></svg>"
+    />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap");
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #000;
+        overflow: hidden;
+        font-family: "Segoe UI", sans-serif;
+      }
+      #loader,
+      #suspended {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(135deg, #0a0a12, #1a1a2e);
+        z-index: 3000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        text-align: center;
+      }
+      #loader-logo {
+        width: 120px;
+        height: 120px;
+        margin-bottom: 30px;
+        animation: pulse-logo 2s ease-in-out infinite;
+      }
+      @keyframes pulse-logo {
+        0%,
+        100% {
+          filter: drop-shadow(0 0 20px #0ff);
+        }
+        50% {
+          filter: drop-shadow(0 0 40px #0ff);
+        }
+      }
+      #loader h1 {
+        font-family: "Orbitron";
+        font-size: clamp(20px, 5vw, 32px);
+        color: #0ff;
+        text-shadow: 0 0 30px #0ff;
+        margin-bottom: 30px;
+      }
+      #loader-bar-container {
+        width: 80%;
+        max-width: 400px;
+        height: 20px;
+        background: #1a1a2e;
+        border: 2px solid #0ff;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 15px;
+      }
+      #loader-bar {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #0ff, #0f8);
+        border-radius: 8px;
+        transition: width 0.3s ease;
+      }
+      #loader-percent {
+        font-family: "Orbitron";
+        font-size: 24px;
+        color: #0ff;
+        margin-bottom: 10px;
+      }
+      #loader-text {
+        font-family: "Share Tech Mono";
+        font-size: 14px;
+        color: #888;
+      }
+      #suspended h1 {
+        font-family: "Orbitron";
+        color: #f36;
+        font-size: 28px;
+        margin-bottom: 20px;
+      }
+      #suspended p {
+        color: #aaa;
+        margin-bottom: 10px;
+      }
+      #suspended .time {
+        font-family: "Orbitron";
+        color: #fc0;
+        font-size: 36px;
+        margin: 20px 0;
+      }
+      #intro {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(135deg, #0a0a12, #1a1a2e);
+        z-index: 2000;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        text-align: center;
+      }
+      #intro h1 {
+        font-family: "Orbitron";
+        font-size: clamp(28px, 8vw, 50px);
+        color: #0ff;
+        text-shadow: 0 0 50px #0ff;
+        margin-bottom: 15px;
+      }
+      #intro p {
+        color: #888;
+        margin-bottom: 40px;
+      }
+      #intro button {
+        background: transparent;
+        border: 2px solid #0ff;
+        color: #0ff;
+        padding: 15px 50px;
+        font-family: "Orbitron";
+        cursor: pointer;
+      }
+      canvas {
+        display: block;
+      }
+      #crosshair {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        pointer-events: none;
+        z-index: 100;
+      }
+      #crosshair::before,
+      #crosshair::after {
+        content: "";
+        position: absolute;
+        background: #0ff;
+      }
+      #crosshair::before {
+        width: 2px;
+        height: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      #crosshair::after {
+        width: 100%;
+        height: 2px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      #prompt {
+        position: fixed;
+        bottom: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #0ff;
+        font-family: "Share Tech Mono";
+        background: rgba(0, 20, 30, 0.9);
+        padding: 12px 24px;
+        border: 2px solid #0ff;
+        border-radius: 8px;
+        opacity: 0;
+        z-index: 100;
+      }
+      #touch-btn {
+        display: none;
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #0ff, #0f8);
+        color: #000;
+        font-family: "Orbitron", sans-serif;
+        font-weight: bold;
+        padding: 18px 40px;
+        border-radius: 30px;
+        font-size: 16px;
+        z-index: 100;
+        cursor: pointer;
+      }
+      #hud {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        color: #0ff;
+        font-family: "Share Tech Mono";
+        font-size: 13px;
+        z-index: 100;
+      }
+      #hud div {
+        margin-bottom: 4px;
+        padding: 5px 10px;
+        background: rgba(0, 255, 255, 0.15);
+        border-left: 3px solid #0ff;
+      }
+      #computer {
+        position: fixed;
+        inset: 0;
+        background: #0a0a12;
+        z-index: 500;
+        display: none;
+        flex-direction: column;
+      }
+      #computer-bar {
+        height: 45px;
+        background: #1a1a2e;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 12px;
+        border-bottom: 1px solid #333;
+      }
+      #computer-bar span {
+        font-family: "Orbitron";
+        color: #0ff;
+      }
+      #computer-bar button {
+        background: #f36;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      #computer-main {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+      }
+      #sidebar {
+        width: 60px;
+        background: #0f0f1a;
+        border-right: 1px solid #1a1a2e;
+        padding: 8px;
+      }
+      .nav-item {
+        padding: 14px 8px;
+        margin-bottom: 4px;
+        background: rgba(0, 255, 255, 0.05);
+        color: #888;
+        font-size: 20px;
+        cursor: pointer;
+        border-left: 3px solid transparent;
+        text-align: center;
+        border-radius: 0 5px 5px 0;
+      }
+      .nav-item:hover,
+      .nav-item.active {
+        background: rgba(0, 255, 255, 0.15);
+        color: #0ff;
+        border-color: #0ff;
+      }
+      .nav-item.notify {
+        background: rgba(255, 51, 102, 0.2);
+        border-color: #f36;
+      }
+      #content {
+        flex: 1;
+        padding: 15px;
+        overflow-y: auto;
+      }
+      .panel {
+        background: #0f0f1a;
+        border: 1px solid #1a1a2e;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+      .panel h2 {
+        font-family: "Orbitron";
+        color: #0ff;
+        margin-bottom: 12px;
+        font-size: 16px;
+      }
+      .case-card {
+        background: #1a1a2e;
+        border: 2px solid #2a2a4e;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+        cursor: pointer;
+      }
+      .case-card:hover,
+      .case-card.active {
+        border-color: #0ff;
+      }
+      .case-card h4 {
+        color: #fff;
+        font-size: 14px;
+      }
+      .case-card p {
+        color: #888;
+        font-size: 12px;
+      }
+      .evidence-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+      }
+      .evidence-card {
+        background: #1a1a2e;
+        border: 2px solid #2a2a4e;
+        border-radius: 8px;
+        padding: 10px;
+        cursor: pointer;
+      }
+      .evidence-card:hover {
+        border-color: #0ff;
+      }
+      .evidence-img {
+        height: 80px;
+        background: #0a0a12;
+        border-radius: 5px;
+        margin-bottom: 8px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .evidence-img img {
+        max-width: 100%;
+        max-height: 100%;
+      }
+      .badge {
+        font-size: 10px;
+        padding: 3px 8px;
+        border-radius: 4px;
+      }
+      .badge-pending {
+        background: rgba(255, 153, 0, 0.3);
+        color: #f90;
+      }
+      .badge-ok {
+        background: rgba(0, 255, 136, 0.3);
+        color: #0f8;
+      }
+      .badge-fake {
+        background: rgba(255, 51, 102, 0.3);
+        color: #f36;
+      }
+      .recipient-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin: 10px 0;
+      }
+      .recipient-opt {
+        background: #1a1a2e;
+        border: 2px solid #2a2a4e;
+        padding: 12px;
+        text-align: center;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .recipient-opt:hover,
+      .recipient-opt.selected {
+        border-color: #0ff;
+        background: rgba(0, 255, 255, 0.1);
+      }
+      .recipient-opt .icon {
+        font-size: 24px;
+      }
+      .recipient-opt .name {
+        color: #fff;
+        font-size: 11px;
+      }
+      .send-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #0f8, #0ff);
+        color: #000;
+        border: none;
+        padding: 14px;
+        font-family: "Orbitron";
+        cursor: pointer;
+        border-radius: 8px;
+        margin-top: 10px;
+      }
+      .send-btn:disabled {
+        background: #333;
+        color: #666;
+      }
+      #analysis {
+        position: fixed;
+        inset: 0;
+        background: #000;
+        z-index: 600;
+        display: none;
+        flex-direction: column;
+      }
+      #analysis-header {
+        background: #1a1a2e;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      #analysis-header h2 {
+        font-family: "Orbitron";
+        color: #0ff;
+        font-size: 14px;
+      }
+      #analysis-header button {
+        background: #f36;
+        border: none;
+        color: #fff;
+        padding: 8px 15px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      #analysis-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      #img-viewer {
+        flex: 1;
+        background: #050508;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      #img-viewer img {
+        max-width: 95%;
+        max-height: 50vh;
+        transition: transform 0.3s;
+        cursor: zoom-in;
+      }
+      #tools-panel {
+        background: #0a0a12;
+        padding: 10px;
+        overflow-y: auto;
+        max-height: 40vh;
+      }
+      .tool-btn {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 5px;
+        background: #1a1a2e;
+        border: 2px solid #2a2a4e;
+        color: #888;
+        font-size: 12px;
+        cursor: pointer;
+        text-align: left;
+        border-radius: 5px;
+      }
+      .tool-btn:hover {
+        border-color: #0ff;
+        color: #0ff;
+      }
+      .tool-btn.locked {
+        opacity: 0.4;
+      }
+      .tool-btn.active {
+        border-color: #0f8;
+        color: #0f8;
+      }
+      #results-box {
+        background: #1a1a2e;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+        max-height: 100px;
+        overflow-y: auto;
+      }
+      .result-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0;
+        font-size: 11px;
+      }
+      .result-val.sus {
+        color: #f90;
+      }
+      .result-val.ok {
+        color: #0f8;
+      }
+      #verdict-btns {
+        display: flex;
+        gap: 10px;
+      }
+      .verdict-btn {
+        flex: 1;
+        padding: 12px;
+        border: 2px solid;
+        background: transparent;
+        font-family: "Orbitron";
+        font-size: 12px;
+        cursor: pointer;
+        border-radius: 8px;
+      }
+      .v-ok {
+        border-color: #0f8;
+        color: #0f8;
+      }
+      .v-fake {
+        border-color: #f36;
+        color: #f36;
+      }
+      #visitor {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 400;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+      }
+      #visitor-box {
+        background: #1a1a2e;
+        border: 2px solid #0ff;
+        border-radius: 15px;
+        padding: 20px;
+        max-width: 400px;
+        width: 100%;
+      }
+      .visitor-head {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+      .visitor-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #0ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+      }
+      #visitor-complaint {
+        color: #ddd;
+        margin-bottom: 15px;
+        padding: 12px;
+        background: #0a0a12;
+        border-radius: 8px;
+        border-left: 3px solid #f90;
+        max-height: 200px;
+        overflow-y: auto;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .visitor-btns {
+        display: flex;
+        gap: 10px;
+      }
+      .visitor-btns button {
+        flex: 1;
+        padding: 12px;
+        font-family: "Orbitron";
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      #btn-accept {
+        background: #0ff;
+        color: #000;
+        border: none;
+      }
+      #btn-reject {
+        background: transparent;
+        border: 2px solid #f36;
+        color: #f36;
+      }
+      #result {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 700;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+      #result-box {
+        text-align: center;
+      }
+      #result-icon {
+        font-size: 60px;
+      }
+      #result-title {
+        font-family: "Orbitron";
+        font-size: 24px;
+        margin: 10px 0;
+      }
+      #result-msg {
+        color: #aaa;
+        margin-bottom: 15px;
+      }
+      #result-reward {
+        font-family: "Orbitron";
+        font-size: 20px;
+        margin-bottom: 20px;
+      }
+      #result button {
+        background: #0ff;
+        color: #000;
+        border: none;
+        padding: 12px 30px;
+        font-family: "Orbitron";
+        cursor: pointer;
+        border-radius: 8px;
+      }
+      #notif {
+        position: fixed;
+        top: 60px;
+        right: 10px;
+        background: #1a1a2e;
+        border: 2px solid #0ff;
+        border-radius: 10px;
+        padding: 12px;
+        z-index: 1000;
+        display: none;
+        max-width: 200px;
+      }
+      #notif h4 {
+        color: #0ff;
+        font-size: 11px;
+      }
+      #notif p {
+        color: #aaa;
+        font-size: 11px;
+      }
+      .shop-item {
+        background: #1a1a2e;
+        border: 2px solid #2a2a4e;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .shop-btn {
+        background: #fc0;
+        color: #000;
+        border: none;
+        padding: 8px 15px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      .shop-btn:disabled {
+        background: #333;
+        color: #666;
+      }
+      .mail-item {
+        background: #1a1a2e;
+        border: 2px solid #2a2a4e;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 8px;
+        cursor: pointer;
+      }
+      .mail-item.unread {
+        border-left: 4px solid #0ff;
+      }
+      #scene-overlay {
+        position: fixed;
+        inset: 0;
+        background: #000;
+        z-index: 800;
+        display: none;
+        flex-direction: column;
+      }
+      #scene-canvas {
+        width: 100%;
+        height: 40vh;
+      }
+      #scene-ui {
+        padding: 15px;
+        overflow-y: auto;
+        flex: 1;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+      }
+      #scene-dialogue {
+        background: #1a1a2e;
+        border: 2px solid #0ff;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+      }
+      .scene-speaker {
+        font-family: "Orbitron";
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+      .scene-speaker.judge {
+        color: #fc0;
+      }
+      .scene-speaker.police {
+        color: #36f;
+      }
+      .scene-speaker.defense {
+        color: #f36;
+      }
+      .scene-speaker.you {
+        color: #0f8;
+      }
+      #scene-text {
+        color: #ddd;
+        line-height: 1.5;
+        font-size: 13px;
+        min-height: 40px;
+      }
+      #scene-input {
+        display: none;
+        margin-top: 10px;
+      }
+      #scene-input textarea {
+        width: 100%;
+        background: #0a0a12;
+        border: 2px solid #0ff;
+        color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 13px;
+        min-height: 60px;
+        resize: none;
+      }
+      #scene-input button {
+        width: 100%;
+        background: linear-gradient(135deg, #0ff, #0f8);
+        color: #000;
+        border: none;
+        padding: 12px;
+        font-family: "Orbitron";
+        cursor: pointer;
+        border-radius: 8px;
+        margin-top: 8px;
+      }
+      #scene-options {
+        display: none;
+        margin-top: 10px;
+      }
+      .scene-option {
+        background: #1a1a2e;
+        border: 2px solid #2a2a4e;
+        color: #aaa;
+        padding: 10px;
+        margin-bottom: 5px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      .scene-option:hover {
+        border-color: #0ff;
+        color: #0ff;
+      }
+      #scene-result {
+        display: none;
+        text-align: center;
+        padding: 20px;
+      }
+      #scene-result h2 {
+        font-family: "Orbitron";
+        font-size: 24px;
+        margin-bottom: 15px;
+      }
+      #scene-result p {
+        color: #aaa;
+        margin-bottom: 20px;
+      }
+      #scene-result button {
+        background: linear-gradient(135deg, #0ff, #0f8);
+        color: #000;
+        border: none;
+        padding: 12px 30px;
+        font-family: "Orbitron";
+        cursor: pointer;
+        border-radius: 8px;
+      }
+      #client-chat {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 650;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+      }
+      #chat-box {
+        background: #1a1a2e;
+        border: 2px solid #0ff;
+        border-radius: 15px;
+        padding: 20px;
+        max-width: 500px;
+        width: 100%;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+      }
+      #chat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      #chat-header h3 {
+        color: #0ff;
+        font-family: "Orbitron";
+      }
+      #chat-close {
+        background: #f36;
+        color: #fff;
+        border: none;
+        padding: 8px 15px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      #chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        margin-bottom: 15px;
+        max-height: 300px;
+      }
+      .chat-msg {
+        padding: 10px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        font-size: 13px;
+      }
+      .chat-msg.client {
+        background: #2a2a4e;
+        color: #fff;
+        margin-right: 40px;
+      }
+      .chat-msg.you {
+        background: #0a3a3a;
+        color: #0ff;
+        margin-left: 40px;
+        text-align: right;
+      }
+      #chat-input {
+        display: flex;
+        gap: 10px;
+      }
+      #chat-input textarea {
+        flex: 1;
+        background: #0a0a12;
+        border: 2px solid #0ff;
+        color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        resize: none;
+        min-height: 50px;
+      }
+      #chat-input button {
+        background: #0ff;
+        color: #000;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 8px;
+        font-family: "Orbitron";
+      }
+    </style>
+  </head>
+  <body>
+    <div id="suspended" style="display: none">
+      <h1>⛔ ZAWIESZONY</h1>
+      <p>Twoja licencja detektywa została zawieszona za błędne wnioski.</p>
+      <p>Możesz wrócić za:</p>
+      <div class="time" id="suspend-time">00:00:00</div>
+      <p style="color: #666; font-size: 12px">Zamknij stronę i wróć później.</p>
+    </div>
+    <div id="loader">
+      <svg
+        id="loader-logo"
+        viewBox="0 0 120 120"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color: #0ff" />
+            <stop offset="100%" style="stop-color: #0f8" />
+          </linearGradient>
+        </defs>
+        <rect fill="#0a0a12" width="120" height="120" rx="15" />
+        <circle
+          cx="45"
+          cy="50"
+          r="28"
+          fill="none"
+          stroke="url(#grad1)"
+          stroke-width="5"
+        />
+        <line
+          x1="66"
+          y1="71"
+          x2="95"
+          y2="100"
+          stroke="url(#grad1)"
+          stroke-width="6"
+          stroke-linecap="round"
+        />
+        <circle cx="85" cy="30" r="12" fill="#f36" />
+        <text
+          x="85"
+          y="35"
+          text-anchor="middle"
+          fill="white"
+          font-size="16"
+          font-weight="bold"
+        >
+          !
+        </text>
+      </svg>
+      <h1>CYBER DETECTIVE</h1>
+      <div id="loader-percent">0%</div>
+      <div id="loader-bar-container"><div id="loader-bar"></div></div>
+      <div id="loader-text">Inicjalizacja...</div>
+    </div>
+    <div id="intro">
+      <h1>CYBER DETECTIVE</h1>
+      <p>Śledczy ds. Cyberprzestępczości</p>
+      <div
+        style="
+          text-align: left;
+          background: #1a1a2e;
+          padding: 15px;
+          border-radius: 10px;
+          margin: 15px 0;
+          max-height: 50vh;
+          overflow-y: auto;
+          font-size: 12px;
+          line-height: 1.6;
+        "
+      >
+        <h3 style="color: #0ff; margin-top: 0">📋 INSTRUKCJA GRY</h3>
+
+        <p style="color: #fc0"><strong>🎯 CEL GRY:</strong></p>
+        <p>
+          Jesteś detektywem cyfrowym. Analizujesz dowody cyberprzestępstw i
+          przedstawiasz sprawy w sądzie lub na policji. Zarabiasz pieniądze za
+          poprawne wnioski, tracisz za błędy!
+        </p>
+
+        <p style="color: #fc0"><strong>🏢 LOKALIZACJE W BIURZE:</strong></p>
+        <p>
+          • <strong>🚪 DRZWI</strong> - przyjmowanie nowych klientów<br />
+          • <strong>💻 KOMPUTER</strong> - analiza dowodów i wysyłanie spraw<br />
+          • <strong>🛒 SKLEP</strong> - kupowanie narzędzi forensycznych
+        </p>
+
+        <p style="color: #fc0">
+          <strong>🔬 ANALIZA DOWODÓW (przy komputerze):</strong>
+        </p>
+        <p>
+          1. Wejdź w zakładkę <strong>📁 SPRAWY</strong><br />
+          2. Wybierz sprawę i kliknij <strong>🔍 ANALIZUJ</strong><br />
+          3. Użyj narzędzi do zbadania dowodu:<br />
+          &nbsp;&nbsp;• <strong>🔍 Lupa</strong> - powiększenie 2.5x
+          (darmowa)<br />
+          &nbsp;&nbsp;• <strong>📊 Meta</strong> - metadane pliku (800💰)<br />
+          &nbsp;&nbsp;• <strong>⚡ ELA</strong> - analiza błędów kompresji
+          (1500💰)<br />
+          &nbsp;&nbsp;• <strong>🔤 Font</strong> - sprawdzenie czcionek
+          (1000💰)<br />
+          &nbsp;&nbsp;• <strong>🕐 Czas</strong> - analiza znaczników czasowych
+          (1200💰)<br />
+          &nbsp;&nbsp;• <strong>🤖 AI</strong> - wykrywanie AI/deepfake
+          (3000💰)<br />
+          4. Na podstawie wyników zaznacz:
+          <strong style="color: #f36">❌ FAŁSZ</strong> lub
+          <strong style="color: #0f8">✓ OK</strong>
+        </p>
+
+        <p style="color: #fc0"><strong>📤 WYSYŁANIE SPRAWY:</strong></p>
+        <p>
+          1. Wejdź w zakładkę <strong>📤 WYŚLIJ</strong><br />
+          2. Wybierz sprawę z listy<br />
+          3. (Opcjonalnie) Kliknij <strong>🤵 POŚREDNIK</strong> - porada za
+          50💰<br />
+          4. Wybierz instytucję:<br />
+          &nbsp;&nbsp;• <strong>🚔 POLICJA</strong> - groźby, stalking,
+          przemoc<br />
+          &nbsp;&nbsp;• <strong>⚖️ SĄD</strong> - zniesławienie, oszustwa
+          cywilne<br />
+          5. Kliknij <strong>📤 WYŚLIJ</strong>
+        </p>
+
+        <p style="color: #fc0"><strong>⚖️ ROZPRAWA / PRZESŁUCHANIE:</strong></p>
+        <p>
+          Po wysłaniu sprawy trafisz do sądu lub na policję. Musisz odpowiadać
+          na pytania!<br />
+          • Używaj <strong>słów kluczowych</strong> ze sprawy (imiona, miejsca,
+          szczegóły)<br />
+          • Twoje zeznania muszą być <strong>SPÓJNE</strong> z tym co
+          zaznaczyłeś!<br />
+          • Jeśli zaznaczyłeś FAŁSZ → mów że dowód jest fałszywy<br />
+          • Jeśli zaznaczyłeś OK → mów że dowód jest prawdziwy
+        </p>
+
+        <p style="color: #f36">
+          <strong>⚠️ UWAGA - KLIENT MOŻE KŁAMAĆ!</strong>
+        </p>
+        <p>
+          Niektórzy klienci sami fałszują dowody żeby wrobić niewinnych! Jeśli
+          analiza wykaże że to KLIENT sfałszował dowód - oskarż JEGO w
+          zeznaniach! (np. "klient kłamie", "klient sfałszował")
+        </p>
+
+        <p style="color: #fc0">
+          <strong>💰 SYSTEM OPŁAT ZA NARZĘDZIA:</strong>
+        </p>
+        <p>
+          Każde kupione narzędzie pobiera
+          <strong style="color: #f36">% z każdej wypłaty</strong>!<br />
+          &nbsp;&nbsp;• 📊 Meta = <strong>5%</strong> z wypłat<br />
+          &nbsp;&nbsp;• 🔤 Font = <strong>6%</strong> z wypłat<br />
+          &nbsp;&nbsp;• 🕐 Czas = <strong>8%</strong> z wypłat<br />
+          &nbsp;&nbsp;• ⚡ ELA = <strong>10%</strong> z wypłat<br />
+          &nbsp;&nbsp;• 🤖 AI = <strong>15%</strong> z wypłat<br />
+          Wszystkie narzędzia razem =
+          <strong style="color: #f36">44% podatku!</strong><br />
+          Możesz <strong style="color: #0f8">sprzedać</strong> narzędzie za 5%
+          jego wartości żeby pozbyć się opłaty.
+        </p>
+
+        <p style="color: #fc0"><strong>💰 NAGRODY I KARY:</strong></p>
+        <p>
+          • ✅ Poprawna analiza + dobre zeznania =
+          <strong style="color: #0f8">+150% nagrody</strong><br />
+          • ✅ Poprawna analiza =
+          <strong style="color: #0f8">+100% nagrody</strong><br />
+          • ⚠️ Słabe zeznania =
+          <strong style="color: #f90">+50% lub mniej</strong><br />
+          • ❌ Błędna analiza = <strong style="color: #f36">GRZYWNA</strong
+          ><br />
+          • ❌ Sprzeczne zeznania = <strong style="color: #f36">GRZYWNA</strong
+          ><br />
+          • ❌ Fałszywe oskarżenie =
+          <strong style="color: #f36">ZAWIESZENIE 2h!</strong>
+        </p>
+
+        <p style="color: #0ff"><strong>💡 WSKAZÓWKI:</strong></p>
+        <p>
+          • Czytaj uważnie historię klienta - tam są wskazówki!<br />
+          • Sprawdź WSZYSTKIE narzędzia przed oceną<br />
+          • Pamiętaj co zaznaczyłeś - sędzia/policja o to zapyta!<br />
+          • Nie spiesz się - błędy kosztują!
+        </p>
+      </div>
+      <button id="start-btn">▶ ROZPOCZNIJ GRĘ</button>
+    </div>
+    <canvas id="canvas"></canvas>
+    <div id="crosshair"></div>
+    <div id="prompt"></div>
+    <div id="touch-btn">👆 WEJDŹ</div>
+    <div id="hud">
+      <div>💰 <span id="hud-credits">500</span></div>
+      <div>📋 <span id="hud-cases">0</span></div>
+      <div>📅 Dzień <span id="hud-day">1</span></div>
+      <div style="color: #f90">📉 <span id="hud-tax">0%</span></div>
+    </div>
+    <div id="computer">
+      <div id="computer-bar">
+        <span>🖥️ TERMINAL</span><button id="exit-btn">✕</button>
+      </div>
+      <div id="computer-main">
+        <div id="sidebar">
+          <div class="nav-item active" data-panel="case">📋</div>
+          <div class="nav-item" data-panel="send">📤</div>
+          <div class="nav-item" data-panel="inbox">📬</div>
+          <div class="nav-item" data-panel="shop">🛒</div>
+          <div class="nav-item" data-panel="archive">📁</div>
+        </div>
+        <div id="content"></div>
+      </div>
+    </div>
+    <div id="analysis">
+      <div id="analysis-header">
+        <h2>🔬 ANALIZA</h2>
+        <button id="close-analysis">✕</button>
+      </div>
+      <div id="analysis-body">
+        <div id="img-viewer"><img id="analysis-img" src="" /></div>
+        <div id="tools-panel"></div>
+      </div>
+    </div>
+    <div id="visitor">
+      <div id="visitor-box">
+        <div class="visitor-head">
+          <div class="visitor-avatar" id="v-avatar">👤</div>
+          <div>
+            <h3 id="v-name" style="color: #fff">Klient</h3>
+            <p style="color: #0f8">Opłata: <span id="v-fee">100</span>💰</p>
+          </div>
+        </div>
+        <div id="visitor-complaint"></div>
+        <p style="color: #f90; font-size: 12px">
+          ⏰ Termin: <span id="v-deadline">3</span> dni | Kara:
+          <span id="v-penalty">200</span>💰
+        </p>
+        <div class="visitor-btns" style="margin-top: 15px">
+          <button id="btn-accept">✓ PRZYJMIJ</button
+          ><button id="btn-reject">✕ ODRZUĆ</button>
+        </div>
+      </div>
+    </div>
+    <div id="result">
+      <div id="result-box">
+        <div id="result-icon">✓</div>
+        <h2 id="result-title">SUKCES!</h2>
+        <p id="result-msg"></p>
+        <p id="result-reward">+300💰</p>
+        <button id="continue-btn">DALEJ →</button>
+      </div>
+    </div>
+    <div id="notif">
+      <h4 id="notif-title">Info</h4>
+      <p id="notif-msg">Msg</p>
+    </div>
+    <div
+      id="client-chat"
+      style="
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 650;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+      "
+    >
+      <div
+        style="
+          background: #1a1a2e;
+          border: 2px solid #0ff;
+          border-radius: 15px;
+          padding: 20px;
+          max-width: 500px;
+          width: 100%;
+          max-height: 80vh;
+          overflow-y: auto;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+          "
+        >
+          <h3 style="color: #0ff; font-family: Orbitron" id="chat-client-name">
+            💬 Klient
+          </h3>
+          <button
+            id="close-chat"
+            style="
+              background: #f36;
+              color: #fff;
+              border: none;
+              padding: 5px 12px;
+              border-radius: 5px;
+              cursor: pointer;
+            "
+          >
+            ✕
+          </button>
+        </div>
+        <div
+          id="chat-messages"
+          style="
+            background: #0a0a12;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+          "
+        ></div>
+        <textarea
+          id="chat-input"
+          placeholder="Napisz do klienta..."
+          style="
+            width: 100%;
+            background: #0a0a12;
+            border: 2px solid #2a2a4e;
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            min-height: 60px;
+            resize: none;
+            margin-bottom: 10px;
+          "
+        ></textarea>
+        <button
+          id="chat-send"
+          style="
+            width: 100%;
+            background: linear-gradient(135deg, #0ff, #0f8);
+            color: #000;
+            border: none;
+            padding: 12px;
+            font-family: Orbitron;
+            cursor: pointer;
+            border-radius: 8px;
+          "
+        >
+          📤 WYŚLIJ
+        </button>
+      </div>
+    </div>
+    <div
+      id="mediator-chat"
+      style="
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 650;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+      "
+    >
+      <div
+        style="
+          background: #1a1a2e;
+          border: 2px solid #fc0;
+          border-radius: 15px;
+          padding: 20px;
+          max-width: 500px;
+          width: 100%;
+          max-height: 80vh;
+          overflow-y: auto;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+          "
+        >
+          <h3 style="color: #fc0; font-family: Orbitron">🤵 POŚREDNIK</h3>
+          <button
+            id="close-mediator"
+            style="
+              background: #f36;
+              color: #fff;
+              border: none;
+              padding: 5px 12px;
+              border-radius: 5px;
+              cursor: pointer;
+            "
+          >
+            ✕
+          </button>
+        </div>
+        <p style="color: #888; font-size: 12px; margin-bottom: 10px">
+          Rozmowa za darmo | Porada: <span style="color: #fc0">50💰</span>
+        </p>
+        <div
+          id="mediator-messages"
+          style="
+            background: #0a0a12;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+          "
+        ></div>
+        <textarea
+          id="mediator-input"
+          placeholder="Opisz sprawę pośrednikowi..."
+          style="
+            width: 100%;
+            background: #0a0a12;
+            border: 2px solid #2a2a4e;
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            min-height: 60px;
+            resize: none;
+            margin-bottom: 10px;
+          "
+        ></textarea>
+        <button
+          id="mediator-send"
+          style="
+            width: 100%;
+            background: linear-gradient(135deg, #fc0, #f90);
+            color: #000;
+            border: none;
+            padding: 12px;
+            font-family: Orbitron;
+            cursor: pointer;
+            border-radius: 8px;
+          "
+        >
+          📤 WYŚLIJ
+        </button>
+      </div>
+    </div>
+    <div id="client-chat">
+      <div id="chat-box">
+        <div id="chat-header">
+          <h3 id="chat-client-name">💬 Chat</h3>
+          <button id="chat-close">✕</button>
+        </div>
+        <div id="chat-messages"></div>
+        <div id="chat-input">
+          <textarea
+            id="chat-textarea"
+            placeholder="Napisz wiadomość..."
+          ></textarea>
+          <button id="chat-send">📤</button>
+        </div>
+      </div>
+    </div>
+    <div id="scene-overlay">
+      <canvas id="scene-canvas"></canvas>
+      <div id="scene-ui">
+        <div id="scene-dialogue">
+          <div class="scene-speaker" id="scene-speaker">⚖️ SĘDZIA</div>
+          <div id="scene-text">...</div>
+        </div>
+        <div id="scene-input">
+          <textarea
+            id="scene-textarea"
+            placeholder="Twoja odpowiedź..."
+          ></textarea>
+          <button id="scene-submit">📢 ODPOWIEDZ</button>
+        </div>
+        <div id="scene-options"></div>
+        <div id="scene-result">
+          <h2 id="scene-verdict-title">WYROK</h2>
+          <p id="scene-verdict-text"></p>
+          <button id="scene-exit">ZAKOŃCZ</button>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+      var G = {
+        credits: 500,
+        day: 1,
+        activeCases: [],
+        selectedCase: null,
+        inPC: false,
+        tools: {
+          zoom: true,
+          meta: false,
+          ela: false,
+          font: false,
+          time: false,
+          ai: false,
+        },
+        results: {},
+        completed: [],
+        inbox: [],
+        suspendedUntil: 0,
+      };
+      var sceneData = { type: null, caseData: null, correct: false, phase: 0 };
+      var sceneScene,
+        sceneCamera,
+        sceneRenderer,
+        sceneRotY = 0,
+        sceneRotX = 0;
+      var TOOLS = {
+        zoom: { n: "🔍 Lupa", p: 0, tax: 0 },
+        meta: { n: "📊 Meta", p: 800, tax: 5 },
+        ela: { n: "⚡ ELA", p: 1500, tax: 10 },
+        font: { n: "🔤 Font", p: 1000, tax: 6 },
+        time: { n: "🕐 Czas", p: 1200, tax: 8 },
+        ai: { n: "🤖 AI", p: 3000, tax: 15 },
+      };
+      function getTotalTax() {
+        var t = 0;
+        for (var k in TOOLS) {
+          if (G.tools[k] && TOOLS[k].tax) t += TOOLS[k].tax;
+        }
+        return t;
+      }
+      function sellTool(k) {
+        if (!G.tools[k] || k == "zoom") return;
+        var refund = Math.floor(TOOLS[k].p * 0.05);
+        G.credits += refund;
+        G.tools[k] = false;
+        saveGame();
+        updateHUD();
+        notify("Sprzedano!", TOOLS[k].n + " +" + refund + "💰");
+      }
+      var CASES = [
+        {
+          id: 1,
+          name: "Anna Nowak",
+          avatar: "👩",
+          fee: 100,
+          days: 3,
+          pen: 200,
+          rew: 400,
+          fine: 200,
+          type: "ZNIESŁAWIENIE",
+          complaint: "Fałszywe screeny Messenger",
+          clientLies: false,
+          fullStory:
+            "Prowadzę sklep internetowy od 5 lat. Tydzień temu na Facebooku pojawiły się screeny z Messengera gdzie niby przyznaję się do oszukiwania klientów na wadze produktów. Problem w tym że NIGDY czegoś takiego nie napisałam! Straciłam już 15 klientów, ludzie piszą że jestem oszustką. Mam podejrzenia kto to zrobił - moja była pracownica Kasia, którą zwolniłam miesiąc temu. Proszę o pomoc, to rujnuje mój biznes!",
+          keywords: [
+            "sklep",
+            "kasia",
+            "pracownic",
+            "zwolni",
+            "messenger",
+            "waga",
+            "klient",
+            "oszuk",
+            "facebook",
+            "screen",
+          ],
+          suspect: "Kasia - była pracownica",
+          evidence: [
+            {
+              id: "e1",
+              tp: "MESSENGER",
+              fake: true,
+              txt: "Tak haha oszukujemy klientów na wadze 😂 Nikt się nie kapnie!",
+              ind: {
+                meta: { s: 1, i: "Photoshop CC 2024 - plik edytowany" },
+                ela: { s: 1, i: "Widoczne ślady manipulacji przy tekście" },
+                font: { s: 1, i: "Czcionka nie pasuje do Messengera" },
+                time: { s: 1, i: "03:47 - klientka spała o tej porze" },
+                ai: { s: 1, i: "94% prawdopodobieństwo manipulacji" },
+              },
+            },
+          ],
+        },
+        {
+          id: 2,
+          name: "Marek Wiśniewski",
+          avatar: "👨‍💼",
+          fee: 150,
+          days: 4,
+          pen: 300,
+          rew: 500,
+          fine: 250,
+          type: "GROŹBY",
+          complaint: "Groźby od byłego wspólnika",
+          clientLies: false,
+          fullStory:
+            'Byłem wspólnikiem w firmie IT z Tomkiem K. Rozstaliśmy się w złych stosunkach - oskarżał mnie o kradzież kodu. Od 2 tygodni dostaję maile z groźbami. Pisze że "zniszczy mnie i moją rodzinę", "wie gdzie mieszkam", "pożałuję". Boję się o żonę i dzieci. Zgłosiłem już na policję ale powiedzieli że potrzebują dowodów że to on. Maile przychodzą z anonimowego adresu ale styl pisania to NA PEWNO Tomek.',
+          keywords: [
+            "tomek",
+            "wspólnik",
+            "firma",
+            "it",
+            "kod",
+            "mail",
+            "groźb",
+            "rodzin",
+            "żon",
+            "dzieci",
+            "anonimow",
+          ],
+          suspect: "Tomek K. - były wspólnik",
+          evidence: [
+            {
+              id: "e2",
+              tp: "EMAIL",
+              fake: false,
+              txt: "Zniszczę cię i twoją rodzinę. Wiem gdzie mieszkasz. Wiem gdzie chodzi twój syn do szkoły. Pożałujesz że się ze mną zadzierałeś.",
+              ind: {
+                meta: { s: 0, i: "Nagłówek email oryginalny - serwer Gmail" },
+                ela: { s: 0, i: "Brak śladów edycji" },
+                font: { s: 0, i: "Standardowa czcionka email" },
+                time: { s: 0, i: "Znaczniki czasowe spójne" },
+                ai: { s: 0, i: "6% - wiadomość autentyczna" },
+              },
+            },
+          ],
+        },
+        {
+          id: 3,
+          name: "Katarzyna D.",
+          avatar: "👩‍🦰",
+          fee: 80,
+          days: 2,
+          pen: 150,
+          rew: 350,
+          fine: 175,
+          type: "STALKING",
+          complaint: "Były partner mnie śledzi",
+          clientLies: false,
+          fullStory:
+            'Rozstałam się z Michałem 3 miesiące temu. Od tamtej pory non stop dostaje wiadomości że mnie widział - w kawiarni, w pracy, w sklepie. Pisze dokładnie w co byłam ubrana, z kim rozmawiałam. Wczoraj napisał że "ładnie mi w tej niebieskiej sukience" - a byłam w niej tylko 2 godziny! Boję się wychodzić z domu. Mam screeny z WhatsApp. Proszę o pomoc, czuję się obserwowana 24/7.',
+          keywords: [
+            "michał",
+            "partner",
+            "whatsapp",
+            "śledzi",
+            "obserwu",
+            "sukienk",
+            "kawiarni",
+            "ubran",
+            "wiadomo",
+            "boi",
+          ],
+          suspect: "Michał - były partner",
+          evidence: [
+            {
+              id: "e3",
+              tp: "WHATSAPP",
+              fake: false,
+              txt: "Widziałem cię dziś w Starbucks o 14:30. Ładna ta niebieska sukienka. Kawa z koleżanką? Ta blondynka to Ania z pracy?",
+              ind: {
+                meta: { s: 0, i: "Oryginalny backup WhatsApp - iPhone" },
+                ela: { s: 0, i: "Zrzut niemodyfikowany" },
+                font: { s: 0, i: "Czcionka WhatsApp prawidłowa" },
+                time: { s: 0, i: "Znaczniki spójne z datą" },
+                ai: { s: 0, i: "4% - wiadomość autentyczna" },
+              },
+            },
+          ],
+        },
+        {
+          id: 4,
+          name: "Piotr Lewandowski",
+          avatar: "👨‍💻",
+          fee: 120,
+          days: 3,
+          pen: 250,
+          rew: 450,
+          fine: 225,
+          type: "PODSZYWANIE",
+          complaint: "Fałszywe konto z rasizmem",
+          clientLies: false,
+          fullStory:
+            "Jestem programistą, aktywnym na Twitterze/X. Ktoś stworzył konto @PiotrLew_PRAWDA i publikuje rasistowskie i antysemickie treści. Używa mojego zdjęcia i nazwiska! Moi klienci myślą że to ja. Straciłem już 2 kontrakty. Twitter nie reaguje na zgłoszenia. Mam screeny tych postów. Podejrzewam konkurencję - firmę DataSoft, z którą walczyłem o duży kontrakt.",
+          keywords: [
+            "programist",
+            "twitter",
+            "datasoft",
+            "konkurencj",
+            "konto",
+            "rasist",
+            "zdjęci",
+            "kontrakt",
+            "podszywa",
+            "fałszyw",
+          ],
+          suspect: "Firma DataSoft - konkurencja",
+          evidence: [
+            {
+              id: "e4",
+              tp: "TWITTER",
+              fake: true,
+              txt: "Imigranci won z Polski! Polska dla prawdziwych Polaków! 🇵🇱 #wypierpol",
+              ind: {
+                meta: { s: 1, i: "Zrzut edytowany - Photoshop" },
+                ela: { s: 1, i: "Avatar wklejony z innego źródła" },
+                font: { s: 1, i: "Czcionka nie pasuje do X/Twitter" },
+                time: { s: 0, i: "Data publikacji możliwa" },
+                ai: { s: 1, i: "91% - profil sfabrykowany" },
+              },
+            },
+          ],
+        },
+        {
+          id: 5,
+          name: "Ewa Kamińska",
+          avatar: "👩‍💼",
+          fee: 200,
+          days: 3,
+          pen: 400,
+          rew: 600,
+          fine: 300,
+          type: "OSZUSTWO",
+          complaint: "Wyłudzenie na fałszywą zbiórkę",
+          clientLies: false,
+          fullStory:
+            'Wpłaciłam 5000 zł na zbiórkę "Pomoc dla chorego Jasia" na Facebooku. Zbiórka wyglądała wiarygodnie - zdjęcia dziecka w szpitalu, dokumenty. Po wpłacie profil zniknął! Napisałam do szpitala który był podany - powiedzieli że nie mają takiego pacjenta. Mam screeny zbiórki i potwierdzenie przelewu. Proszę o pomoc w znalezieniu oszusta!',
+          keywords: [
+            "zbiórk",
+            "5000",
+            "jasio",
+            "szpital",
+            "facebook",
+            "przelew",
+            "profil",
+            "zniknął",
+            "oszust",
+            "chory",
+          ],
+          suspect: "Nieznany - fałszywa zbiórka",
+          evidence: [
+            {
+              id: "e5",
+              tp: "FACEBOOK",
+              fake: false,
+              txt: "Zbiórka: Pomoc dla chorego Jasia ❤️ Cel: 50000 zł. Jasio ma 5 lat i walczy z białaczką...",
+              ind: {
+                meta: { s: 0, i: "Zrzut oryginalny - Chrome" },
+                ela: { s: 0, i: "Bez edycji" },
+                font: { s: 0, i: "Czcionka FB prawidłowa" },
+                time: { s: 0, i: "Data spójna" },
+                ai: {
+                  s: 0,
+                  i: "3% - zrzut autentyczny (ale zbiórka fałszywa)",
+                },
+              },
+            },
+          ],
+        },
+        {
+          id: 6,
+          name: "Tomasz Kowalczyk",
+          avatar: "👨",
+          fee: 90,
+          days: 2,
+          pen: 180,
+          rew: 380,
+          fine: 190,
+          type: "GROŹBY",
+          complaint: "Groźby przez SMS",
+          clientLies: false,
+          fullStory:
+            "Od tygodnia dostaję SMS-y z nieznanego numeru. Grożą że mnie zabiją, że wiedzą gdzie pracuję. Podejrzewam że to przez konflikt z sąsiadem - pokłóciliśmy się o miejsce parkingowe. On to typ agresywny, już raz miał sprawę o pobicie. Numer jest na kartę więc nie wiem jak udowodnić że to on.",
+          keywords: [
+            "sms",
+            "sąsiad",
+            "parking",
+            "pobici",
+            "numer",
+            "karta",
+            "groźb",
+            "zabij",
+            "praca",
+            "konflikt",
+          ],
+          suspect: "Sąsiad - konflikt o parking",
+          evidence: [
+            {
+              id: "e6",
+              tp: "SMS",
+              fake: false,
+              txt: "Zabiję cię i całą twoją rodzinę skurwysynu. Wiem gdzie pracujesz. Uważaj jak wychodzisz z roboty.",
+              ind: {
+                meta: { s: 0, i: "Zrzut Samsung - oryginalny" },
+                ela: { s: 0, i: "Brak modyfikacji" },
+                font: { s: 0, i: "Systemowa czcionka SMS" },
+                time: { s: 0, i: "Daty wiadomości spójne" },
+                ai: { s: 0, i: "5% - wiadomości autentyczne" },
+              },
+            },
+          ],
+        },
+        {
+          id: 7,
+          name: "Magdalena Zielińska",
+          avatar: "👩‍🔬",
+          fee: 180,
+          days: 4,
+          pen: 350,
+          rew: 550,
+          fine: 275,
+          type: "ZNIESŁAWIENIE",
+          complaint: "Fałszywy post o plagiacie",
+          clientLies: false,
+          fullStory:
+            'Jestem doktorantką na Politechnice. Na forum naukowym pojawił się post gdzie rzekomo przyznaję się do plagiatu w pracy doktorskiej. Screenshot z Messengera gdzie piszę "skopiowałam 70% pracy, system antyplagiatowy tego nie wykrył". To NIEPRAWDA! Moja promotorka już ma wątpliwości. Podejrzewam zazdrosną koleżankę Anetę która też pisze doktorat z tego tematu.',
+          keywords: [
+            "doktorant",
+            "politechnik",
+            "plagiat",
+            "aneta",
+            "koleżank",
+            "forum",
+            "70%",
+            "promotor",
+            "praca",
+            "screenshot",
+          ],
+          suspect: "Aneta - zazdrosna koleżanka",
+          evidence: [
+            {
+              id: "e7",
+              tp: "FORUM POST",
+              fake: true,
+              txt: 'Screenshot rozmowy dr Zielińskiej: "Tak, skopiowałam 70% pracy doktorskiej lol. System tego nie wykrył 😂"',
+              ind: {
+                meta: { s: 1, i: "Obraz edytowany - Canva" },
+                ela: { s: 1, i: "Tekst wstawiony cyfrowo" },
+                font: { s: 1, i: "Font nie pasuje do Messengera" },
+                time: { s: 1, i: "Konto na forum założone dzień przed postem" },
+                ai: { s: 1, i: "89% - screenshot sfabrykowany" },
+              },
+            },
+          ],
+        },
+        {
+          id: 8,
+          name: "Robert Adamski",
+          avatar: "👨‍🦲",
+          fee: 250,
+          days: 5,
+          pen: 500,
+          rew: 700,
+          fine: 350,
+          type: "HACKING",
+          complaint: "Włamanie na konto bankowe",
+          clientLies: false,
+          fullStory:
+            'W zeszłym tygodniu ktoś włamał się na moje konto w banku i przelał 12000 zł na zagraniczne konto. Bank mówi że logowanie było z mojego urządzenia ale to niemożliwe - byłem w pracy! Podejrzewam phishing - tydzień wcześniej dostałem dziwny mail "z banku". Głupio kliknąłem w link i wpisałem dane. Mam ten mail zapisany.',
+          keywords: [
+            "bank",
+            "12000",
+            "phishing",
+            "mail",
+            "link",
+            "właman",
+            "przelew",
+            "zagranic",
+            "dane",
+            "konto",
+          ],
+          suspect: "Nieznany haker - phishing",
+          evidence: [
+            {
+              id: "e8",
+              tp: "EMAIL PHISHING",
+              fake: false,
+              txt: "Szanowny Kliencie! Wykryliśmy podejrzaną aktywność. Kliknij aby zweryfikować: bank-weryfikacja.tk/login",
+              ind: {
+                meta: { s: 0, i: "Mail prawdziwy - nagłówki potwierdzone" },
+                ela: { s: 0, i: "Oryginalny mail phishingowy" },
+                font: { s: 0, i: "Próba imitacji banku" },
+                time: { s: 0, i: "Wysłany z serwera w Rosji" },
+                ai: { s: 0, i: "2% - autentyczny mail phishingowy" },
+              },
+            },
+          ],
+        },
+        {
+          id: 9,
+          name: "Alicja Pawlak",
+          avatar: "👧",
+          fee: 60,
+          days: 2,
+          pen: 120,
+          rew: 300,
+          fine: 150,
+          type: "GROŹBY",
+          complaint: "Cyberprzemoc w szkole",
+          clientLies: false,
+          fullStory:
+            'Moja córka Zuzia (13 lat) wraca ze szkoły z płaczem. Na Snapchacie grupa "Zuzia to ofiara" gdzie koleżanki z klasy piszą okropne rzeczy - że jest brzydka, że nikt jej nie lubi, że powinna "zniknąć". Wczoraj było "jutro dostaniesz w twarz". Zuzia nie chce iść do szkoły. Dyrekcja mówi że "nie mogą nic zrobić bo to poza szkołą". Mam screeny z jej telefonu.',
+          keywords: [
+            "zuzia",
+            "córka",
+            "szkoła",
+            "snapchat",
+            "grupa",
+            "koleżank",
+            "brzydka",
+            "przemoc",
+            "13 lat",
+            "dyrekcj",
+          ],
+          suspect: "Koleżanki z klasy",
+          evidence: [
+            {
+              id: "e9",
+              tp: "SNAPCHAT",
+              fake: false,
+              txt: 'Grupa "Zuzia to ofiara": "Jesteś taka brzydka 🤮 Nikt cię nie lubi. Jutro dostaniesz w twarz loserko!!!"',
+              ind: {
+                meta: { s: 0, i: "Screenshot Snapchat - oryginalny" },
+                ela: { s: 0, i: "Bez edycji" },
+                font: { s: 0, i: "Czcionka Snapchat OK" },
+                time: { s: 0, i: "Data spójna" },
+                ai: { s: 0, i: "3% - wiadomości autentyczne" },
+              },
+            },
+          ],
+        },
+        {
+          id: 10,
+          name: "Krzysztof Nowicki",
+          avatar: "👨‍💼",
+          fee: 300,
+          days: 5,
+          pen: 600,
+          rew: 800,
+          fine: 400,
+          type: "SZANTAŻ",
+          complaint: "Szantaż intymnymi zdjęciami",
+          clientLies: false,
+          fullStory:
+            "Poznałem kogoś na Tinderze, wymieniliśmy kilka zdjęć... w tym intymne. Teraz ta osoba grozi że wyśle je do mojej żony i do pracy jeśli nie zapłacę 10000 zł. Mam rodzinę, dobrą pracę w korporacji - to by mnie zniszczyło. Wiem że to moja głupota ale proszę o pomoc. Osoba pisze z anonimowego maila przez Protonmail.",
+          keywords: [
+            "tinder",
+            "zdjęci",
+            "intymn",
+            "żona",
+            "praca",
+            "10000",
+            "szantaż",
+            "protonmail",
+            "anonimow",
+            "bitcoin",
+            "btc",
+          ],
+          suspect: "Nieznany - szantażysta z Tindera",
+          evidence: [
+            {
+              id: "e10",
+              tp: "EMAIL",
+              fake: false,
+              txt: "Mam twoje zdjęcia. Wiem gdzie pracujesz - [nazwa firmy]. Mam FB twojej żony. 10000 zł na BTC albo wszyscy zobaczą.",
+              ind: {
+                meta: { s: 0, i: "Email przez Protonmail - anonimowy" },
+                ela: { s: 0, i: "Oryginalny email" },
+                font: { s: 0, i: "Standardowy format" },
+                time: { s: 0, i: "Wysłany przez sieć TOR" },
+                ai: { s: 0, i: "4% - prawdziwy szantaż" },
+              },
+            },
+          ],
+        },
+        {
+          id: 11,
+          name: "Damian Krawczyk",
+          avatar: "👨‍🦱",
+          fee: 180,
+          days: 3,
+          pen: 350,
+          rew: 500,
+          fine: 400,
+          type: "ZNIESŁAWIENIE",
+          complaint: "Były pracodawca mnie oczernia",
+          clientLies: true,
+          fullStory:
+            "Mój były szef Janusz z firmy BudMal pisze o mnie kłamstwa na forach budowlanych! Twierdzi że kradłem materiały i oszukiwałem klientów. To NIEPRAWDA! Przez niego nie mogę znaleźć pracy w branży. Mam screeny jego postów. Chcę go pozwać!",
+          keywords: [
+            "janusz",
+            "budmal",
+            "szef",
+            "forum",
+            "kradł",
+            "materiał",
+            "praca",
+            "branż",
+            "post",
+          ],
+          suspect: "Janusz - były szef",
+          evidence: [
+            {
+              id: "e11",
+              tp: "FORUM",
+              fake: true,
+              txt: "UWAGA na Damiana K.! Pracował u mnie i kradł materiały budowlane. Oszukiwał też klientów na metrażu. Nie zatrudniajcie!",
+              ind: {
+                meta: { s: 1, i: "Screenshot edytowany - Paint.NET" },
+                ela: { s: 1, i: "Tekst wklejony cyfrowo" },
+                font: { s: 1, i: "Font nie pasuje do forum" },
+                time: {
+                  s: 1,
+                  i: "Post datowany na dzień wolny - forum zamknięte",
+                },
+                ai: { s: 1, i: "92% - screenshot sfabrykowany przez KLIENTA" },
+              },
+            },
+          ],
+        },
+        {
+          id: 12,
+          name: "Natalia Woźniak",
+          avatar: "👩‍🎤",
+          fee: 150,
+          days: 3,
+          pen: 300,
+          rew: 450,
+          fine: 350,
+          type: "GROŹBY",
+          complaint: "Stalker grozi mi śmiercią",
+          clientLies: true,
+          fullStory:
+            "Jestem influencerką na Instagramie. Od miesiąca dostaję wiadomości od stalkera który grozi że mnie zabije! Pisze z anonimowego konta. Boję się wychodzić z domu. Mam screeny tych wiadomości. Proszę o pomoc!",
+          keywords: [
+            "instagram",
+            "stalker",
+            "grozi",
+            "anonimow",
+            "wiadomo",
+            "influencer",
+            "zabij",
+            "konto",
+            "dm",
+          ],
+          suspect: "Anonimowy stalker",
+          evidence: [
+            {
+              id: "e12",
+              tp: "INSTAGRAM DM",
+              fake: true,
+              txt: "Wiem gdzie mieszkasz suko. Obserwuję cię codziennie. Niedługo cię dorwę i zabiję!!! 🔪",
+              ind: {
+                meta: { s: 1, i: "Screenshot utworzony w Photoshop" },
+                ela: { s: 1, i: "Interfejs IG niezgodny z wersją" },
+                font: { s: 1, i: "Czcionka nie pasuje do Instagram" },
+                time: { s: 1, i: "Timestamp niemożliwy - format błędny" },
+                ai: { s: 1, i: "96% - KLIENTKA sama stworzyła te screeny" },
+              },
+            },
+          ],
+        },
+        {
+          id: 13,
+          name: "Bartosz Maj",
+          avatar: "👨‍💻",
+          fee: 200,
+          days: 4,
+          pen: 400,
+          rew: 550,
+          fine: 450,
+          type: "HACKING",
+          complaint: "Ktoś włamał się na moje konto",
+          clientLies: true,
+          fullStory:
+            "Ktoś włamał się na moje konto bankowe i zrobił przelew na 8000 zł! Bank nie chce oddać pieniędzy bo mówią że logowanie było z mojego IP. Ale ja nie robiłem tego przelewu! Mam potwierdzenie z banku. To musiał być haker!",
+          keywords: [
+            "bank",
+            "8000",
+            "przelew",
+            "ip",
+            "właman",
+            "haker",
+            "konto",
+            "logowani",
+            "pieniąd",
+          ],
+          suspect: "Nieznany haker",
+          evidence: [
+            {
+              id: "e13",
+              tp: "POTWIERDZENIE PRZELEWU",
+              fake: false,
+              txt: 'Przelew: 8000 zł | Odbiorca: Konto Bartosza M. (drugie konto) | Tytuł: "zwrot"',
+              ind: {
+                meta: { s: 0, i: "Dokument oryginalny z banku" },
+                ela: { s: 0, i: "Brak edycji" },
+                font: { s: 0, i: "Oficjalny format bankowy" },
+                time: { s: 0, i: "Data i godzina spójne" },
+                ai: {
+                  s: 0,
+                  i: "2% - KLIENT sam przelał na swoje drugie konto!",
+                },
+              },
+            },
+          ],
+        },
+      ];
+      function speak(text, voice) {
+        if (!("speechSynthesis" in window)) return;
+        var u = new SpeechSynthesisUtterance(text);
+        u.lang = "pl-PL";
+        u.rate = 0.9;
+        if (voice == "judge") {
+          u.pitch = 0.8;
+          u.rate = 0.85;
+        } else if (voice == "defense") {
+          u.pitch = 1.1;
+          u.rate = 1.0;
+        } else if (voice == "police") {
+          u.pitch = 0.9;
+          u.rate = 0.95;
+        }
+        speechSynthesis.speak(u);
+      }
+      function genImg(e) {
+        var c = document.createElement("canvas");
+        c.width = 300;
+        c.height = 150;
+        var x = c.getContext("2d");
+        x.fillStyle = "#1a1a2e";
+        x.fillRect(0, 0, 300, 150);
+        x.fillStyle = "#0ff";
+        x.font = "bold 11px Arial";
+        x.fillText(e.tp, 10, 18);
+        x.fillStyle = "#fff";
+        x.font = "11px Arial";
+        var w = e.txt.split(" "),
+          l = "",
+          y = 40;
+        for (var i = 0; i < w.length; i++) {
+          if ((l + w[i]).length > 38) {
+            x.fillText(l, 10, y);
+            y += 14;
+            l = "";
+          }
+          l += w[i] + " ";
+        }
+        x.fillText(l, 10, y);
+        return c.toDataURL();
+      }
+      function saveGame() {
+        try {
+          localStorage.setItem(
+            "cyberdetective",
+            JSON.stringify({
+              credits: G.credits,
+              day: G.day,
+              tools: G.tools,
+              completed: G.completed,
+              inbox: G.inbox,
+              suspendedUntil: G.suspendedUntil,
+              activeCases: G.activeCases,
+              selectedCase: G.selectedCase,
+              results: G.results,
+            })
+          );
+        } catch (e) {
+          console.log("Save error", e);
+        }
+      }
+      function loadGame() {
+        try {
+          var s = localStorage.getItem("cyberdetective");
+          if (s) {
+            var d = JSON.parse(s);
+            G.credits = d.credits !== undefined ? d.credits : 500;
+            G.day = d.day || 1;
+            G.tools = d.tools || {
+              zoom: true,
+              meta: false,
+              ela: false,
+              font: false,
+              time: false,
+              ai: false,
+            };
+            G.completed = d.completed || [];
+            G.inbox = d.inbox || [];
+            G.suspendedUntil = d.suspendedUntil || 0;
+            G.activeCases = d.activeCases || [];
+            G.selectedCase =
+              d.selectedCase !== undefined ? d.selectedCase : null;
+            G.results = d.results || {};
+            for (var i = 0; i < G.activeCases.length; i++) {
+              for (var j = 0; j < G.activeCases[i].evidence.length; j++) {
+                G.activeCases[i].evidence[j].img = genImg(
+                  G.activeCases[i].evidence[j]
+                );
+              }
+            }
+            return true;
+          }
+        } catch (e) {
+          console.log("Load error", e);
+        }
+        return false;
+      }
+      function checkSuspension() {
+        if (G.suspendedUntil > Date.now()) {
+          document.getElementById("loader").style.display = "none";
+          document.getElementById("suspended").style.display = "flex";
+          updateSuspendTimer();
+          return true;
+        }
+        return false;
+      }
+      function updateSuspendTimer() {
+        var left = G.suspendedUntil - Date.now();
+        if (left <= 0) {
+          G.suspendedUntil = 0;
+          saveGame();
+          location.reload();
+          return;
+        }
+        var h = Math.floor(left / 3600000);
+        var m = Math.floor((left % 3600000) / 60000);
+        var s = Math.floor((left % 60000) / 1000);
+        document.getElementById("suspend-time").textContent =
+          (h < 10 ? "0" : "") +
+          h +
+          ":" +
+          (m < 10 ? "0" : "") +
+          m +
+          ":" +
+          (s < 10 ? "0" : "") +
+          s;
+        setTimeout(updateSuspendTimer, 1000);
+      }
+      function suspendPlayer(hours) {
+        G.suspendedUntil = Date.now() + hours * 3600000;
+        saveGame();
+        document.getElementById("scene-overlay").style.display = "none";
+        document.getElementById("suspended").style.display = "flex";
+        updateSuspendTimer();
+      }
+      loadGame();
+      var loadSteps = [
+        "Inicjalizacja...",
+        "Ładowanie interfejsu...",
+        "Wczytywanie spraw...",
+        "Konfiguracja narzędzi...",
+        "Weryfikacja...",
+        "System gotowy!",
+      ];
+      function runLoader() {
+        if (checkSuspension()) return;
+        var bar = document.getElementById("loader-bar"),
+          pct = document.getElementById("loader-percent"),
+          txt = document.getElementById("loader-text"),
+          prog = 0;
+        var iv = setInterval(function () {
+          prog += Math.random() * 20 + 5;
+          if (prog > 100) prog = 100;
+          bar.style.width = prog + "%";
+          pct.textContent = Math.floor(prog) + "%";
+          txt.textContent = loadSteps[Math.min(Math.floor(prog / 20), 5)];
+          if (prog >= 100) {
+            clearInterval(iv);
+            setTimeout(function () {
+              document.getElementById("loader").style.display = "none";
+              document.getElementById("intro").style.display = "flex";
+            }, 400);
+          }
+        }, 200);
+      }
+      window.onload = runLoader;
+      var scene,
+        camera,
+        renderer,
+        objs = [],
+        rotY = 0,
+        rotX = 0,
+        lookAt = null;
+      function init3D() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a15);
+        camera = new THREE.PerspectiveCamera(
+          70,
+          innerWidth / innerHeight,
+          0.1,
+          100
+        );
+        camera.position.set(0, 1.6, 0);
+        renderer = new THREE.WebGLRenderer({
+          canvas: document.getElementById("canvas"),
+          antialias: true,
+        });
+        renderer.setSize(innerWidth, innerHeight);
+        scene.add(new THREE.AmbientLight(0x1a2a4a, 0.5));
+        var fl = new THREE.Mesh(
+          new THREE.PlaneGeometry(10, 10),
+          new THREE.MeshBasicMaterial({ color: 0x2a1810 })
+        );
+        fl.rotation.x = -Math.PI / 2;
+        scene.add(fl);
+        var dr = new THREE.Mesh(
+          new THREE.BoxGeometry(2, 2.9, 0.1),
+          new THREE.MeshBasicMaterial({ color: 0x4a3020 })
+        );
+        dr.position.set(0, 1.45, 4.9);
+        dr.userData = { type: "door" };
+        objs.push(dr);
+        scene.add(dr);
+        var mn = new THREE.Mesh(
+          new THREE.BoxGeometry(1.2, 0.7, 0.05),
+          new THREE.MeshBasicMaterial({ color: 0x003355 })
+        );
+        mn.position.set(0, 1.35, -3.2);
+        mn.userData = { type: "pc" };
+        objs.push(mn);
+        scene.add(mn);
+        animate();
+      }
+      function animate() {
+        requestAnimationFrame(animate);
+        camera.rotation.order = "YXZ";
+        camera.rotation.y = rotY;
+        camera.rotation.x = rotX;
+        var ray = new THREE.Raycaster();
+        ray.setFromCamera({ x: 0, y: 0 }, camera);
+        var hits = ray.intersectObjects(objs);
+        var pr = document.getElementById("prompt"),
+          tb = document.getElementById("touch-btn");
+        if (hits.length && hits[0].distance < 6) {
+          lookAt = hits[0].object;
+          var t = lookAt.userData.type == "pc" ? "KOMPUTER" : "DRZWI";
+          pr.textContent = "👆 " + t;
+          pr.style.opacity = "1";
+          if (!G.inPC) {
+            tb.style.display = "block";
+            tb.textContent = "👆 " + t;
+          }
+        } else {
+          lookAt = null;
+          pr.style.opacity = "0";
+          tb.style.display = "none";
+        }
+        renderer.render(scene, camera);
+      }
+      var md = false;
+      document.onmousedown = function (e) {
+        md = true;
+        if (e.button == 0 && lookAt && !G.inPC) interact(lookAt);
+      };
+      document.onmouseup = function () {
+        md = false;
+      };
+      document.onmousemove = function (e) {
+        if (md && !G.inPC) {
+          rotY -= e.movementX * 0.003;
+          rotX = Math.max(-1, Math.min(1, rotX - e.movementY * 0.003));
+        }
+      };
+      var tx = 0,
+        ty = 0,
+        tt = false,
+        tm = false;
+      document.ontouchstart = function (e) {
+        if (
+          G.inPC ||
+          e.target.closest(
+            "#computer,#visitor,#analysis,#result,#intro,#scene-overlay"
+          )
+        )
+          return;
+        tt = true;
+        tm = false;
+        tx = e.touches[0].clientX;
+        ty = e.touches[0].clientY;
+      };
+      document.ontouchmove = function (e) {
+        if (!tt || G.inPC) return;
+        var dx = e.touches[0].clientX - tx,
+          dy = e.touches[0].clientY - ty;
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) tm = true;
+        rotY -= dx * 0.006;
+        rotX = Math.max(-1, Math.min(1, rotX - dy * 0.006));
+        tx = e.touches[0].clientX;
+        ty = e.touches[0].clientY;
+      };
+      document.ontouchend = function () {
+        if (!tt) return;
+        tt = false;
+        if (!tm && lookAt && !G.inPC) interact(lookAt);
+      };
+      function interact(o) {
+        if (o.userData.type == "pc") enterPC();
+        else spawnVisitor();
+      }
+      function enterPC() {
+        G.inPC = true;
+        document.getElementById("computer").style.display = "flex";
+        document.getElementById("crosshair").style.display = "none";
+        document.getElementById("prompt").style.opacity = "0";
+        document.getElementById("touch-btn").style.display = "none";
+        initNav();
+        renderPanel("case");
+      }
+      function exitPC() {
+        G.inPC = false;
+        document.getElementById("computer").style.display = "none";
+        document.getElementById("crosshair").style.display = "block";
+      }
+      document.getElementById("exit-btn").onclick = exitPC;
+      function initNav() {
+        var items = document.querySelectorAll(".nav-item");
+        for (var i = 0; i < items.length; i++) {
+          items[i].onclick = items[i].ontouchend = function (e) {
+            e.preventDefault();
+            for (var j = 0; j < items.length; j++)
+              items[j].classList.remove("active");
+            this.classList.add("active");
+            renderPanel(this.dataset.panel);
+          };
+        }
+      }
+      function updateHUD() {
+        document.getElementById("hud-credits").textContent = G.credits;
+        document.getElementById("hud-cases").textContent = G.activeCases.length;
+        document.getElementById("hud-day").textContent = G.day;
+        var tax = getTotalTax();
+        var taxEl = document.getElementById("hud-tax");
+        if (taxEl) taxEl.textContent = tax + "%";
+      }
+      function notify(t, m) {
+        document.getElementById("notif-title").textContent = t;
+        document.getElementById("notif-msg").textContent = m;
+        document.getElementById("notif").style.display = "block";
+        setTimeout(function () {
+          document.getElementById("notif").style.display = "none";
+        }, 2500);
+      }
+      function renderPanel(p) {
+        var c = document.getElementById("content");
+        if (p == "case") c.innerHTML = renderCase();
+        else if (p == "send") c.innerHTML = renderSend();
+        else if (p == "inbox") c.innerHTML = renderInbox();
+        else if (p == "shop") c.innerHTML = renderShop();
+        else if (p == "archive") c.innerHTML = renderArchive();
+        bindEvents(p);
+      }
+      function renderCase() {
+        if (!G.activeCases.length)
+          return '<div class="panel"><h2>📋 Brak Spraw</h2><p style="color:#888">Idź do DRZWI aby przyjąć klienta.</p></div>';
+        var h =
+          '<div class="panel"><h2>📋 Aktywne Sprawy (' +
+          G.activeCases.length +
+          ")</h2>";
+        for (var i = 0; i < G.activeCases.length; i++) {
+          var c = G.activeCases[i],
+            left = c.days - (G.day - c.startDay),
+            ready = c.evidence[0].verified;
+          h +=
+            '<div class="case-card' +
+            (G.selectedCase == i ? " active" : "") +
+            '" data-idx="' +
+            i +
+            '"><h4>' +
+            c.avatar +
+            " " +
+            c.name +
+            "</h4><p>" +
+            c.type +
+            " | ⏰" +
+            left +
+            " dni | " +
+            (ready ? "✅ Gotowe" : "🔍 Analizuj") +
+            "</p></div>";
+        }
+        h += "</div>";
+        if (G.selectedCase !== null && G.activeCases[G.selectedCase]) {
+          var c = G.activeCases[G.selectedCase];
+          h +=
+            '<div class="panel"><h3 style="color:#fff;margin-bottom:10px">' +
+            c.avatar +
+            " " +
+            c.name +
+            " - " +
+            c.type +
+            '</h3><p style="color:#888;font-size:12px;margin-bottom:10px;line-height:1.5">' +
+            c.fullStory +
+            '</p><button class="chat-client-btn" data-cidx="' +
+            G.selectedCase +
+            '" style="background:#0ff;color:#000;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;margin-bottom:15px">💬 Napisz do klienta</button><h4 style="color:#0ff;margin-bottom:10px">📎 Dowody:</h4><div class="evidence-grid">';
+          for (var j = 0; j < c.evidence.length; j++) {
+            var e = c.evidence[j];
+            h +=
+              '<div class="evidence-card" data-eid="' +
+              e.id +
+              '"><div class="evidence-img"><img src="' +
+              e.img +
+              '"></div><span class="badge ' +
+              (e.verified
+                ? e.verdict
+                  ? "badge-fake"
+                  : "badge-ok"
+                : "badge-pending") +
+              '">' +
+              (e.verified
+                ? e.verdict
+                  ? "⚠️ FAŁSZ"
+                  : "✅ OK"
+                : "❓ Analizuj") +
+              "</span></div>";
+          }
+          h += "</div></div>";
+        }
+        return h;
+      }
+      function renderSend() {
+        var ready = G.activeCases.filter(function (c) {
+          return c.evidence[0].verified;
+        });
+        if (!ready.length)
+          return '<div class="panel"><h2>📤 Wyślij</h2><p style="color:#f90">Przeanalizuj dowody!</p></div>';
+        var h =
+          '<div class="panel"><h2>📤 Wyślij</h2><select id="case-sel" style="width:100%;padding:10px;background:#1a1a2e;border:1px solid #2a2a4e;color:#fff;border-radius:5px;margin-bottom:10px">';
+        for (var i = 0; i < ready.length; i++) {
+          var idx = G.activeCases.indexOf(ready[i]);
+          h +=
+            '<option value="' +
+            idx +
+            '">' +
+            ready[i].name +
+            " (" +
+            ready[i].type +
+            ")</option>";
+        }
+        h +=
+          '</select><p style="color:#f90;font-size:11px;margin-bottom:5px">⚠️ Błędne wnioski = GRZYWNA lub ZAWIESZENIE!</p><button id="mediator-btn" style="width:100%;background:linear-gradient(135deg,#fc0,#f90);color:#000;border:none;padding:10px;font-family:Orbitron;cursor:pointer;border-radius:8px;margin-bottom:15px;font-size:12px">🤵 ZAPYTAJ POŚREDNIKA</button><div class="recipient-grid"><div class="recipient-opt" data-r="Policja"><div class="icon">🚔</div><div class="name">Policja</div></div><div class="recipient-opt" data-r="Sąd"><div class="icon">⚖️</div><div class="name">Sąd</div></div></div><button class="send-btn" id="send-btn" disabled>📤 WYŚLIJ</button></div>';
+        return h;
+      }
+      function renderInbox() {
+        if (!G.inbox.length)
+          return '<div class="panel"><h2>📬 Poczta</h2><p style="color:#888">Brak.</p></div>';
+        var h = '<div class="panel"><h2>📬 Poczta</h2>';
+        for (var i = 0; i < G.inbox.length; i++) {
+          var m = G.inbox[i];
+          h +=
+            '<div class="mail-item' +
+            (m.read ? "" : " unread") +
+            '" data-idx="' +
+            i +
+            '"><strong>' +
+            m.from +
+            '</strong><p style="color:#888;font-size:11px">' +
+            m.body.substring(0, 40) +
+            "...</p></div>";
+        }
+        return h + "</div>";
+      }
+      function renderShop() {
+        var tax = getTotalTax();
+        var h =
+          '<div class="panel"><h2>🛒 Sklep</h2><p style="color:#f90;font-size:11px;margin-bottom:10px">⚠️ Opłata za narzędzia: <strong>' +
+          tax +
+          "%</strong> z każdej wypłaty</p>";
+        for (var k in TOOLS) {
+          if (k == "zoom") continue;
+          var t = TOOLS[k];
+          var owned = G.tools[k];
+          var sellPrice = Math.floor(t.p * 0.05);
+          h +=
+            '<div class="shop-item" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="color:#fff">' +
+            t.n +
+            ' <span style="color:#f90;font-size:10px">(' +
+            t.tax +
+            "%)</span></span>";
+          if (owned) {
+            h +=
+              '<button class="sell-btn" data-tool="' +
+              k +
+              '" style="background:#f36;color:#fff;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:11px">Sprzedaj ' +
+              sellPrice +
+              "💰</button>";
+          } else {
+            h +=
+              '<button class="shop-btn" data-tool="' +
+              k +
+              '" ' +
+              (G.credits < t.p ? "disabled" : "") +
+              ' style="background:#0ff;color:#000;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:11px">' +
+              t.p +
+              "💰</button>";
+          }
+          h += "</div>";
+        }
+        return (
+          h +
+          '</div><div class="panel"><h2>⚙️</h2><button id="reset-btn" style="background:#f36;color:#fff;border:none;padding:10px;border-radius:5px;cursor:pointer">🗑️ RESET</button></div>'
+        );
+      }
+      function renderArchive() {
+        var h = '<div class="panel"><h2>📁 Archiwum</h2>';
+        if (!G.completed.length) h += '<p style="color:#888">Brak.</p>';
+        for (var i = 0; i < G.completed.length; i++) {
+          var c = G.completed[i];
+          h +=
+            '<div class="shop-item"><span>' +
+            c.name +
+            '</span><span style="color:' +
+            (c.rew >= 0 ? "#0f8" : "#f36") +
+            '">' +
+            (c.rew >= 0 ? "+" : "") +
+            c.rew +
+            "💰</span></div>";
+        }
+        return h + "</div>";
+      }
+      function bindEvents(p) {
+        if (p == "case") {
+          var cards = document.querySelectorAll(".case-card");
+          for (var i = 0; i < cards.length; i++) {
+            cards[i].onclick = cards[i].ontouchend = function (e) {
+              e.preventDefault();
+              G.selectedCase = parseInt(this.dataset.idx);
+              saveGame();
+              renderPanel("case");
+            };
+          }
+          var evs = document.querySelectorAll(".evidence-card");
+          for (var i = 0; i < evs.length; i++) {
+            evs[i].onclick = evs[i].ontouchend = function (e) {
+              e.preventDefault();
+              openAnalysis(this.dataset.eid);
+            };
+          }
+          var chatBtn = document.querySelector(".chat-client-btn");
+          if (chatBtn) {
+            chatBtn.onclick = chatBtn.ontouchend = function (e) {
+              e.preventDefault();
+              openClientChat(parseInt(this.dataset.cidx));
+            };
+          }
+        }
+        if (p == "send") {
+          var sel = null;
+          var opts = document.querySelectorAll(".recipient-opt");
+          for (var i = 0; i < opts.length; i++) {
+            opts[i].onclick = opts[i].ontouchend = function (e) {
+              e.preventDefault();
+              for (var j = 0; j < opts.length; j++)
+                opts[j].classList.remove("selected");
+              this.classList.add("selected");
+              sel = this.dataset.r;
+              document.getElementById("send-btn").disabled = false;
+            };
+          }
+          document.getElementById("send-btn").onclick = document.getElementById(
+            "send-btn"
+          ).ontouchend = function (e) {
+            e.preventDefault();
+            if (sel) {
+              var idx = parseInt(document.getElementById("case-sel").value);
+              finishCase(idx, sel);
+            }
+          };
+          var mb = document.getElementById("mediator-btn");
+          if (mb) {
+            mb.onclick = mb.ontouchend = function (e) {
+              e.preventDefault();
+              openMediatorChat();
+            };
+          }
+        }
+        if (p == "inbox") {
+          var items = document.querySelectorAll(".mail-item");
+          for (var i = 0; i < items.length; i++) {
+            items[i].onclick = items[i].ontouchend = function (e) {
+              e.preventDefault();
+              var m = G.inbox[this.dataset.idx];
+              m.read = true;
+              saveGame();
+              alert(m.from + "\n\n" + m.body);
+              renderPanel("inbox");
+            };
+          }
+        }
+        if (p == "shop") {
+          var btns = document.querySelectorAll(".shop-btn");
+          for (var i = 0; i < btns.length; i++) {
+            btns[i].onclick = btns[i].ontouchend = function (e) {
+              e.preventDefault();
+              var t = this.dataset.tool;
+              if (!G.tools[t] && G.credits >= TOOLS[t].p) {
+                G.credits -= TOOLS[t].p;
+                G.tools[t] = true;
+                updateHUD();
+                saveGame();
+                renderPanel("shop");
+                notify(
+                  "Kupiono!",
+                  TOOLS[t].n + " (-" + TOOLS[t].tax + "% z wypłat)"
+                );
+              }
+            };
+          }
+          var sellBtns = document.querySelectorAll(".sell-btn");
+          for (var i = 0; i < sellBtns.length; i++) {
+            sellBtns[i].onclick = sellBtns[i].ontouchend = function (e) {
+              e.preventDefault();
+              var t = this.dataset.tool;
+              if (G.tools[t]) {
+                sellTool(t);
+                renderPanel("shop");
+              }
+            };
+          }
+          var rb = document.getElementById("reset-btn");
+          if (rb)
+            rb.onclick = function () {
+              if (confirm("Reset?")) {
+                localStorage.clear();
+                location.reload();
+              }
+            };
+        }
+      }
+      var curEv = null,
+        curCase = null;
+      function openAnalysis(eid) {
+        if (G.selectedCase === null) return;
+        curCase = G.activeCases[G.selectedCase];
+        curEv = null;
+        for (var i = 0; i < curCase.evidence.length; i++) {
+          if (curCase.evidence[i].id == eid) curEv = curCase.evidence[i];
+        }
+        if (!curEv) return;
+        document.getElementById("analysis-img").src = curEv.img;
+        document.getElementById("analysis").style.display = "flex";
+        if (!G.results[curCase.id]) G.results[curCase.id] = {};
+        if (!G.results[curCase.id][eid]) G.results[curCase.id][eid] = {};
+        saveGame();
+        renderTools();
+      }
+      document.getElementById("close-analysis").onclick = function () {
+        document.getElementById("analysis").style.display = "none";
+      };
+      function renderTools() {
+        var res = G.results[curCase.id][curEv.id] || {};
+        var h =
+          '<div style="padding:5px"><h4 style="color:#0ff;margin-bottom:8px">NARZĘDZIA</h4>';
+        for (var k in TOOLS) {
+          var t = TOOLS[k],
+            have = G.tools[k],
+            used = res[k];
+          h +=
+            '<button class="tool-btn' +
+            (have ? "" : " locked") +
+            (used ? " active" : "") +
+            '" data-t="' +
+            k +
+            '">' +
+            t.n +
+            " " +
+            (have ? (used ? "✓" : "") : t.p + "💰") +
+            "</button>";
+        }
+        h += '</div><div id="results-box"><h5 style="color:#0ff">📊</h5>';
+        for (var k in res) {
+          if (!res[k]) continue;
+          h +=
+            '<div class="result-row"><span>' +
+            TOOLS[k].n +
+            '</span><span class="result-val ' +
+            (res[k].s ? "sus" : "ok") +
+            '">' +
+            (res[k].s ? "⚠️" : "✓") +
+            '</span></div><p style="color:#888;font-size:10px">' +
+            res[k].i +
+            "</p>";
+        }
+        h +=
+          '</div><div id="verdict-btns"><button class="verdict-btn v-ok" id="v-ok">✓ OK</button><button class="verdict-btn v-fake" id="v-fake">✗ FAŁSZ</button></div>';
+        document.getElementById("tools-panel").innerHTML = h;
+        var btns = document.querySelectorAll(".tool-btn");
+        for (var i = 0; i < btns.length; i++) {
+          btns[i].onclick = btns[i].ontouchend = function (e) {
+            e.preventDefault();
+            var t = this.dataset.t;
+            if (!G.tools[t]) {
+              notify("Brak!", "Kup w sklepie");
+              return;
+            }
+            if (t == "zoom") {
+              var img = document.getElementById("analysis-img");
+              if (!img.dataset.zoomed || img.dataset.zoomed == "false") {
+                img.style.transform = "scale(2.5)";
+                img.style.cursor = "zoom-out";
+                img.dataset.zoomed = "true";
+                notify("🔍 Lupa", "Powiększono 2.5x");
+                G.results[curCase.id][curEv.id]["zoom"] = {
+                  s: 0,
+                  i: "Powiększenie aktywne",
+                };
+              } else {
+                img.style.transform = "scale(1)";
+                img.style.cursor = "zoom-in";
+                img.dataset.zoomed = "false";
+                notify("🔍 Lupa", "Normalny rozmiar");
+              }
+              renderTools();
+              return;
+            }
+            if (!curEv.ind || !curEv.ind[t]) return;
+            if (G.results[curCase.id][curEv.id][t]) return;
+            G.results[curCase.id][curEv.id][t] = curEv.ind[t];
+            renderTools();
+            saveGame();
+            notify(TOOLS[t].n, curEv.ind[t].s ? "⚠️ PODEJRZANE!" : "✓ OK");
+          };
+        }
+        document.getElementById("v-ok").onclick = document.getElementById(
+          "v-ok"
+        ).ontouchend = function (e) {
+          e.preventDefault();
+          verdict(false);
+        };
+        document.getElementById("v-fake").onclick = document.getElementById(
+          "v-fake"
+        ).ontouchend = function (e) {
+          e.preventDefault();
+          verdict(true);
+        };
+      }
+      function verdict(isFake) {
+        curEv.verified = true;
+        curEv.verdict = isFake;
+        document.getElementById("analysis").style.display = "none";
+        saveGame();
+        renderPanel("case");
+        if (curCase.evidence[0].verified) {
+          notify("Gotowe!", "Wyślij");
+          document.querySelector('[data-panel="send"]').classList.add("notify");
+        }
+      }
+      var chatCaseIdx = null;
+      function openClientChat(idx) {
+        chatCaseIdx = idx;
+        var c = G.activeCases[idx];
+        if (!c.chatHistory) c.chatHistory = [];
+        document.getElementById("chat-client-name").textContent =
+          "💬 " + c.avatar + " " + c.name;
+        renderChatMessages(c);
+        document.getElementById("client-chat").style.display = "flex";
+      }
+      function renderChatMessages(c) {
+        var h =
+          '<div class="chat-msg client">' +
+          c.avatar +
+          ": Cześć! Dziękuję że Pan/Pani zajmuje się moją sprawą. Jeśli ma Pan pytania - proszę pisać!</div>";
+        if (c.chatHistory) {
+          for (var i = 0; i < c.chatHistory.length; i++) {
+            var m = c.chatHistory[i];
+            h +=
+              '<div class="chat-msg ' +
+              m.from +
+              '">' +
+              (m.from == "you" ? "Ty: " : c.avatar + ": ") +
+              m.text +
+              "</div>";
+          }
+        }
+        document.getElementById("chat-messages").innerHTML = h;
+        var msgs = document.getElementById("chat-messages");
+        msgs.scrollTop = msgs.scrollHeight;
+      }
+      function getClientResponse(c, msg) {
+        var m = msg.toLowerCase();
+        if (m.indexOf("policj") >= 0 || m.indexOf("zgłosi") >= 0)
+          return "Czy to znaczy że sprawa idzie do policji? Proszę mi powiedzieć co mam robić!";
+        if (m.indexOf("sąd") >= 0 || m.indexOf("rozprawa") >= 0)
+          return "Sąd? Będę musiał(a) zeznawać? Trochę się boję ale zrobię co trzeba.";
+        if (
+          m.indexOf("fałsz") >= 0 ||
+          m.indexOf("fake") >= 0 ||
+          m.indexOf("sfabrykowan") >= 0
+        )
+          return "Wiedziałem(am)! To było podrobione! Czy to znaczy że mogę wygrać sprawę?";
+        if (m.indexOf("prawdzi") >= 0 || m.indexOf("autentyczn") >= 0)
+          return "Czyli te dowody są prawdziwe? To dobrze czy źle dla mojej sprawy?";
+        if (
+          m.indexOf("dowod") >= 0 ||
+          m.indexOf("screen") >= 0 ||
+          m.indexOf("więcej") >= 0
+        )
+          return "Mam jeszcze trochę screenów i zapisanych wiadomości. Czy potrzebuje Pan/Pani więcej materiałów?";
+        if (m.indexOf("spokojnie") >= 0 || m.indexOf("nie martw") >= 0)
+          return "Dziękuję bardzo. Staram się nie panikować ale to naprawdę stresująca sytuacja...";
+        if (m.indexOf("aresztow") >= 0 || m.indexOf("zatrzym") >= 0)
+          return "Naprawdę go aresztują?! Nie wierzę! Dziękuję za pomoc!!!";
+        if (m.indexOf("nic") >= 0 && m.indexOf("zrobić") >= 0)
+          return "Jak to nic? Czyli nie ma żadnej nadziei? Proszę, musi być jakiś sposób...";
+        if (m.indexOf("czekaj") >= 0 || m.indexOf("cierpliw") >= 0)
+          return "Rozumiem, postaram się czekać. Ile to może potrwać?";
+        if (m.indexOf("pytanie") >= 0 || m.indexOf("?") >= 0)
+          return "Tak, słucham? O co chodzi?";
+        if (m.indexOf("dzięk") >= 0 || m.indexOf("super") >= 0)
+          return "To ja dziękuję! Bardzo się cieszę że ktoś mi pomaga!";
+        if (m.indexOf("podejrzew") >= 0 || m.indexOf("kto to") >= 0)
+          return "Mam pewne podejrzenia kto za tym stoi, ale nie mam 100% pewności. Wolę nie rzucać oskarżeń bez dowodów.";
+        if (m.indexOf("bezpiecz") >= 0 || m.indexOf("ochrona") >= 0)
+          return "Czy mogę liczyć na jakąś ochronę? Trochę się boję co będzie dalej...";
+        return "Rozumiem. Proszę dać mi znać jak tylko będzie coś nowego w sprawie. Czekam na informacje!";
+      }
+      document.getElementById("chat-close").onclick = function () {
+        document.getElementById("client-chat").style.display = "none";
+        chatCaseIdx = null;
+      };
+      document.getElementById("chat-send").onclick = document.getElementById(
+        "chat-send"
+      ).ontouchend = function (e) {
+        e.preventDefault();
+        var txt = document.getElementById("chat-textarea").value.trim();
+        if (!txt || chatCaseIdx === null) return;
+        var c = G.activeCases[chatCaseIdx];
+        if (!c.chatHistory) c.chatHistory = [];
+        c.chatHistory.push({ from: "you", text: txt });
+        document.getElementById("chat-textarea").value = "";
+        renderChatMessages(c);
+        setTimeout(function () {
+          var resp = getClientResponse(c, txt);
+          c.chatHistory.push({ from: "client", text: resp });
+          renderChatMessages(c);
+          saveGame();
+        }, 1000 + Math.random() * 1000);
+      };
+      var currentVisitor = null;
+      function spawnVisitor() {
+        var avail = CASES.filter(function (c) {
+          return (
+            !G.completed.find(function (x) {
+              return x.id == c.id;
+            }) &&
+            !G.activeCases.find(function (x) {
+              return x.id == c.id;
+            })
+          );
+        });
+        if (!avail.length) {
+          notify("Brak", "Wszystkie sprawy!");
+          return;
+        }
+        currentVisitor = avail[Math.floor(Math.random() * avail.length)];
+        var c = currentVisitor;
+        document.getElementById("v-avatar").textContent = c.avatar;
+        document.getElementById("v-name").textContent = c.name;
+        document.getElementById("v-fee").textContent = c.fee;
+        document.getElementById("visitor-complaint").innerHTML =
+          "<strong>" +
+          c.type +
+          "</strong><br><br>" +
+          c.fullStory +
+          '<br><br><em style="color:#0ff">Dowód: ' +
+          c.evidence[0].tp +
+          ' - "' +
+          c.evidence[0].txt +
+          '"</em>';
+        document.getElementById("v-deadline").textContent = c.days;
+        document.getElementById("v-penalty").textContent = c.pen;
+        document.getElementById("visitor").style.display = "flex";
+      }
+      document.getElementById("btn-accept").onclick = function () {
+        if (!currentVisitor) return;
+        var c = currentVisitor;
+        G.credits += c.fee;
+        var nc = JSON.parse(JSON.stringify(c));
+        nc.startDay = G.day;
+        nc.evidence[0].verified = false;
+        nc.evidence[0].verdict = null;
+        nc.evidence[0].img = genImg(nc.evidence[0]);
+        G.results[nc.id] = {};
+        G.activeCases.push(nc);
+        G.selectedCase = G.activeCases.length - 1;
+        currentVisitor = null;
+        document.getElementById("visitor").style.display = "none";
+        updateHUD();
+        saveGame();
+        notify("Przyjęto!", "+" + c.fee + "💰");
+      };
+      document.getElementById("btn-reject").onclick = function () {
+        currentVisitor = null;
+        document.getElementById("visitor").style.display = "none";
+      };
+      function finishCase(idx, to) {
+        var c = JSON.parse(JSON.stringify(G.activeCases[idx]));
+        var correct = c.evidence[0].verdict == c.evidence[0].fake;
+        G.activeCases.splice(idx, 1);
+        delete G.results[c.id];
+        G.selectedCase = G.activeCases.length ? 0 : null;
+        saveGame();
+        if (to == "Sąd" || to == "Policja") {
+          exitPC();
+          startScene(to, c, correct);
+          return;
+        }
+      }
+      function showResult(correct, rew, to) {
+        document.getElementById("result-icon").textContent = correct
+          ? "✓"
+          : "✗";
+        document.getElementById("result-icon").style.color = correct
+          ? "#0f8"
+          : "#f36";
+        document.getElementById("result-title").textContent = correct
+          ? "SUKCES!"
+          : "BŁĄD!";
+        document.getElementById("result-title").style.color = correct
+          ? "#0f8"
+          : "#f36";
+        document.getElementById("result-msg").textContent = "→ " + to;
+        document.getElementById("result-reward").textContent =
+          (rew >= 0 ? "+" : "") + rew + "💰";
+        document.getElementById("result-reward").style.color =
+          rew >= 0 ? "#fc0" : "#f36";
+        document.getElementById("result").style.display = "flex";
+      }
+      document.getElementById("continue-btn").onclick = function () {
+        document.getElementById("result").style.display = "none";
+        G.day++;
+        updateHUD();
+        saveGame();
+        renderPanel("case");
+      };
+      function initScene3D(type) {
+        var canvas = document.getElementById("scene-canvas");
+        sceneScene = new THREE.Scene();
+        sceneScene.background = new THREE.Color(
+          type == "Sąd" ? 0x1a1208 : 0x0a1020
+        );
+        sceneCamera = new THREE.PerspectiveCamera(
+          60,
+          innerWidth / (innerHeight * 0.4),
+          0.1,
+          100
+        );
+        sceneCamera.position.set(0, 1.6, 3);
+        sceneRenderer = new THREE.WebGLRenderer({
+          canvas: canvas,
+          antialias: true,
+        });
+        sceneRenderer.setSize(innerWidth, innerHeight * 0.4);
+        sceneScene.add(
+          new THREE.AmbientLight(type == "Sąd" ? 0xffd090 : 0x4060ff, 0.5)
+        );
+        var light = new THREE.PointLight(
+          type == "Sąd" ? 0xffcc66 : 0x3366ff,
+          1,
+          20
+        );
+        light.position.set(0, 4, 0);
+        sceneScene.add(light);
+        var floor = new THREE.Mesh(
+          new THREE.PlaneGeometry(20, 20),
+          new THREE.MeshBasicMaterial({
+            color: type == "Sąd" ? 0x2a1a0a : 0x1a1a2a,
+          })
+        );
+        floor.rotation.x = -Math.PI / 2;
+        sceneScene.add(floor);
+        if (type == "Sąd") {
+          var bench = new THREE.Mesh(
+            new THREE.BoxGeometry(4, 1.5, 1),
+            new THREE.MeshBasicMaterial({ color: 0x4a2a10 })
+          );
+          bench.position.set(0, 0.75, -4);
+          sceneScene.add(bench);
+          var emblem = new THREE.Mesh(
+            new THREE.CircleGeometry(0.5, 32),
+            new THREE.MeshBasicMaterial({ color: 0xffd700 })
+          );
+          emblem.position.set(0, 2.5, -4.5);
+          sceneScene.add(emblem);
+        } else {
+          var desk = new THREE.Mesh(
+            new THREE.BoxGeometry(3, 1, 1.5),
+            new THREE.MeshBasicMaterial({ color: 0x2a2a4a })
+          );
+          desk.position.set(0, 0.5, -3);
+          sceneScene.add(desk);
+          var lamp = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.1, 0.3, 0.4),
+            new THREE.MeshBasicMaterial({ color: 0x4080ff })
+          );
+          lamp.position.set(1, 1.2, -3);
+          sceneScene.add(lamp);
+        }
+        var stx = 0,
+          sty = 0;
+        canvas.ontouchstart = function (e) {
+          stx = e.touches[0].clientX;
+          sty = e.touches[0].clientY;
+        };
+        canvas.ontouchmove = function (e) {
+          sceneRotY -= (e.touches[0].clientX - stx) * 0.005;
+          sceneRotX = Math.max(
+            -0.5,
+            Math.min(0.5, sceneRotX - (e.touches[0].clientY - sty) * 0.005)
+          );
+          stx = e.touches[0].clientX;
+          sty = e.touches[0].clientY;
+        };
+        canvas.onmousemove = function (e) {
+          if (e.buttons) {
+            sceneRotY -= e.movementX * 0.003;
+            sceneRotX = Math.max(
+              -0.5,
+              Math.min(0.5, sceneRotX - e.movementY * 0.003)
+            );
+          }
+        };
+        animateScene();
+      }
+      function animateScene() {
+        if (document.getElementById("scene-overlay").style.display != "flex")
+          return;
+        requestAnimationFrame(animateScene);
+        sceneCamera.rotation.order = "YXZ";
+        sceneCamera.rotation.y = sceneRotY;
+        sceneCamera.rotation.x = sceneRotX;
+        sceneRenderer.render(sceneScene, sceneCamera);
+      }
+      function startScene(type, caseData, correct) {
+        sceneData = {
+          type: type,
+          caseData: caseData,
+          correct: correct,
+          phase: 0,
+          allTexts: "",
+        };
+        sceneRotY = 0;
+        sceneRotX = 0;
+        document.getElementById("scene-overlay").style.display = "flex";
+        document.getElementById("scene-result").style.display = "none";
+        document.getElementById("scene-dialogue").style.display = "block";
+        initScene3D(type);
+        animateScene();
+        runScenePhase();
+      }
+      function analyzePlayerText(txt) {
+        var score = 0;
+        var result = {};
+        var kw = {
+          evidence: [
+            "dowod",
+            "screen",
+            "zrzut",
+            "nagranie",
+            "mail",
+            "wiadomo",
+            "sms",
+            "foto",
+            "zdjęci",
+            "plik",
+            "dokument",
+            "wyciąg",
+            "log",
+            "historia",
+            "backup",
+          ],
+          technical: [
+            "metadan",
+            "analiz",
+            "exif",
+            "ip",
+            "adres",
+            "lokalizacj",
+            "timestamp",
+            "hash",
+            "sygnatur",
+            "photoshop",
+            "edycj",
+            "manipulacj",
+            "fałsz",
+          ],
+          professional: [
+            "wysoki sądzie",
+            "panie oficerze",
+            "pani oficer",
+            "przedstawiam",
+            "wnoszę",
+            "oświadczam",
+            "zeznaj",
+            "potwierdzam",
+          ],
+          uncertain: [
+            "nie wiem",
+            "może",
+            "chyba",
+            "wydaje mi się",
+            "nie jestem pewien",
+            "trudno powiedzieć",
+            "możliwe",
+            "prawdopodobnie",
+            "nie pamiętam",
+          ],
+          aggressive: [
+            "kłam",
+            "oszust",
+            "przestępc",
+            "bandyt",
+            "złodziej",
+            "świnia",
+            "idiota",
+            "głupi",
+          ],
+          urgent: [
+            "pilne",
+            "szybko",
+            "natychmiast",
+            "teraz",
+            "zaraz",
+            "niebezpiecz",
+            "grozi",
+            "życi",
+            "zdrowi",
+            "przemoc",
+          ],
+          suspect: [
+            "znam",
+            "wiem kto",
+            "to jest",
+            "nazwisko",
+            "adres",
+            "mieszka",
+            "pracuje",
+            "numer",
+            "telefon",
+            "profil",
+          ],
+          victim: [
+            "ofiara",
+            "pokrzywdzon",
+            "bezpiecz",
+            "strach",
+            "boi się",
+            "ukrywa",
+            "chroni",
+            "pomoc",
+          ],
+          weak: [
+            "tylko",
+            "trochę",
+            "niewiele",
+            "mało",
+            "sam",
+            "jeden",
+            "może być",
+          ],
+          strong: [
+            "pewny",
+            "na pewno",
+            "jednoznaczn",
+            "bezsprzeczn",
+            "niezbity",
+            "oczywist",
+            "ewidentn",
+          ],
+          legal: [
+            "paragraf",
+            "artykuł",
+            "kodeks",
+            "ustawa",
+            "prawo",
+            "przepis",
+            "sankcj",
+          ],
+          emotional: [
+            "proszę",
+            "błagam",
+            "pomóż",
+            "ratuj",
+            "straszn",
+            "okropn",
+            "koszmar",
+          ],
+        };
+        for (var cat in kw) {
+          result[cat] = 0;
+          for (var i = 0; i < kw[cat].length; i++) {
+            if (txt.indexOf(kw[cat][i]) >= 0) {
+              result[cat]++;
+              score +=
+                cat == "uncertain" || cat == "weak" || cat == "aggressive"
+                  ? -2
+                  : 2;
+            }
+          }
+        }
+        result.score = score;
+        result.hasEvidence = result.evidence > 0 || result.technical > 0;
+        result.isPro = result.professional > 0;
+        result.isUnsure = result.uncertain > 0 || result.weak > 1;
+        result.isAggressive = result.aggressive > 0;
+        result.isUrgent = result.urgent > 0;
+        result.knowsSuspect = result.suspect > 0;
+        result.victimDanger = result.urgent > 0 && result.victim > 0;
+        result.isStrong = result.strong > 0 && result.evidence > 1;
+        result.isEmotional = result.emotional > 0;
+        result.isLegal = result.legal > 0;
+        result.length = txt.length;
+        return result;
+      }
+
+      function getDefResp(a, txt) {
+        if (a.isUnsure && a.length < 50)
+          return "Wysoki Sądzie! To jest żart? Oskarżyciel sam przyznaje że nie jest pewien i nie potrafi nawet sensownie opisać sprawy! Żądam natychmiastowego uniewinnienia!";
+        if (a.isUnsure)
+          return 'Wysoki Sądzie! Słyszeliście te wahania? "Może", "chyba"... To nie są słowa kogoś kto ma twarde dowody!';
+        if (a.isAggressive)
+          return "Sprzeciw! Oskarżyciel zamiast faktów rzuca obelgi! To świadczy o braku argumentów! Proszę o upomnienie!";
+        if (a.isEmotional && !a.hasEvidence)
+          return "Wysoki Sądzie, widzę tu dużo emocji, ale zero konkretnych dowodów. Emocje to nie dowody!";
+        if (txt.indexOf("photoshop") >= 0 || txt.indexOf("edyt") >= 0)
+          return 'Oskarżyciel twierdzi że wykrył edycję? A może to ON sfabrykował te tak zwane "dowody"? Każdy może coś napisać!';
+        if (txt.indexOf("metadan") >= 0)
+          return "Metadane? Wysoki Sądzie, każdy nastolatek umie zmienić metadane pliku! To żaden dowód!";
+        if (a.technical > 2 && a.evidence > 1)
+          return "Te... te techniczne bzdury... Wysoki Sądzie, wnoszę o powołanie NIEZALEŻNEGO biegłego! Nie możemy ufać analizom oskarżyciela!";
+        if (a.isStrong)
+          return "Mimo pewności siebie oskarżyciela, wciąż nie widzę NIEBITYCH dowodów! Mój klient jest niewinny!";
+        if (a.hasEvidence)
+          return 'Te tak zwane "dowody" mogły zostać sfabrykowane! W dobie AI wszystko można podrobić! To nic nie dowodzi!';
+        if (a.isLegal)
+          return "Oskarżyciel cytuje paragrafy, ale czy naprawdę rozumie prawo? Interpretacja jest wysoce wątpliwa!";
+        if (a.length < 30)
+          return "To wszystko? TAK KRÓTKA wypowiedź ma być oskarżeniem? Śmieszne! Żądam uniewinnienia!";
+        return "Wysoki Sądzie, oskarżyciel nie przedstawił żadnych konkretnych, niepodważalnych dowodów! Żądam uniewinnienia mojego klienta!";
+      }
+
+      function getJudgeResp(a, txt) {
+        if (a.isAggressive)
+          return "Proszę o spokój i powagę! To jest sala sądowa. Następne takie zachowanie skończy się karą porządkową. Proszę trzymać się faktów.";
+        if (a.isUnsure && a.length < 50)
+          return "Panie oskarżycielu, Pana wypowiedź jest bardzo niepewna i krótka. Czy jest Pan przygotowany do tej rozprawy?";
+        if (a.isUnsure)
+          return "Słyszę w Pana słowach niepewność. Sąd potrzebuje PEWNOŚCI, nie domysłów. Czy ma Pan twarde dowody?";
+        if (a.isEmotional && !a.hasEvidence)
+          return "Rozumiem emocje, ale sąd opiera się na faktach i dowodach, nie na uczuciach. Proszę o konkrety.";
+        if (a.isPro && a.isStrong)
+          return "Dziękuję za profesjonalne i pewne przedstawienie sprawy. Sąd weźmie pod uwagę przedstawione argumenty.";
+        if (a.isPro && a.hasEvidence)
+          return "Dziękuję. Widzę że jest Pan przygotowany. Proszę kontynuować.";
+        if (a.technical > 2)
+          return "Rozumiem że sprawa ma aspekt techniczny. Czy te analizy były przeprowadzone zgodnie ze standardami?";
+        if (a.hasEvidence && !a.isUnsure)
+          return "Dobrze, mamy więc jakieś dowody. Sąd je rozpatrzy.";
+        if (a.isLegal)
+          return "Widzę że zna Pan przepisy. Proszę jednak pamiętać że interpretacja prawa należy do sądu.";
+        if (a.length > 200 && a.hasEvidence)
+          return "Dziękuję za szczegółowe wyjaśnienie. Sąd ma teraz pełniejszy obraz sprawy.";
+        if (a.length < 30)
+          return "To bardzo krótka wypowiedź. Czy nie ma Pan nic więcej do dodania?";
+        return "Rozumiem. Proszę kontynuować i przedstawić więcej szczegółów.";
+      }
+
+      function getPolResp(a, txt) {
+        if (a.isAggressive)
+          return "Proszę się uspokoić. Rozumiem że jest Pan zdenerwowany, ale potrzebuję konkretnych informacji, nie emocji.";
+        if (a.isUnsure && a.length < 50)
+          return "Hmm, nie brzmi to przekonująco. Potrzebuję konkretów żeby podjąć działania. Kto, co, kiedy, gdzie?";
+        if (a.isUnsure)
+          return 'Słyszę dużo niepewności. Trudno mi działać na podstawie "może" i "chyba". Ma Pan coś konkretnego?';
+        if (a.isUrgent && a.victimDanger)
+          return "Rozumiem że sytuacja jest poważna. Natychmiast wyślę patrol do ofiary. Proszę kontynuować zgłoszenie.";
+        if (a.isUrgent)
+          return "OK, widzę że sprawa jest pilna. Proszę szybko podać najważniejsze fakty.";
+        if (a.isPro && a.hasEvidence)
+          return "Dobrze, widzę że jest Pan przygotowany i ma dowody. To ułatwi sprawę.";
+        if (a.hasEvidence && a.technical > 1)
+          return "O, ma Pan analizy techniczne? To może być kluczowe. Zabezpieczymy te materiały.";
+        if (a.hasEvidence)
+          return "Dobrze, mamy jakieś dowody. Screeny, nagrania - to podstawa do działania.";
+        if (a.knowsSuspect)
+          return "Zna Pan podejrzanego? To bardzo ważne. Proszę podać wszystkie szczegóły.";
+        if (a.isEmotional)
+          return "Rozumiem że to trudna sytuacja. Proszę się uspokoić i podać mi fakty po kolei.";
+        if (a.length > 200)
+          return "OK, mam sporo informacji. Zaczynam rozumieć sytuację.";
+        if (a.length < 30)
+          return "To trochę mało. Potrzebuję więcej szczegółów żeby podjąć działania.";
+        return "Rozumiem. Proszę kontynuować - potrzebuję pełnego obrazu sytuacji.";
+      }
+
+      function getSceneOutcome(d) {
+        var txt = d.allTexts ? d.allTexts.toLowerCase() : "";
+        var c = d.caseData;
+        var keywordsFound = 0;
+        if (c.keywords) {
+          for (var i = 0; i < c.keywords.length; i++) {
+            if (txt.indexOf(c.keywords[i]) >= 0) keywordsFound++;
+          }
+        }
+        var keywordScore =
+          keywordsFound / Math.max(1, c.keywords ? c.keywords.length : 1);
+        var isEmpty = txt.length < 30;
+        var mentionedEvidence =
+          txt.indexOf("dowod") >= 0 ||
+          txt.indexOf("screen") >= 0 ||
+          txt.indexOf("analiz") >= 0 ||
+          txt.indexOf("metadan") >= 0;
+
+        var playerVerdict = c.evidence[0].verdict;
+        var realFake = c.evidence[0].fake;
+        var wasCorrect = playerVerdict == realFake;
+
+        var saidFake =
+          txt.indexOf("fałsz") >= 0 ||
+          txt.indexOf("fake") >= 0 ||
+          txt.indexOf("podrobion") >= 0 ||
+          txt.indexOf("sfałsz") >= 0 ||
+          txt.indexOf("zmodyf") >= 0 ||
+          txt.indexOf("edytow") >= 0;
+        var saidReal =
+          txt.indexOf("prawdzi") >= 0 ||
+          txt.indexOf("autentycz") >= 0 ||
+          txt.indexOf("oryginal") >= 0 ||
+          txt.indexOf("prawda") >= 0;
+
+        var speechMatchesVerdict =
+          (playerVerdict && saidFake) || (!playerVerdict && saidReal);
+        var speechContradicts =
+          (playerVerdict && saidReal) || (!playerVerdict && saidFake);
+
+        var accusedClient =
+          txt.indexOf("klient") >= 0 &&
+          (txt.indexOf("kłam") >= 0 ||
+            txt.indexOf("sfałsz") >= 0 ||
+            txt.indexOf("oszuk") >= 0 ||
+            txt.indexOf("winn") >= 0);
+        accusedClient =
+          accusedClient ||
+          (txt.indexOf(c.name.split(" ")[0].toLowerCase()) >= 0 &&
+            (txt.indexOf("kłam") >= 0 ||
+              txt.indexOf("sfałsz") >= 0 ||
+              txt.indexOf("winn") >= 0));
+
+        if (isEmpty)
+          return {
+            type: "dismissed",
+            msg: "Nie przedstawiono żadnych argumentów.",
+            rew: 0,
+          };
+
+        if (speechContradicts) {
+          return {
+            type: "contradiction",
+            msg:
+              "SPRZECZNOŚĆ! Zaznaczyłeś że dowód jest " +
+              (playerVerdict ? "FAŁSZYWY" : "PRAWDZIWY") +
+              " ale mówisz że jest " +
+              (saidFake ? "fałszywy" : "prawdziwy") +
+              "!",
+            rew: -Math.floor(c.fine * 0.5),
+          };
+        }
+
+        if (c.clientLies) {
+          if (accusedClient && realFake) {
+            return {
+              type: "client_guilty",
+              msg:
+                "BRAWO! Wykryłeś że to KLIENT sfałszował dowody! " +
+                c.name +
+                " próbował wrobić niewinną osobę!",
+              rew: Math.floor(c.rew * 2),
+            };
+          }
+          if (!accusedClient && wasCorrect) {
+            return {
+              type: "partial",
+              msg: "Dowód jest fałszywy, ale nie wskazałeś prawdziwego winnego - KLIENTA!",
+              rew: Math.floor(c.rew * 0.3),
+            };
+          }
+          if (!wasCorrect) {
+            return {
+              type: "wrong",
+              msg: "Błędna analiza. Dowód był sfałszowany przez klienta!",
+              rew: -c.fine,
+            };
+          }
+        }
+
+        if (accusedClient && !c.clientLies) {
+          return {
+            type: "wrong_accusation",
+            msg: "Oskarżyłeś klienta który mówił prawdę! To pomyłka!",
+            rew: -c.fine,
+          };
+        }
+
+        var wrongAccusation =
+          !wasCorrect &&
+          !c.clientLies &&
+          (txt.indexOf("winn") >= 0 ||
+            txt.indexOf("skazać") >= 0 ||
+            txt.indexOf("aresztować") >= 0);
+        if (wrongAccusation)
+          return {
+            type: "suspend",
+            msg: "Fałszywe oskarżenie niewinnej osoby!",
+            rew: 0,
+          };
+
+        if (wasCorrect) {
+          if (speechMatchesVerdict && keywordScore > 0.4 && mentionedEvidence)
+            return {
+              type: "full_win",
+              msg: "Doskonałe! Analiza poprawna, zeznania spójne, argumenty mocne!",
+              rew: Math.floor(c.rew * 1.5),
+            };
+          if (speechMatchesVerdict && keywordScore > 0.25)
+            return {
+              type: "win",
+              msg: "Sprawa udowodniona. Zeznania zgodne z analizą.",
+              rew: c.rew,
+            };
+          if (keywordScore > 0.2)
+            return {
+              type: "partial",
+              msg: "Analiza poprawna ale słabe argumenty w zeznaniach.",
+              rew: Math.floor(c.rew * 0.5),
+            };
+          if (mentionedEvidence)
+            return {
+              type: "weak_win",
+              msg: "Tylko dowody uratowały sprawę.",
+              rew: Math.floor(c.rew * 0.3),
+            };
+          return {
+            type: "dismissed",
+            msg: "Brak konkretów mimo poprawnej analizy.",
+            rew: 0,
+          };
+        } else {
+          if (keywordScore > 0.3)
+            return {
+              type: "fine",
+              msg: "Znałeś fakty ale źle oceniłeś dowody!",
+              rew: -c.fine,
+            };
+          return {
+            type: "lose",
+            msg: "Błędna analiza dowodów.",
+            rew: -Math.floor(c.fine * 0.5),
+          };
+        }
+      }
+      function runScenePhase() {
+        var d = sceneData,
+          sp = document.getElementById("scene-speaker"),
+          tx = document.getElementById("scene-text"),
+          inp = document.getElementById("scene-input"),
+          opts = document.getElementById("scene-options");
+        inp.style.display = "none";
+        opts.style.display = "none";
+        var c = d.caseData;
+        var txt = d.allTexts ? d.allTexts.toLowerCase() : "";
+        var found = [];
+        if (c.keywords) {
+          for (var i = 0; i < c.keywords.length; i++) {
+            if (txt.indexOf(c.keywords[i]) >= 0) found.push(c.keywords[i]);
+          }
+        }
+        var mentionedSuspect =
+          c.suspect && txt.indexOf(c.suspect.split(" ")[0].toLowerCase()) >= 0;
+        var mentionedEvidence =
+          txt.indexOf("dowod") >= 0 ||
+          txt.indexOf("screen") >= 0 ||
+          txt.indexOf("analiz") >= 0;
+        var playerVerdict = c.evidence[0].verdict;
+        var verdictWord = playerVerdict ? "FAŁSZYWY" : "PRAWDZIWY";
+
+        if (d.type == "Sąd") {
+          var phases = [
+            {
+              who: "judge",
+              icon: "⚖️ SĘDZIA",
+              say:
+                "Rozprawa w sprawie " +
+                c.name +
+                ". Zarzut: " +
+                c.type +
+                ". Oskarżycielu, proszę opisać czego dotyczy ta sprawa.",
+            },
+            {
+              who: "you",
+              icon: "🔍 TY",
+              say: "(Opisz sprawę własnymi słowami - co się stało?)",
+            },
+            {
+              who: "judge",
+              icon: "⚖️ SĘDZIA",
+              say: function () {
+                if (txt.length < 20)
+                  return "Panie oskarżycielu, proszę mówić głośniej. Czego dotyczy sprawa?";
+                if (found.length > 3)
+                  return "Rozumiem sytuację. Kto według Pana jest sprawcą?";
+                return "Proszę doprecyzować - jakie są szczegóły tej sprawy?";
+              },
+            },
+            {
+              who: "you",
+              icon: "🔍 TY",
+              say: "(Kto jest podejrzany? Opisz sprawcę)",
+            },
+            {
+              who: "judge",
+              icon: "⚖️ SĘDZIA",
+              say: function () {
+                if (mentionedSuspect)
+                  return (
+                    "Dobrze, mamy podejrzanego: " +
+                    c.suspect.split("-")[0] +
+                    ". Jakie ma Pan dowody?"
+                  );
+                if (
+                  txt.indexOf("nie wiem") >= 0 ||
+                  txt.indexOf("nie znam") >= 0
+                )
+                  return "Nie zna Pan sprawcy? Trudno będzie prowadzić sprawę. A dowody?";
+                return "Rozumiem. Proszę teraz przedstawić dowody.";
+              },
+            },
+            {
+              who: "you",
+              icon: "🔍 TY",
+              say: "(Jakie masz dowody? Co wykazała analiza?)",
+            },
+            {
+              who: "defense",
+              icon: "👔 OBROŃCA",
+              say: function () {
+                if (mentionedEvidence && found.length > 4)
+                  return 'Wysoki Sądzie! Te tak zwane "dowody" można sfabrykować! Żądam ich odrzucenia!';
+                if (mentionedEvidence)
+                  return "Sprzeciw! Skąd wiemy że te dowody są prawdziwe?";
+                return "Wysoki Sądzie, oskarżyciel nie przedstawił ŻADNYCH konkretnych dowodów!";
+              },
+            },
+            {
+              who: "judge",
+              icon: "⚖️ SĘDZIA",
+              say:
+                "W analizie zaznaczył Pan że dowód jest " +
+                verdictWord +
+                ". Czy podtrzymuje Pan tę ocenę? Proszę wyjaśnić.",
+            },
+            {
+              who: "you",
+              icon: "🔍 TY",
+              say: "(Powiedz czy dowód jest fałszywy czy prawdziwy i DLACZEGO - musi się zgadzać z tym co zaznaczyłeś!)",
+            },
+            {
+              who: "judge",
+              icon: "⚖️ SĘDZIA",
+              say: function () {
+                var saidFake =
+                  txt.indexOf("fałsz") >= 0 || txt.indexOf("sfałsz") >= 0;
+                var saidReal =
+                  txt.indexOf("prawdzi") >= 0 || txt.indexOf("autentycz") >= 0;
+                if ((playerVerdict && saidReal) || (!playerVerdict && saidFake))
+                  return "Chwileczkę... Pan mówi co innego niż zaznaczył w analizie! To poważna sprzeczność!";
+                if ((playerVerdict && saidFake) || (!playerVerdict && saidReal))
+                  return "Dobrze, zeznania zgadzają się z analizą. Ostatnie słowo.";
+                return "Proszę jasno powiedzieć - dowód FAŁSZYWY czy PRAWDZIWY?";
+              },
+            },
+            {
+              who: "you",
+              icon: "🔍 TY",
+              say: "(Podsumuj - kto winny i dlaczego)",
+            },
+            {
+              who: "judge",
+              icon: "⚖️ SĘDZIA",
+              say: "Dziękuję. Sąd wyda teraz wyrok...",
+              verdict: true,
+            },
+          ];
+        } else {
+          var phases = [
+            {
+              who: "police",
+              icon: "🚔 OFICER",
+              say:
+                "Dzień dobry. Przyjmuję zgłoszenie. " +
+                c.name +
+                " - " +
+                c.type +
+                ". Co się stało?",
+            },
+            {
+              who: "you",
+              icon: "🔍 TY",
+              say: "(Opisz sytuację - co się wydarzyło?)",
+            },
+            {
+              who: "police",
+              icon: "🚔 OFICER",
+              say: function () {
+                if (txt.length < 20)
+                  return "Proszę mówić wyraźniej. Co dokładnie się stało?";
+                if (found.length > 2)
+                  return "Rozumiem. Kto jest podejrzany o to przestępstwo?";
+                return "Potrzebuję więcej szczegółów. Kto jest sprawcą?";
+              },
+            },
+            {
+              who: "you",
+              icon: "🔍 TY",
+              say: "(Kto to zrobił? Masz podejrzenia?)",
+            },
+            {
+              who: "police",
+              icon: "🚔 OFICER",
+              say: function () {
+                if (mentionedSuspect)
+                  return (
+                    "Mamy namiar: " +
+                    c.suspect.split("-")[0] +
+                    ". Jakie masz dowody przeciwko tej osobie?"
+                  );
+                if (txt.indexOf("nie wiem") >= 0)
+                  return "Nie znasz sprawcy? Będzie trudniej. A dowody jakieś masz?";
+                return "OK. Jakie masz dowody?";
+              },
+            },
+            {
+              who: "you",
+              icon: "🔍 TY",
+              say: "(Jakie masz dowody? Screeny, maile, nagrania?)",
+            },
+            {
+              who: "police",
+              icon: "🚔 OFICER",
+              say:
+                "W analizie zaznaczyłeś że dowód jest " +
+                verdictWord +
+                ". Czy to na pewno? Co dokładnie wykazała analiza?",
+            },
+            {
+              who: "you",
+              icon: "🔍 TY",
+              say: "(Potwierdź - dowód FAŁSZYWY czy PRAWDZIWY? Musi się zgadzać z zaznaczeniem!)",
+            },
+            {
+              who: "police",
+              icon: "🚔 OFICER",
+              say: function () {
+                var saidFake =
+                  txt.indexOf("fałsz") >= 0 || txt.indexOf("sfałsz") >= 0;
+                var saidReal =
+                  txt.indexOf("prawdzi") >= 0 || txt.indexOf("autentycz") >= 0;
+                if ((playerVerdict && saidReal) || (!playerVerdict && saidFake))
+                  return "Zaraz, zaraz... Mówisz co innego niż masz w dokumentach! To się nie zgadza!";
+                if (c.type == "GROŹBY" || c.type == "STALKING")
+                  return "OK. Czy ofiara jest bezpieczna?";
+                return "Rozumiem. Mam wystarczająco informacji.";
+              },
+            },
+            { who: "you", icon: "🔍 TY", say: "(Ostatnie informacje)" },
+            {
+              who: "police",
+              icon: "🚔 OFICER",
+              say: "Dobrze, mam pełny obraz. Podejmuję decyzję...",
+              verdict: true,
+            },
+          ];
+        }
+        var ph = phases[d.phase];
+        if (!ph) {
+          showSceneVerdict();
+          return;
+        }
+        sp.className = "scene-speaker " + ph.who;
+        sp.textContent = ph.icon;
+        var sayTxt = typeof ph.say === "function" ? ph.say() : ph.say;
+        tx.textContent = sayTxt;
+        if (ph.who != "you") speak(sayTxt, ph.who);
+        if (ph.input || ph.who == "you") {
+          inp.style.display = "block";
+          document.getElementById("scene-textarea").value = "";
+          document.getElementById("scene-textarea").focus();
+        } else if (ph.verdict) {
+          setTimeout(showSceneVerdict, 3000);
+        } else {
+          d.phase++;
+          setTimeout(runScenePhase, 3000);
+        }
+      }
+      document.getElementById("scene-submit").onclick = document.getElementById(
+        "scene-submit"
+      ).ontouchend = function (e) {
+        e.preventDefault();
+        var txt = document
+          .getElementById("scene-textarea")
+          .value.toLowerCase()
+          .trim();
+        document.getElementById("scene-input").style.display = "none";
+        if (!sceneData.allTexts) sceneData.allTexts = "";
+        sceneData.allTexts += " " + txt;
+        document.getElementById("scene-text").textContent =
+          txt.length > 0
+            ? '"' + txt.substring(0, 80) + (txt.length > 80 ? "..." : "") + '"'
+            : '"(milczenie)"';
+        sceneData.phase++;
+        setTimeout(runScenePhase, 2000);
+      };
+      function showSceneVerdict() {
+        document.getElementById("scene-dialogue").style.display = "none";
+        var res = document.getElementById("scene-result");
+        res.style.display = "block";
+        var title = document.getElementById("scene-verdict-title"),
+          text = document.getElementById("scene-verdict-text");
+        var outcome = getSceneOutcome(sceneData);
+        var rew = outcome.rew;
+        var msg = outcome.msg;
+        var col = rew > 0 ? "#0f8" : rew == 0 ? "#f90" : "#f36";
+        var speak_txt = "";
+        if (outcome.type == "suspend") {
+          title.textContent = "⛔ ZAWIESZENIE!";
+          title.style.color = "#f36";
+          text.innerHTML =
+            msg +
+            '<br><br><span style="color:#f36">Licencja zawieszona na 2 godziny!</span>';
+          speak_txt =
+            sceneData.type == "Sąd"
+              ? "Za fałszywe oskarżenie zawieszam Pana licencję!"
+              : "Za fałszywe zgłoszenie nakładam zawieszenie!";
+          speak(speak_txt, sceneData.type == "Sąd" ? "judge" : "police");
+          G.completed.push({
+            id: sceneData.caseData.id,
+            name: sceneData.caseData.name,
+            rew: 0,
+          });
+          G.inbox.unshift({
+            from: sceneData.type,
+            body: "Licencja zawieszona za fałszywe oskarżenie.",
+            read: false,
+          });
+          updateHUD();
+          saveGame();
+          setTimeout(function () {
+            suspendPlayer(2);
+          }, 3000);
+          return;
+        }
+        if (outcome.type == "full_win")
+          speak_txt =
+            sceneData.type == "Sąd"
+              ? "Uznaję oskarżonego winnym! Doskonała praca!"
+              : "Aresztujemy podejrzanego! Świetna robota!";
+        else if (outcome.type == "win")
+          speak_txt =
+            sceneData.type == "Sąd"
+              ? "Uznaję oskarżonego winnym."
+              : "Wszczynamy postępowanie.";
+        else if (outcome.type == "partial")
+          speak_txt =
+            sceneData.type == "Sąd"
+              ? "Częściowo uznaję winę."
+              : "Przyjmujemy zgłoszenie.";
+        else if (outcome.type == "weak_win")
+          speak_txt = "Słabe argumenty, ale akceptuję.";
+        else if (outcome.type == "dismissed")
+          speak_txt = "Sprawa umorzona. Brak dowodów.";
+        else if (outcome.type == "fine")
+          speak_txt = "Nakładam grzywnę za błędne oskarżenie!";
+        else if (outcome.type == "lose") speak_txt = "Odrzucam to zgłoszenie.";
+        else speak_txt = "Sprawa rozpatrzona.";
+        speak(speak_txt, sceneData.type == "Sąd" ? "judge" : "police");
+        title.textContent =
+          rew > 0 ? "✅ SUKCES!" : rew == 0 ? "⚠️ UMORZONE" : "❌ PORAŻKA!";
+        title.style.color = col;
+        var tax = getTotalTax();
+        var taxAmount = rew > 0 ? Math.floor((rew * tax) / 100) : 0;
+        var finalRew = rew - taxAmount;
+        text.innerHTML =
+          msg +
+          '<br><br><span style="font-size:20px;color:' +
+          col +
+          '">' +
+          (rew >= 0 ? "+" : "") +
+          rew +
+          "💰</span>" +
+          (taxAmount > 0
+            ? '<br><span style="font-size:14px;color:#f90">-' +
+              taxAmount +
+              "💰 (" +
+              tax +
+              '% opłata za narzędzia)</span><br><span style="font-size:16px;color:#0f8">= ' +
+              finalRew +
+              "💰 netto</span>"
+            : "");
+        G.credits = Math.max(0, G.credits + finalRew);
+        G.completed.push({
+          id: sceneData.caseData.id,
+          name: sceneData.caseData.name,
+          rew: rew,
+        });
+        G.inbox.unshift({ from: sceneData.type, body: msg, read: false });
+        updateHUD();
+        saveGame();
+      }
+      document.getElementById("scene-exit").onclick = document.getElementById(
+        "scene-exit"
+      ).ontouchend = function (e) {
+        e.preventDefault();
+        document.getElementById("scene-overlay").style.display = "none";
+        G.day++;
+        updateHUD();
+        saveGame();
+        renderPanel("case");
+      };
+      document.getElementById("start-btn").onclick = function () {
+        document.getElementById("intro").style.display = "none";
+        init3D();
+        document.getElementById("touch-btn").onclick = function () {
+          if (lookAt && !G.inPC) interact(lookAt);
+        };
+        setTimeout(function () {
+          notify("Witaj!", "Idź do DRZWI");
+        }, 500);
+      };
+      window.onresize = function () {
+        if (camera && renderer) {
+          camera.aspect = innerWidth / innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(innerWidth, innerHeight);
+        }
+      };
+      var chatClientIdx = null;
+      function openClientChat(idx) {
+        chatClientIdx = idx;
+        var c = G.activeCases[idx];
+        if (!c.chatHistory) c.chatHistory = [];
+        document.getElementById("chat-client-name").textContent =
+          "💬 " + c.name;
+        renderChatMessages();
+        document.getElementById("client-chat").style.display = "flex";
+      }
+      function renderChatMessages() {
+        var c = G.activeCases[chatClientIdx];
+        var h = "";
+        if (!c.chatHistory.length)
+          h =
+            '<p style="color:#666;text-align:center;font-style:italic">Rozpocznij rozmowę z klientem...</p>';
+        for (var i = 0; i < c.chatHistory.length; i++) {
+          var m = c.chatHistory[i];
+          h +=
+            '<div style="margin-bottom:10px;text-align:' +
+            (m.from == "ty" ? "right" : "left") +
+            '"><div style="display:inline-block;background:' +
+            (m.from == "ty" ? "#0ff" : "#2a2a4e") +
+            ";color:" +
+            (m.from == "ty" ? "#000" : "#fff") +
+            ';padding:8px 12px;border-radius:10px;max-width:80%;font-size:13px">' +
+            m.txt +
+            "</div></div>";
+        }
+        document.getElementById("chat-messages").innerHTML = h;
+        document.getElementById("chat-messages").scrollTop = 9999;
+      }
+      function getClientResponse(msg, c) {
+        var m = msg.toLowerCase();
+        if (m.indexOf("jak się czujesz") >= 0 || m.indexOf("jak się masz") >= 0)
+          return "Szczerze? Okropnie. Ta sytuacja mnie wykańcza. Dziękuję że pan pyta.";
+        if (
+          m.indexOf("policja") >= 0 ||
+          m.indexOf("zgłosiłem") >= 0 ||
+          m.indexOf("zgłosiłam") >= 0
+        )
+          return "Policja? Mam nadzieję że pomoże. Proszę mnie informować o postępach!";
+        if (m.indexOf("sąd") >= 0)
+          return "Sąd brzmi poważnie... Czy będę musiał/a zeznawać?";
+        if (m.indexOf("dowody") >= 0 || m.indexOf("screeny") >= 0)
+          return "Mam wszystko zapisane. Mogę przesłać więcej jeśli trzeba.";
+        if (
+          m.indexOf("podejrzany") >= 0 ||
+          m.indexOf("sprawca") >= 0 ||
+          m.indexOf("kto to") >= 0
+        )
+          return c.fullStory.indexOf("Podejrzewam") >= 0
+            ? "Jak mówiłem/am, mam podejrzenia kto za tym stoi. Ale nie mam 100% pewności."
+            : "Nie wiem dokładnie kto to. Dlatego proszę o pomoc.";
+        if (
+          m.indexOf("bezpiecz") >= 0 ||
+          m.indexOf("boisz") >= 0 ||
+          m.indexOf("grozi") >= 0
+        )
+          return c.type == "GROŹBY" || c.type == "STALKING"
+            ? "Tak, boję się. Czy mogę liczyć na jakąś ochronę?"
+            : "Na razie jest OK, ale sytuacja jest stresująca.";
+        if (
+          m.indexOf("spokojnie") >= 0 ||
+          m.indexOf("pomogę") >= 0 ||
+          m.indexOf("pomożemy") >= 0
+        )
+          return "Dziękuję bardzo. To dużo dla mnie znaczy.";
+        if (
+          m.indexOf("pieniąd") >= 0 ||
+          m.indexOf("koszt") >= 0 ||
+          m.indexOf("zapłac") >= 0
+        )
+          return "Jestem w stanie zapłacić ile trzeba, żeby to rozwiązać.";
+        if (
+          m.indexOf("deadline") >= 0 ||
+          m.indexOf("termin") >= 0 ||
+          m.indexOf("czas") >= 0
+        )
+          return "Proszę się nie spieszyć, ale... im szybciej tym lepiej. Ta sytuacja mnie dobija.";
+        if (
+          m.indexOf("więcej") >= 0 ||
+          m.indexOf("szczegóły") >= 0 ||
+          m.indexOf("opowiedz") >= 0
+        )
+          return c.fullStory;
+        if (
+          m.indexOf("sukces") >= 0 ||
+          m.indexOf("wygrał") >= 0 ||
+          m.indexOf("udało") >= 0
+        )
+          return "To wspaniała wiadomość! Dziękuję za pomoc!";
+        if (
+          m.indexOf("przegra") >= 0 ||
+          m.indexOf("nie udało") >= 0 ||
+          m.indexOf("przepraszam") >= 0
+        )
+          return "Rozumiem... Dziękuję że pan próbował. Może uda się inaczej.";
+        if (m.length < 5) return "Słucham?";
+        return "Rozumiem. Czy jest coś jeszcze co powinienem/powinnam wiedzieć? Proszę mnie informować o sprawie.";
+      }
+      document.getElementById("close-chat").onclick = function () {
+        document.getElementById("client-chat").style.display = "none";
+        chatClientIdx = null;
+      };
+      document.getElementById("chat-send").onclick = document.getElementById(
+        "chat-send"
+      ).ontouchend = function (e) {
+        e.preventDefault();
+        var input = document.getElementById("chat-input");
+        var txt = input.value.trim();
+        if (!txt) return;
+        var c = G.activeCases[chatClientIdx];
+        if (!c.chatHistory) c.chatHistory = [];
+        c.chatHistory.push({ from: "ty", txt: txt });
+        var resp = getClientResponse(txt, c);
+        setTimeout(function () {
+          c.chatHistory.push({ from: "klient", txt: resp });
+          renderChatMessages();
+          saveGame();
+        }, 800);
+        input.value = "";
+        renderChatMessages();
+        saveGame();
+      };
+      var mediatorHistory = [];
+      var mediatorCaseIdx = null;
+      function openMediatorChat() {
+        mediatorCaseIdx = parseInt(document.getElementById("case-sel").value);
+        var c = G.activeCases[mediatorCaseIdx];
+        mediatorHistory = [];
+        if (c) {
+          mediatorHistory.push({
+            from: "mediator",
+            txt:
+              "Witam, jestem pośrednikiem prawnym. Widzę sprawę: " +
+              c.name +
+              " (" +
+              c.type +
+              '). Mogę doradzić gdzie najlepiej ją skierować. Napisz "porada" a za 50💰 powiem ci dokładnie gdzie wysłać i dlaczego.',
+          });
+        } else {
+          mediatorHistory.push({
+            from: "mediator",
+            txt: "Witam. Nie widzę wybranej sprawy. Wybierz sprawę z listy i wróć do mnie.",
+          });
+        }
+        renderMediatorMessages();
+        document.getElementById("mediator-chat").style.display = "flex";
+      }
+      function renderMediatorMessages() {
+        var h = "";
+        for (var i = 0; i < mediatorHistory.length; i++) {
+          var m = mediatorHistory[i];
+          h +=
+            '<div style="margin-bottom:10px;text-align:' +
+            (m.from == "ty" ? "right" : "left") +
+            '"><div style="display:inline-block;background:' +
+            (m.from == "ty" ? "#fc0" : "#2a2a4e") +
+            ";color:" +
+            (m.from == "ty" ? "#000" : "#fff") +
+            ';padding:8px 12px;border-radius:10px;max-width:80%;font-size:13px;white-space:pre-wrap">' +
+            m.txt +
+            "</div></div>";
+        }
+        document.getElementById("mediator-messages").innerHTML = h;
+        document.getElementById("mediator-messages").scrollTop = 9999;
+      }
+      function getMediatorResponse(msg) {
+        var m = msg.toLowerCase();
+        var c = G.activeCases[mediatorCaseIdx];
+        if (!c)
+          return "Nie widzę żadnej wybranej sprawy. Zamknij okno, wybierz sprawę z listy i wróć.";
+        if (
+          m.indexOf("porada") >= 0 ||
+          m.indexOf("tak") >= 0 ||
+          m.indexOf("chcę") >= 0 ||
+          m.indexOf("dawaj") >= 0 ||
+          m.indexOf("mów") >= 0
+        ) {
+          if (G.credits < 50)
+            return (
+              "❌ Nie masz wystarczających środków. Potrzebujesz 50💰, masz tylko " +
+              G.credits +
+              "💰."
+            );
+          G.credits -= 50;
+          updateHUD();
+          saveGame();
+          var best = "";
+          var reason = "";
+          if (c.type == "GROŹBY") {
+            best = "🚔 POLICJA";
+            reason =
+              "Groźby to sprawa karna. Policja może natychmiast działać, zabezpieczyć dowody i zapewnić ochronę ofierze. Mogą też namierzyć sprawcę.";
+          } else if (c.type == "STALKING") {
+            best = "🚔 POLICJA";
+            reason =
+              "Stalking to przestępstwo ścigane z urzędu. Policja może wydać zakaz zbliżania się i monitorować sprawcę. Ofiara dostanie ochronę.";
+          } else if (c.type == "ZNIESŁAWIENIE") {
+            best = "⚖️ SĄD";
+            reason =
+              "Zniesławienie to sprawa cywilna. Sąd może nakazać usunięcie fałszywych treści, przeprosiny i odszkodowanie finansowe.";
+          } else if (c.type == "PODSZYWANIE") {
+            best = "⚖️ SĄD";
+            reason =
+              "Podszywanie się pod kogoś to naruszenie dóbr osobistych. Sąd może nakazać usunięcie fałszywego profilu i zasądzić odszkodowanie.";
+          } else if (c.type == "OSZUSTWO") {
+            best = "🚔 POLICJA";
+            reason =
+              "Oszustwo to przestępstwo. Policja wszczyna śledztwo, może zablokować konta bankowe sprawcy i odzyskać pieniądze.";
+          } else if (c.type == "HACKING") {
+            best = "🚔 POLICJA";
+            reason =
+              "Włamanie na konto to cyberprzestępstwo. Policja ma wydział cyberprzestępczości który może namierzyć hakera.";
+          } else if (c.type == "SZANTAŻ") {
+            best = "🚔 POLICJA lub 📋 PROKURATURA";
+            reason =
+              "Szantaż to poważne przestępstwo zagrożone więzieniem. Policja działa szybciej, prokuratura ma więcej zasobów na trudne sprawy.";
+          } else if (c.type == "WYŁUDZENIE") {
+            best = "📋 PROKURATURA";
+            reason =
+              "Wyłudzenia na dużą skalę najlepiej kierować do prokuratury - prowadzą kompleksowe śledztwa finansowe.";
+          } else {
+            best = "🚔 POLICJA";
+            reason =
+              "W razie wątpliwości policja to bezpieczny wybór - przekażą sprawę dalej jeśli trzeba.";
+          }
+          return (
+            "✅ PORADA (-50💰)\n\n➡️ Wyślij do: " +
+            best +
+            "\n\n📝 Dlaczego: " +
+            reason +
+            "\n\nPowodzenia!"
+          );
+        }
+        if (
+          m.indexOf("ile") >= 0 ||
+          m.indexOf("koszt") >= 0 ||
+          m.indexOf("cena") >= 0
+        )
+          return 'Porada kosztuje 50💰. Napisz "porada" żeby ją otrzymać.';
+        if (m.indexOf("dzięki") >= 0 || m.indexOf("dziękuję") >= 0)
+          return "Nie ma za co! Powodzenia ze sprawą.";
+        if (
+          m.indexOf("hej") >= 0 ||
+          m.indexOf("cześć") >= 0 ||
+          m.indexOf("siema") >= 0
+        )
+          return 'Witam! Napisz "porada" jeśli chcesz wiedzieć gdzie wysłać sprawę (50💰).';
+        return 'Napisz "porada" żeby otrzymać rekomendację za 50💰, lub "ile" żeby sprawdzić cenę.';
+      }
+      document.getElementById("close-mediator").onclick = function () {
+        document.getElementById("mediator-chat").style.display = "none";
+      };
+      document.getElementById("mediator-send").onclick =
+        document.getElementById("mediator-send").ontouchend = function (e) {
+          e.preventDefault();
+          var input = document.getElementById("mediator-input");
+          var txt = input.value.trim();
+          if (!txt) return;
+          mediatorHistory.push({ from: "ty", txt: txt });
+          var resp = getMediatorResponse(txt);
+          setTimeout(function () {
+            mediatorHistory.push({ from: "mediator", txt: resp });
+            renderMediatorMessages();
+          }, 500);
+          input.value = "";
+          renderMediatorMessages();
+        };
+    </script>
+  </body>
+</html>

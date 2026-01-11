@@ -2294,358 +2294,565 @@
       function genImg(e) {
         var c = document.createElement("canvas");
         c.width = 400;
-        c.height = 280;
+        c.height = 300;
         var x = c.getContext("2d");
         var appType = e.tp.split(" ")[0].split("#")[0].trim();
+        // DOKŁADNE STYLE PLATFORM - kolory, czcionki, gradienty 1:1
         var apps = {
           MESSENGER: {
             bg1: "#0084ff",
             bg2: "#00a6ff",
-            headerH: 50,
-            msgBg: "#e4e6eb",
-            msgColor: "#050505",
+            headerH: 54,
+            headerBg: "#fff",
+            headerColor: "#000",
+            msgBg: "#f0f0f0",
+            msgColor: "#000",
             bubbleBg: "#0084ff",
             bubbleColor: "#fff",
-            font: "Helvetica",
+            font: '"Segoe UI", Helvetica, Arial, sans-serif',
             icon: "💬",
-            statusBar: "#006acc",
+            statusBar: "#fff",
+            statusColor: "#000",
+            inputBg: "#f0f0f0",
+            inputColor: "#65676b",
+            avatarBg: "#0084ff",
+            sendIcon: "👍",
+            cameraIcon: "📷",
+            micIcon: "🎤",
+            extraIcons: true,
           },
           WHATSAPP: {
             bg1: "#075e54",
             bg2: "#128c7e",
-            headerH: 50,
-            msgBg: "#dcf8c6",
+            headerH: 56,
+            headerBg: "#075e54",
+            headerColor: "#fff",
+            msgBg: "#e7ffdb",
             msgColor: "#000",
             bubbleBg: "#dcf8c6",
-            bubbleColor: "#000",
-            font: "Segoe UI",
+            bubbleColor: "#303030",
+            font: '"Segoe UI", Helvetica, sans-serif',
             icon: "📱",
-            statusBar: "#054d44",
+            statusBar: "#075e54",
+            statusColor: "#fff",
+            inputBg: "#fff",
+            inputColor: "#667781",
+            avatarBg: "#25d366",
+            sendIcon: "🎤",
+            cameraIcon: "📷",
+            extraIcons: false,
+            wallpaper: "#e5ddd5",
           },
           SMS: {
-            bg1: "#2d2d3a",
-            bg2: "#3d3d4a",
-            headerH: 45,
-            msgBg: "#3a3a5e",
-            msgColor: "#fff",
-            bubbleBg: "#0b93f6",
+            bg1: "#2c2c2e",
+            bg2: "#1c1c1e",
+            headerH: 44,
+            headerBg: "#1c1c1e",
+            headerColor: "#fff",
+            msgBg: "#e5e5ea",
+            msgColor: "#000",
+            bubbleBg: "#007aff",
             bubbleColor: "#fff",
-            font: "Roboto",
+            font: '"SF Pro Text", -apple-system, sans-serif',
             icon: "💬",
-            statusBar: "#1a1a2a",
+            statusBar: "#000",
+            statusColor: "#fff",
+            inputBg: "#1c1c1e",
+            inputColor: "#8e8e93",
+            avatarBg: "#8e8e93",
+            sendIcon: "⬆️",
+            extraIcons: false,
+            isIOS: true,
           },
           TWITTER: {
             bg1: "#1da1f2",
-            bg2: "#1a91da",
-            headerH: 48,
-            msgBg: "#192734",
+            bg2: "#1a8cd8",
+            headerH: 50,
+            headerBg: "#15202b",
+            headerColor: "#fff",
+            msgBg: "#1e2732",
             msgColor: "#fff",
-            bubbleBg: "#192734",
+            bubbleBg: "#1d9bf0",
             bubbleColor: "#fff",
-            font: "Arial",
-            icon: "🐦",
-            statusBar: "#0d7cc0",
+            font: 'Arial, "Helvetica Neue", sans-serif',
+            icon: "𝕏",
+            statusBar: "#15202b",
+            statusColor: "#fff",
+            inputBg: "#273340",
+            inputColor: "#8899a6",
+            avatarBg: "#1d9bf0",
+            sendIcon: "📤",
+            extraIcons: false,
+            isDark: true,
           },
           INSTAGRAM: {
             bg1: "#833ab4",
             bg2: "#fd1d1d",
             headerH: 50,
-            msgBg: "#262626",
-            msgColor: "#fff",
+            headerBg: "#fff",
+            headerColor: "#262626",
+            msgBg: "#efefef",
+            msgColor: "#262626",
             bubbleBg: "#3797f0",
             bubbleColor: "#fff",
-            font: "Arial",
+            font: '"Segoe UI", Roboto, sans-serif',
             icon: "📷",
-            statusBar: "#5b2a82",
+            statusBar: "#fff",
+            statusColor: "#262626",
+            inputBg: "#efefef",
+            inputColor: "#8e8e8e",
+            avatarBg:
+              "linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)",
+            sendIcon: "❤️",
+            heartIcon: "❤️",
+            extraIcons: true,
+            hasGradient: true,
           },
           EMAIL: {
-            bg1: "#c71610",
+            bg1: "#c5221f",
             bg2: "#ea4335",
-            headerH: 55,
+            headerH: 56,
+            headerBg: "#fff",
+            headerColor: "#202124",
             msgBg: "#fff",
             msgColor: "#202124",
             bubbleBg: "#f1f3f4",
             bubbleColor: "#202124",
-            font: "Arial",
-            icon: "📧",
-            statusBar: "#a50e0a",
+            font: "Arial, sans-serif",
+            icon: "✉️",
+            statusBar: "#fff",
+            statusColor: "#5f6368",
+            inputBg: "#f1f3f4",
+            inputColor: "#5f6368",
+            avatarBg: "#ea4335",
+            isEmail: true,
+            gmailRed: "#ea4335",
           },
           FACEBOOK: {
             bg1: "#1877f2",
-            bg2: "#4293f5",
-            headerH: 48,
-            msgBg: "#f0f2f5",
+            bg2: "#166fe5",
+            headerH: 52,
+            headerBg: "#fff",
+            headerColor: "#050505",
+            msgBg: "#e4e6eb",
             msgColor: "#050505",
             bubbleBg: "#0084ff",
             bubbleColor: "#fff",
-            font: "Helvetica",
+            font: '"Segoe UI", Helvetica, sans-serif',
             icon: "👤",
-            statusBar: "#1466cc",
+            statusBar: "#fff",
+            statusColor: "#050505",
+            inputBg: "#f0f2f5",
+            inputColor: "#65676b",
+            avatarBg: "#1877f2",
+            sendIcon: "👍",
+            extraIcons: true,
           },
           SNAPCHAT: {
             bg1: "#fffc00",
             bg2: "#ffeb3b",
-            headerH: 45,
+            headerH: 48,
+            headerBg: "#fffc00",
+            headerColor: "#000",
             msgBg: "#fff",
             msgColor: "#000",
-            bubbleBg: "#fff",
+            bubbleBg: "#e1e1e1",
             bubbleColor: "#000",
-            font: "Avenir",
+            font: '"Avenir Next", "Segoe UI", sans-serif',
             icon: "👻",
-            statusBar: "#e6e300",
+            statusBar: "#fffc00",
+            statusColor: "#000",
+            inputBg: "#f1f1f1",
+            inputColor: "#a0a0a0",
+            avatarBg: "#fffc00",
+            sendIcon: "➤",
+            extraIcons: false,
+            isSnap: true,
           },
           FORUM: {
-            bg1: "#2a2a4e",
-            bg2: "#3a3a6e",
-            headerH: 50,
-            msgBg: "#1a1a2e",
-            msgColor: "#ccc",
-            bubbleBg: "#2a2a4e",
-            bubbleColor: "#fff",
-            font: "Verdana",
+            bg1: "#2d3748",
+            bg2: "#1a202c",
+            headerH: 48,
+            headerBg: "#2d3748",
+            headerColor: "#e2e8f0",
+            msgBg: "#1a202c",
+            msgColor: "#e2e8f0",
+            bubbleBg: "#4a5568",
+            bubbleColor: "#e2e8f0",
+            font: "Verdana, Geneva, sans-serif",
             icon: "💻",
-            statusBar: "#1a1a3e",
+            statusBar: "#1a202c",
+            statusColor: "#a0aec0",
+            inputBg: "#2d3748",
+            inputColor: "#a0aec0",
+            avatarBg: "#4299e1",
+            sendIcon: "📤",
+            isForum: true,
+          },
+          POTWIERDZENIE: {
+            bg1: "#0052cc",
+            bg2: "#003d99",
+            headerH: 60,
+            headerBg: "#fff",
+            headerColor: "#172b4d",
+            msgBg: "#fff",
+            msgColor: "#172b4d",
+            bubbleBg: "#deebff",
+            bubbleColor: "#172b4d",
+            font: "Arial, sans-serif",
+            icon: "🏦",
+            statusBar: "#0052cc",
+            statusColor: "#fff",
+            isBank: true,
+            bankGreen: "#00875a",
           },
         };
         var app = apps[appType] || apps["SMS"];
         // Status bar
         x.fillStyle = app.statusBar;
-        x.fillRect(0, 0, 400, 22);
-        x.fillStyle = "#fff";
-        x.font = "bold 11px Arial";
-        x.fillText("⚡", 10, 15);
-        x.fillText("9:41", 180, 15);
-        x.fillText("📶 100%", 340, 15);
-        // Header gradient
-        var grad = x.createLinearGradient(0, 22, 0, 22 + app.headerH);
-        grad.addColorStop(0, app.bg1);
-        grad.addColorStop(1, app.bg2);
-        x.fillStyle = grad;
-        x.fillRect(0, 22, 400, app.headerH);
+        x.fillRect(0, 0, 400, 24);
+        x.fillStyle = app.statusColor;
+        x.font = "bold 12px " + app.font;
+        if (app.isIOS) {
+          x.fillText("9:41", 185, 16);
+        } else {
+          x.fillText("📶", 15, 16);
+          x.fillText("9:41", 180, 16);
+          x.fillText("🔋", 355, 16);
+        }
+        // Header z gradientem lub solid
+        var chatY = 24;
+        if (app.hasGradient) {
+          var hgrad = x.createLinearGradient(0, chatY, 400, chatY);
+          hgrad.addColorStop(0, "#833ab4");
+          hgrad.addColorStop(0.5, "#fd1d1d");
+          hgrad.addColorStop(1, "#fcb045");
+          x.fillStyle = hgrad;
+          x.fillRect(0, chatY, 400, app.headerH);
+        } else {
+          x.fillStyle = app.headerBg;
+          x.fillRect(0, chatY, 400, app.headerH);
+        }
         // Header content
+        x.fillStyle = app.headerColor;
+        x.font = "bold 15px " + app.font;
+        var headerTxt = app.icon + " " + appType;
+        if (app.isEmail)
+          headerTxt = "Gmail - " + e.tp.replace("EMAIL", "").trim();
+        if (app.isBank) headerTxt = "🏦 Bank - Potwierdzenie";
+        x.fillText(headerTxt, 50, chatY + app.headerH / 2 + 5);
+        // Avatar circle
+        x.beginPath();
+        x.arc(28, chatY + app.headerH / 2, 16, 0, Math.PI * 2);
+        x.fillStyle = app.avatarBg;
+        x.fill();
         x.fillStyle = "#fff";
-        x.font = "bold 16px " + app.font;
-        x.fillText(app.icon + " " + appType, 15, 22 + app.headerH / 2 + 6);
+        x.font = "14px Arial";
+        x.fillText("👤", 21, chatY + app.headerH / 2 + 5);
+        // Online status
+        x.fillStyle =
+          app.headerColor == "#fff"
+            ? "rgba(255,255,255,0.7)"
+            : "rgba(0,0,0,0.5)";
         x.font = "11px " + app.font;
-        x.fillText("online", 15, 22 + app.headerH - 8);
+        if (!app.isEmail && !app.isBank)
+          x.fillText("online", 50, chatY + app.headerH / 2 + 18);
         // Back arrow
-        x.fillStyle = "rgba(255,255,255,0.8)";
-        x.font = "20px Arial";
-        x.fillText("←", 360, 22 + app.headerH / 2 + 6);
+        x.fillStyle = app.headerColor;
+        x.font = "18px Arial";
+        x.fillText("←", 370, chatY + app.headerH / 2 + 5);
         // Chat area
-        var chatY = 22 + app.headerH;
-        x.fillStyle = "#0a0a15";
-        x.fillRect(0, chatY, 400, 280 - chatY - 50);
-        // Message bubble with shadow
-        var bubbleY = chatY + 20;
-        x.shadowColor = "rgba(0,0,0,0.3)";
-        x.shadowBlur = 8;
+        chatY += app.headerH;
+        x.fillStyle = app.wallpaper || "#0a0a12";
+        x.fillRect(0, chatY, 400, 300 - chatY - 55);
+        // WhatsApp wallpaper pattern
+        if (app.wallpaper) {
+          x.globalAlpha = 0.03;
+          for (var i = 0; i < 20; i++) {
+            x.fillStyle = "#000";
+            x.fillText("💬", Math.random() * 400, chatY + Math.random() * 150);
+          }
+          x.globalAlpha = 1;
+        }
+        // Message bubble
+        var bubbleY = chatY + 15;
+        x.shadowColor = "rgba(0,0,0,0.15)";
+        x.shadowBlur = 10;
         x.shadowOffsetY = 2;
         x.fillStyle = app.bubbleBg;
         x.beginPath();
-        x.roundRect(15, bubbleY, 320, 100, 12);
+        x.roundRect(15, bubbleY, 330, 110, 16);
         x.fill();
         x.shadowBlur = 0;
-        // Message text
+        // Message text - PRAWIDŁOWA CZCIONKA
         x.fillStyle = app.bubbleColor;
-        x.font = "13px " + app.font;
+        x.font = "14px " + app.font;
         var words = e.txt.split(" "),
           line = "",
-          y = bubbleY + 22;
+          y = bubbleY + 25;
         for (var i = 0; i < words.length; i++) {
-          if ((line + words[i]).length > 42) {
-            x.fillText(line, 25, y);
-            y += 18;
+          if ((line + words[i]).length > 40) {
+            x.fillText(line.trim(), 28, y);
+            y += 20;
             line = "";
           }
           line += words[i] + " ";
         }
-        x.fillText(line, 25, y);
+        x.fillText(line.trim(), 28, y);
         // Timestamp
-        x.fillStyle = "rgba(255,255,255,0.5)";
+        x.fillStyle =
+          app.bubbleColor == "#fff"
+            ? "rgba(255,255,255,0.6)"
+            : "rgba(0,0,0,0.5)";
         x.font = "10px " + app.font;
-        var hours = [
-          "08",
-          "09",
-          "10",
-          "11",
-          "12",
-          "13",
-          "14",
-          "15",
-          "16",
-          "17",
-          "18",
-          "19",
-          "20",
-          "21",
-          "22",
-          "23",
-        ];
-        var mins = ["00", "05", "12", "23", "34", "45", "47", "52", "58"];
+        var h = ["08", "09", "10", "11", "14", "15", "16", "19", "20", "21"];
+        var m = ["00", "12", "23", "34", "45", "52"];
         x.fillText(
-          hours[Math.floor(Math.random() * hours.length)] +
+          h[Math.floor(Math.random() * h.length)] +
             ":" +
-            mins[Math.floor(Math.random() * mins.length)],
-          290,
-          bubbleY + 90
+            m[Math.floor(Math.random() * m.length)],
+          295,
+          bubbleY + 98
         );
-        // Read indicator
-        if (Math.random() > 0.5) {
-          x.fillText("✓✓", 320, bubbleY + 90);
-        }
-        // Type indicator
-        x.fillStyle = e.fake ? "#f36" : "#0f8";
-        x.font = "bold 10px Arial";
-        x.fillText(e.fake ? "⚠️ PODEJRZANY" : "📎 DOWÓD", 15, chatY + 135);
-        // Bottom bar
-        x.fillStyle = "#1a1a2e";
-        x.fillRect(0, 230, 400, 50);
-        x.fillStyle = "#3a3a5e";
+        if (appType == "WHATSAPP") x.fillText("✓✓", 320, bubbleY + 98);
+        // Evidence indicator
+        x.fillStyle = e.fake ? "#ff3b30" : "#34c759";
+        x.font = "bold 11px Arial";
+        x.fillText(
+          e.fake ? "⚠️ PODEJRZANY DOWÓD" : "📎 DOWÓD #" + e.id.replace("e", ""),
+          15,
+          chatY + 145
+        );
+        // Input bar
+        var inputY = 245;
+        x.fillStyle = app.inputBg;
+        x.fillRect(0, inputY, 400, 55);
+        x.fillStyle = "#3a3a4a";
         x.beginPath();
-        x.roundRect(15, 240, 300, 30, 15);
+        x.roundRect(15, inputY + 12, app.extraIcons ? 290 : 340, 32, 16);
         x.fill();
-        x.fillStyle = "#888";
-        x.font = "12px " + app.font;
-        x.fillText("Aa  Napisz wiadomość...", 30, 260);
-        x.fillStyle = "#0084ff";
-        x.font = "20px Arial";
-        x.fillText("📷", 330, 260);
-        x.fillText("🎤", 360, 260);
-        // Noise/grain effect for realism
-        var imgData = x.getImageData(0, 0, 400, 280);
-        for (var i = 0; i < imgData.data.length; i += 4) {
-          var noise = (Math.random() - 0.5) * 8;
-          imgData.data[i] += noise;
-          imgData.data[i + 1] += noise;
-          imgData.data[i + 2] += noise;
+        x.fillStyle = app.inputColor;
+        x.font = "13px " + app.font;
+        x.fillText("Aa  Napisz wiadomość...", 30, inputY + 33);
+        if (app.extraIcons) {
+          x.font = "18px Arial";
+          x.fillText("📷", 320, inputY + 33);
+          x.fillText(app.sendIcon || "📤", 360, inputY + 33);
         }
-        x.putImageData(imgData, 0, 0);
+        // Noise
+        var imgD = x.getImageData(0, 0, 400, 300);
+        for (var i = 0; i < imgD.data.length; i += 4) {
+          var n = (Math.random() - 0.5) * 6;
+          imgD.data[i] += n;
+          imgD.data[i + 1] += n;
+          imgD.data[i + 2] += n;
+        }
+        x.putImageData(imgD, 0, 0);
         return c.toDataURL();
       }
+
       function genCompareImg(appType) {
         var c = document.createElement("canvas");
         c.width = 400;
-        c.height = 280;
+        c.height = 300;
         var x = c.getContext("2d");
+        // TE SAME STYLE CO W genImg - dla porównania
         var apps = {
           MESSENGER: {
             bg1: "#0084ff",
             bg2: "#00a6ff",
-            headerH: 50,
-            font: "Helvetica",
+            headerH: 54,
+            headerBg: "#fff",
+            headerColor: "#000",
+            bubbleBg: "#0084ff",
+            bubbleColor: "#fff",
+            font: '"Segoe UI", Helvetica, Arial, sans-serif',
             icon: "💬",
+            statusBar: "#fff",
+            statusColor: "#000",
           },
           WHATSAPP: {
             bg1: "#075e54",
             bg2: "#128c7e",
-            headerH: 50,
-            font: "Segoe UI",
+            headerH: 56,
+            headerBg: "#075e54",
+            headerColor: "#fff",
+            bubbleBg: "#dcf8c6",
+            bubbleColor: "#303030",
+            font: '"Segoe UI", Helvetica, sans-serif',
             icon: "📱",
+            statusBar: "#075e54",
+            statusColor: "#fff",
+            wallpaper: "#e5ddd5",
           },
           SMS: {
-            bg1: "#2d2d3a",
-            bg2: "#3d3d4a",
-            headerH: 45,
-            font: "Roboto",
+            bg1: "#2c2c2e",
+            bg2: "#1c1c1e",
+            headerH: 44,
+            headerBg: "#1c1c1e",
+            headerColor: "#fff",
+            bubbleBg: "#007aff",
+            bubbleColor: "#fff",
+            font: '"SF Pro Text", -apple-system, sans-serif',
             icon: "💬",
+            statusBar: "#000",
+            statusColor: "#fff",
           },
           TWITTER: {
             bg1: "#1da1f2",
-            bg2: "#1a91da",
-            headerH: 48,
-            font: "Arial",
-            icon: "🐦",
+            bg2: "#1a8cd8",
+            headerH: 50,
+            headerBg: "#15202b",
+            headerColor: "#fff",
+            bubbleBg: "#1d9bf0",
+            bubbleColor: "#fff",
+            font: 'Arial, "Helvetica Neue", sans-serif',
+            icon: "𝕏",
+            statusBar: "#15202b",
+            statusColor: "#fff",
           },
           INSTAGRAM: {
             bg1: "#833ab4",
             bg2: "#fd1d1d",
             headerH: 50,
-            font: "Arial",
+            headerBg: "#fff",
+            headerColor: "#262626",
+            bubbleBg: "#3797f0",
+            bubbleColor: "#fff",
+            font: '"Segoe UI", Roboto, sans-serif',
             icon: "📷",
+            statusBar: "#fff",
+            statusColor: "#262626",
+            hasGradient: true,
           },
           EMAIL: {
-            bg1: "#c71610",
+            bg1: "#c5221f",
             bg2: "#ea4335",
-            headerH: 55,
-            font: "Arial",
-            icon: "📧",
+            headerH: 56,
+            headerBg: "#fff",
+            headerColor: "#202124",
+            bubbleBg: "#f1f3f4",
+            bubbleColor: "#202124",
+            font: "Arial, sans-serif",
+            icon: "✉️",
+            statusBar: "#fff",
+            statusColor: "#5f6368",
           },
           FACEBOOK: {
             bg1: "#1877f2",
-            bg2: "#4293f5",
-            headerH: 48,
-            font: "Helvetica",
+            bg2: "#166fe5",
+            headerH: 52,
+            headerBg: "#fff",
+            headerColor: "#050505",
+            bubbleBg: "#0084ff",
+            bubbleColor: "#fff",
+            font: '"Segoe UI", Helvetica, sans-serif',
             icon: "👤",
+            statusBar: "#fff",
+            statusColor: "#050505",
           },
           SNAPCHAT: {
             bg1: "#fffc00",
             bg2: "#ffeb3b",
-            headerH: 45,
-            font: "Avenir",
+            headerH: 48,
+            headerBg: "#fffc00",
+            headerColor: "#000",
+            bubbleBg: "#e1e1e1",
+            bubbleColor: "#000",
+            font: '"Avenir Next", "Segoe UI", sans-serif',
             icon: "👻",
+            statusBar: "#fffc00",
+            statusColor: "#000",
           },
           FORUM: {
-            bg1: "#2a2a4e",
-            bg2: "#3a3a6e",
-            headerH: 50,
-            font: "Verdana",
+            bg1: "#2d3748",
+            bg2: "#1a202c",
+            headerH: 48,
+            headerBg: "#2d3748",
+            headerColor: "#e2e8f0",
+            bubbleBg: "#4a5568",
+            bubbleColor: "#e2e8f0",
+            font: "Verdana, Geneva, sans-serif",
             icon: "💻",
+            statusBar: "#1a202c",
+            statusColor: "#a0aec0",
+          },
+          POTWIERDZENIE: {
+            bg1: "#0052cc",
+            bg2: "#003d99",
+            headerH: 60,
+            headerBg: "#fff",
+            headerColor: "#172b4d",
+            bubbleBg: "#deebff",
+            bubbleColor: "#172b4d",
+            font: "Arial, sans-serif",
+            icon: "🏦",
+            statusBar: "#0052cc",
+            statusColor: "#fff",
           },
         };
         var app = apps[appType] || apps["SMS"];
         // Status bar
-        x.fillStyle = "#1a1a2a";
-        x.fillRect(0, 0, 400, 22);
-        x.fillStyle = "#fff";
-        x.font = "bold 11px Arial";
-        x.fillText("⚡", 10, 15);
-        x.fillText("9:41", 180, 15);
-        x.fillText("📶 100%", 340, 15);
+        x.fillStyle = app.statusBar;
+        x.fillRect(0, 0, 400, 24);
+        x.fillStyle = app.statusColor;
+        x.font = "bold 12px Arial";
+        x.fillText("📶", 15, 16);
+        x.fillText("9:41", 180, 16);
+        x.fillText("🔋", 355, 16);
         // Header
-        var grad = x.createLinearGradient(0, 22, 0, 22 + app.headerH);
-        grad.addColorStop(0, app.bg1);
-        grad.addColorStop(1, app.bg2);
-        x.fillStyle = grad;
-        x.fillRect(0, 22, 400, app.headerH);
-        x.fillStyle = "#fff";
-        x.font = "bold 16px " + app.font;
+        var chatY = 24;
+        if (app.hasGradient) {
+          var hgrad = x.createLinearGradient(0, chatY, 400, chatY);
+          hgrad.addColorStop(0, "#833ab4");
+          hgrad.addColorStop(0.5, "#fd1d1d");
+          hgrad.addColorStop(1, "#fcb045");
+          x.fillStyle = hgrad;
+        } else {
+          x.fillStyle = app.headerBg;
+        }
+        x.fillRect(0, chatY, 400, app.headerH);
+        x.fillStyle = app.headerColor;
+        x.font = "bold 15px " + app.font;
         x.fillText(
-          app.icon + " " + appType + " - ORYGINAŁ",
+          app.icon + " " + appType + " - WZORZEC",
           15,
-          22 + app.headerH / 2 + 6
+          chatY + app.headerH / 2 + 5
         );
         // Chat area
-        var chatY = 22 + app.headerH;
-        x.fillStyle = "#0a0a15";
-        x.fillRect(0, chatY, 400, 280 - chatY);
-        // Example bubble
-        x.fillStyle = "#0084ff";
+        chatY += app.headerH;
+        x.fillStyle = app.wallpaper || "#0a0a12";
+        x.fillRect(0, chatY, 400, 300 - chatY);
+        // Example bubble - DOKŁADNIE TE SAME KOLORY
+        x.shadowColor = "rgba(0,0,0,0.15)";
+        x.shadowBlur = 8;
+        x.fillStyle = app.bubbleBg;
         x.beginPath();
-        x.roundRect(15, chatY + 20, 280, 70, 12);
+        x.roundRect(15, chatY + 20, 300, 70, 16);
         x.fill();
-        x.fillStyle = "#fff";
-        x.font = "13px " + app.font;
-        x.fillText("To jest przykład prawidłowej", 25, chatY + 45);
-        x.fillText("wiadomości w aplikacji " + appType, 25, chatY + 63);
-        // Info box
-        x.fillStyle = "rgba(0,255,255,0.1)";
-        x.fillRect(15, chatY + 110, 370, 80);
+        x.shadowBlur = 0;
+        x.fillStyle = app.bubbleColor;
+        x.font = "14px " + app.font;
+        x.fillText("To jest PRAWDZIWA wiadomość", 28, chatY + 50);
+        x.fillText("z aplikacji " + appType, 28, chatY + 70);
+        // Info panel
+        x.fillStyle = "rgba(0,255,255,0.08)";
+        x.fillRect(15, chatY + 110, 370, 100);
         x.strokeStyle = "#0ff";
         x.lineWidth = 2;
-        x.strokeRect(15, chatY + 110, 370, 80);
+        x.strokeRect(15, chatY + 110, 370, 100);
         x.fillStyle = "#0ff";
-        x.font = "bold 12px Arial";
-        x.fillText("📋 SPRAWDŹ:", 25, chatY + 130);
+        x.font = "bold 13px Arial";
+        x.fillText("🔍 PORÓWNAJ Z DOWODEM:", 25, chatY + 135);
         x.fillStyle = "#fff";
-        x.font = "11px Arial";
-        x.fillText("• Czcionka: " + app.font, 25, chatY + 148);
-        x.fillText("• Kolor nagłówka: prawidłowy gradient", 25, chatY + 163);
+        x.font = "12px Arial";
         x.fillText(
-          "• Układ elementów: standardowy dla " + appType,
+          "✓ Czcionka: " + app.font.split(",")[0].replace(/"/g, ""),
           25,
-          chatY + 178
+          chatY + 158
         );
+        x.fillText("✓ Kolor bąbelka: " + app.bubbleBg, 25, chatY + 178);
+        x.fillText("✓ Kolor nagłówka: " + app.headerBg, 25, chatY + 198);
         return c.toDataURL();
       }
       function saveGame() {

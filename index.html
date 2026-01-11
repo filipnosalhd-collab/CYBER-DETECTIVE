@@ -193,9 +193,11 @@
         display: none;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         padding: 20px;
         text-align: center;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
       #intro::before {
         content: "";
@@ -211,6 +213,28 @@
             rgba(255, 0, 255, 0.1) 0%,
             transparent 50%
           );
+        pointer-events: none;
+      }
+      #intro > * {
+        position: relative;
+        z-index: 1;
+      }
+      .rules-box {
+        width: 90%;
+        max-width: 550px;
+        max-height: 50vh;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        background: #111;
+        color: #ccc;
+        border: 2px solid #0ff;
+        border-radius: 10px;
+        padding: 15px;
+        font-size: 13px;
+        line-height: 1.6;
+        font-family: Arial, sans-serif;
+        text-align: left;
+        margin-bottom: 20px;
       }
       #intro h1 {
         font-family: "Orbitron";
@@ -376,6 +400,22 @@
           transparent
         );
         padding-left: 20px;
+      }
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0a0a15;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #0ff, #0f8);
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #0f8, #0ff);
       }
       #computer {
         position: fixed;
@@ -1102,133 +1142,107 @@
     <div id="intro">
       <h1>CYBER DETECTIVE</h1>
       <p>Śledczy ds. Cyberprzestępczości</p>
-      <div
-        style="
-          text-align: left;
-          background: #1a1a2e;
-          padding: 15px;
-          border-radius: 10px;
-          margin: 15px 0;
-          max-height: 50vh;
-          overflow-y: auto;
-          font-size: 12px;
-          line-height: 1.6;
-        "
-      >
-        <h3 style="color: #0ff; margin-top: 0">📋 INSTRUKCJA GRY</h3>
+      <div class="rules-box">
+        <div
+          style="
+            color: #0ff;
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 10px;
+          "
+        >
+          📋 INSTRUKCJA GRY
+        </div>
 
-        <p style="color: #fc0"><strong>🎯 CEL GRY:</strong></p>
-        <p>
+        <div style="color: #fc0; font-weight: bold; margin-bottom: 5px">
+          🎯 CEL GRY:
+        </div>
+        <div style="margin-bottom: 15px">
           Jesteś detektywem cyfrowym. Analizujesz dowody cyberprzestępstw i
           przedstawiasz sprawy w sądzie lub na policji. Zarabiasz pieniądze za
           poprawne wnioski, tracisz za błędy!
-        </p>
+        </div>
 
-        <p style="color: #fc0"><strong>🏢 LOKALIZACJE W BIURZE:</strong></p>
-        <p>
-          • <strong>🚪 DRZWI</strong> - przyjmowanie nowych klientów<br />
-          • <strong>💻 KOMPUTER</strong> - analiza dowodów i wysyłanie spraw<br />
-          • <strong>🛒 SKLEP</strong> - kupowanie narzędzi forensycznych
-        </p>
+        <div style="color: #0f8; font-weight: bold; margin-bottom: 5px">
+          🏢 LOKALIZACJE W BIURZE:
+        </div>
+        <div style="margin-bottom: 15px">
+          • 🚪 DRZWI - przyjmowanie nowych klientów<br />
+          • 💻 KOMPUTER - analiza dowodów i wysyłanie spraw<br />
+          • 🛒 SKLEP - kupowanie narzędzi forensycznych
+        </div>
 
-        <p style="color: #fc0">
-          <strong>🔬 ANALIZA DOWODÓW (przy komputerze):</strong>
-        </p>
-        <p>
-          1. Wejdź w zakładkę <strong>📁 SPRAWY</strong><br />
-          2. Wybierz sprawę i kliknij <strong>🔍 ANALIZUJ</strong><br />
+        <div style="color: #0ff; font-weight: bold; margin-bottom: 5px">
+          🔬 ANALIZA DOWODÓW (przy komputerze):
+        </div>
+        <div style="margin-bottom: 15px">
+          1. Wejdź w zakładkę 📋 SPRAWY<br />
+          2. Wybierz sprawę i kliknij 🔍 ANALIZUJ<br />
           3. Użyj narzędzi do zbadania dowodu:<br />
-          &nbsp;&nbsp;• <strong>🔍 Lupa</strong> - powiększenie 2.5x
-          (darmowa)<br />
-          &nbsp;&nbsp;• <strong>📊 Meta</strong> - metadane pliku (800💰)<br />
-          &nbsp;&nbsp;• <strong>⚡ ELA</strong> - analiza błędów kompresji
-          (1500💰)<br />
-          &nbsp;&nbsp;• <strong>🔤 Font</strong> - sprawdzenie czcionek
-          (1000💰)<br />
-          &nbsp;&nbsp;• <strong>🕐 Czas</strong> - analiza znaczników czasowych
-          (1200💰)<br />
-          &nbsp;&nbsp;• <strong>🤖 AI</strong> - wykrywanie AI/deepfake
-          (3000💰)<br />
-          4. Na podstawie wyników zaznacz:
-          <strong style="color: #f36">❌ FAŁSZ</strong> lub
-          <strong style="color: #0f8">✓ OK</strong>
-        </p>
+          • 🔍 Lupa - powiększenie 2.5x (darmowa)<br />
+          • 📊 Meta - metadane pliku (800💰)<br />
+          • ⚡ ELA - analiza poziomu błędów (1500💰)<br />
+          • 🔤 Font - wykrywanie fontów (1000💰)<br />
+          • 🕐 Czas - analiza daty (1200💰)<br />
+          • 🤖 AI - wykrywanie AI (3000💰)<br />
+          4. Oceń dowód: ✓ PRAWDZIWY lub ✗ FAŁSZYWY
+        </div>
 
-        <p style="color: #fc0"><strong>📤 WYSYŁANIE SPRAWY:</strong></p>
-        <p>
-          1. Wejdź w zakładkę <strong>📤 WYŚLIJ</strong><br />
-          2. Wybierz sprawę z listy<br />
-          3. (Opcjonalnie) Kliknij <strong>🤵 POŚREDNIK</strong> - porada za
-          50💰<br />
-          4. Wybierz instytucję:<br />
-          &nbsp;&nbsp;• <strong>🚔 POLICJA</strong> - groźby, stalking,
-          przemoc<br />
-          &nbsp;&nbsp;• <strong>⚖️ SĄD</strong> - zniesławienie, oszustwa
-          cywilne<br />
-          5. Kliknij <strong>📤 WYŚLIJ</strong>
-        </p>
+        <div style="color: #fc0; font-weight: bold; margin-bottom: 5px">
+          📤 WYSYŁANIE SPRAW:
+        </div>
+        <div style="margin-bottom: 15px">
+          🚔 POLICJA - groźby, stalking, hacking, oszustwa<br />
+          ⚖️ SĄD - zniesławienie, podszywanie się<br />
+          📋 PROKURATURA - szantaż, wyłudzenia
+        </div>
 
-        <p style="color: #fc0"><strong>⚖️ ROZPRAWA / PRZESŁUCHANIE:</strong></p>
-        <p>
-          Po wysłaniu sprawy trafisz do sądu lub na policję. Musisz odpowiadać
-          na pytania!<br />
-          • Używaj <strong>słów kluczowych</strong> ze sprawy (imiona, miejsca,
-          szczegóły)<br />
-          • Twoje zeznania muszą być <strong>SPÓJNE</strong> z tym co
-          zaznaczyłeś!<br />
-          • Jeśli zaznaczyłeś FAŁSZ → mów że dowód jest fałszywy<br />
-          • Jeśli zaznaczyłeś OK → mów że dowód jest prawdziwy
-        </p>
+        <div style="color: #f36; font-weight: bold; margin-bottom: 5px">
+          ⚖️ ROZPRAWA/PRZESŁUCHANIE:
+        </div>
+        <div style="margin-bottom: 15px">
+          Odpowiadaj na pytania sędziego lub policji! Twoje zeznania MUSZĄ być
+          spójne z tym jak oceniłeś dowody. Używaj słów kluczowych związanych ze
+          sprawą.
+        </div>
 
-        <p style="color: #f36">
-          <strong>⚠️ UWAGA - KLIENT MOŻE KŁAMAĆ!</strong>
-        </p>
-        <p>
-          Niektórzy klienci sami fałszują dowody żeby wrobić niewinnych! Jeśli
-          analiza wykaże że to KLIENT sfałszował dowód - oskarż JEGO w
-          zeznaniach! (np. "klient kłamie", "klient sfałszował")
-        </p>
+        <div style="color: #f90; font-weight: bold; margin-bottom: 5px">
+          ⚠️ UWAGA - KLIENT MOŻE KŁAMAĆ!
+        </div>
+        <div style="margin-bottom: 15px">
+          Niektórzy klienci sami fałszują dowody! Jeśli odkryjesz że to KLIENT
+          sfabrykował dowody - możesz oskarżyć JEGO zamiast rzekomego sprawcy!
+        </div>
 
-        <p style="color: #fc0">
-          <strong>💰 SYSTEM OPŁAT ZA NARZĘDZIA:</strong>
-        </p>
-        <p>
-          Każde kupione narzędzie pobiera
-          <strong style="color: #f36">% z każdej wypłaty</strong>!<br />
-          &nbsp;&nbsp;• 📊 Meta = <strong>5%</strong> z wypłat<br />
-          &nbsp;&nbsp;• 🔤 Font = <strong>6%</strong> z wypłat<br />
-          &nbsp;&nbsp;• 🕐 Czas = <strong>8%</strong> z wypłat<br />
-          &nbsp;&nbsp;• ⚡ ELA = <strong>10%</strong> z wypłat<br />
-          &nbsp;&nbsp;• 🤖 AI = <strong>15%</strong> z wypłat<br />
-          Wszystkie narzędzia razem =
-          <strong style="color: #f36">44% podatku!</strong><br />
-          Możesz <strong style="color: #0f8">sprzedać</strong> narzędzie za 5%
-          jego wartości żeby pozbyć się opłaty.
-        </p>
+        <div style="color: #0f8; font-weight: bold; margin-bottom: 5px">
+          💰 SYSTEM PODATKÓW:
+        </div>
+        <div style="margin-bottom: 15px">
+          Każde zakupione narzędzie pobiera % od wypłat:<br />
+          Meta 5%, ELA 10%, Font 6%, Czas 8%, AI 15%<br />
+          Wszystkie razem = 44% podatku!<br />
+          Możesz sprzedać narzędzia w sklepie za 5% ceny.
+        </div>
 
-        <p style="color: #fc0"><strong>💰 NAGRODY I KARY:</strong></p>
-        <p>
-          • ✅ Poprawna analiza + dobre zeznania =
-          <strong style="color: #0f8">+150% nagrody</strong><br />
-          • ✅ Poprawna analiza =
-          <strong style="color: #0f8">+100% nagrody</strong><br />
-          • ⚠️ Słabe zeznania =
-          <strong style="color: #f90">+50% lub mniej</strong><br />
-          • ❌ Błędna analiza = <strong style="color: #f36">GRZYWNA</strong
-          ><br />
-          • ❌ Sprzeczne zeznania = <strong style="color: #f36">GRZYWNA</strong
-          ><br />
-          • ❌ Fałszywe oskarżenie =
-          <strong style="color: #f36">ZAWIESZENIE 2h!</strong>
-        </p>
+        <div style="color: #0ff; font-weight: bold; margin-bottom: 5px">
+          💬 ROZMOWY Z KLIENTAMI:
+        </div>
+        <div style="margin-bottom: 15px">
+          Możesz rozmawiać z klientami przez czat! Poproś o dodatkowe screeny -
+          ale pamiętaj: jeśli pierwszy dowód był fałszywy, kolejne też będą
+          fałszywe!
+        </div>
 
-        <p style="color: #0ff"><strong>💡 WSKAZÓWKI:</strong></p>
-        <p>
-          • Czytaj uważnie historię klienta - tam są wskazówki!<br />
-          • Sprawdź WSZYSTKIE narzędzia przed oceną<br />
-          • Pamiętaj co zaznaczyłeś - sędzia/policja o to zapyta!<br />
-          • Nie spiesz się - błędy kosztują!
-        </p>
+        <div style="color: #fc0; font-weight: bold; margin-bottom: 5px">
+          💡 WSKAZÓWKI:
+        </div>
+        <div>
+          • Czytaj uważnie historię klienta<br />
+          • Sprawdź wszystkie narzędzia<br />
+          • Pamiętaj co zaznaczyłeś (prawdziwe/fałszywe)<br />
+          • Nie spiesz się z oceną!<br />
+          • Negocjuj cenę z klientami
+        </div>
       </div>
       <button id="start-btn">▶ ROZPOCZNIJ GRĘ</button>
     </div>

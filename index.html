@@ -433,13 +433,11 @@
         flex: 1;
         background: #050508;
         display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
+        flex-direction: row;
+        overflow: auto;
       }
       #img-viewer img {
-        max-width: 95%;
-        max-height: 50vh;
+        max-width: 100%;
         transition: transform 0.3s;
         cursor: zoom-in;
       }
@@ -1099,20 +1097,32 @@
       </div>
       <div id="analysis-body">
         <div id="img-viewer">
-          <img id="analysis-img" src="" />
+          <div
+            id="evidence-side"
+            style="
+              flex: 1;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              overflow: auto;
+              padding: 10px;
+            "
+          >
+            <img
+              id="analysis-img"
+              src=""
+              style="display: block; max-width: 100%; max-height: 100%"
+            />
+          </div>
           <div
             id="compare-panel"
             style="
               display: none;
-              position: absolute;
-              right: 0;
-              top: 0;
               width: 45%;
-              height: 100%;
               background: #0a0a15;
               border-left: 2px solid #0ff;
               padding: 10px;
-              overflow: hidden;
+              overflow: auto;
             "
           >
             <h4 style="color: #0ff; font-size: 11px; margin-bottom: 5px">
@@ -2859,10 +2869,16 @@
               var compare = document.getElementById("compare-panel");
               var compareImg = document.getElementById("compare-img");
               if (!img.dataset.zoomed || img.dataset.zoomed == "false") {
-                img.style.width = "50%";
-                img.style.transform = "scale(2)";
+                img.style.transform = "scale(1.8)";
+                img.style.transformOrigin = "top left";
                 img.style.cursor = "zoom-out";
                 img.dataset.zoomed = "true";
+                document.getElementById("evidence-side").style.alignItems =
+                  "flex-start";
+                document.getElementById("evidence-side").style.justifyContent =
+                  "flex-start";
+                document.getElementById("evidence-side").style.overflow =
+                  "auto";
                 compare.style.display = "block";
                 var appType = curEv.tp.split(" ")[0].split("#")[0].trim();
                 compareImg.src = genCompareImg(appType);
@@ -2882,11 +2898,15 @@
                 };
                 notify("🔍 Lupa+Porównanie", "Oryginał po prawej!");
               } else {
-                img.style.width = "100%";
                 img.style.transform = "scale(1)";
+                img.style.transformOrigin = "center";
                 img.style.cursor = "zoom-in";
                 img.dataset.zoomed = "false";
                 compare.style.display = "none";
+                document.getElementById("evidence-side").style.alignItems =
+                  "center";
+                document.getElementById("evidence-side").style.justifyContent =
+                  "center";
               }
               renderTools();
               return;

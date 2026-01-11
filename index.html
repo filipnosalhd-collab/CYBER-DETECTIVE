@@ -5457,218 +5457,555 @@
         opts.style.display = "none";
         var c = d.caseData;
         var txt = d.allTexts ? d.allTexts.toLowerCase() : "";
-        var found = [];
+        var lastTxt = d.lastAnswer ? d.lastAnswer.toLowerCase() : "";
+
+        // SŁOWA KLUCZOWE W KONTEKŚCIE - per typ sprawy
+        var contextKeywords = {
+          GROŹBY: [
+            "groźb",
+            "grozi",
+            "zastrasz",
+            "zabij",
+            "pobij",
+            "atak",
+            "strach",
+            "boj",
+            "niebezp",
+            "przem",
+            "zagrożen",
+            "śmier",
+            "krzywda",
+            "rodzin",
+          ],
+          STALKING: [
+            "śledzeni",
+            "obserwuj",
+            "stalking",
+            "śledzi",
+            "nachodzi",
+            "czatuj",
+            "nękani",
+            "kontroluj",
+            "prześladuj",
+            "obsesj",
+            "dzwoni",
+            "wiadomo",
+          ],
+          HACKING: [
+            "właman",
+            "hack",
+            "hasło",
+            "konto",
+            "phishing",
+            "link",
+            "malware",
+            "wirus",
+            "dostęp",
+            "logowani",
+            "danych",
+            "kradzie",
+            "cyberprzestęp",
+            "serwer",
+          ],
+          OSZUSTWO: [
+            "oszust",
+            "pieniąd",
+            "przelew",
+            "płatno",
+            "konto",
+            "bank",
+            "fałszyw",
+            "wyłudz",
+            "kradzież",
+            "pienięd",
+            "strat",
+            "ofiara",
+            "scam",
+          ],
+          ZNIESŁAWIENIE: [
+            "zniesławi",
+            "pomówi",
+            "kłamstw",
+            "reputacj",
+            "opini",
+            "fałszyw",
+            "oskarżeni",
+            "zarzut",
+            "publiczn",
+            "media",
+            "post",
+            "komentarz",
+          ],
+          PODSZYWANIE: [
+            "podszyw",
+            "fałszyw",
+            "profil",
+            "tożsam",
+            "konto",
+            "udawa",
+            "imitacj",
+            "fake",
+            "imperson",
+            "kradzież",
+            "wizerun",
+          ],
+          SZANTAŻ: [
+            "szantaż",
+            "groźb",
+            "ujawni",
+            "zdjęci",
+            "nagra",
+            "pieniąd",
+            "żąda",
+            "zapłat",
+            "sekret",
+            "kompromit",
+            "wyciek",
+          ],
+        };
+        var typeKw = contextKeywords[c.type] || [];
+
+        // Sprawdź ile słów kluczowych z kontekstu użył gracz
+        var foundContext = 0;
+        for (var i = 0; i < typeKw.length; i++) {
+          if (txt.indexOf(typeKw[i]) >= 0) foundContext++;
+        }
+        // Sprawdź też słowa kluczowe z samej sprawy
+        var foundCase = 0;
         if (c.keywords) {
           for (var i = 0; i < c.keywords.length; i++) {
-            if (txt.indexOf(c.keywords[i]) >= 0) found.push(c.keywords[i]);
+            if (txt.indexOf(c.keywords[i]) >= 0) foundCase++;
           }
         }
+
         var mentionedSuspect =
           c.suspect && txt.indexOf(c.suspect.split(" ")[0].toLowerCase()) >= 0;
         var mentionedEvidence =
           txt.indexOf("dowod") >= 0 ||
           txt.indexOf("screen") >= 0 ||
-          txt.indexOf("analiz") >= 0;
+          txt.indexOf("analiz") >= 0 ||
+          txt.indexOf("mail") >= 0 ||
+          txt.indexOf("sms") >= 0 ||
+          txt.indexOf("zdjęci") >= 0;
+        var mentionedDetails =
+          txt.indexOf("szczegół") >= 0 ||
+          txt.indexOf("dokładni") >= 0 ||
+          foundCase > 2 ||
+          foundContext > 2;
         var playerVerdict = c.evidence[0].verdict;
         var verdictWord = playerVerdict ? "FAŁSZYWY" : "PRAWDZIWY";
 
-        if (d.type == "Sad") {
-          var phases = [
-            {
-              who: "judge",
-              icon: "⚖️ SĘDZIA",
-              say:
-                "Rozprawa w sprawie " +
-                c.name +
-                ". Zarzut: " +
-                c.type +
-                ". Oskarżycielu, proszę opisać czego dotyczy ta sprawa.",
-            },
-            {
-              who: "you",
-              icon: "🔍 TY",
-              say: "(Opisz sprawę własnymi słowami - co się stało?)",
-            },
-            {
-              who: "judge",
-              icon: "⚖️ SĘDZIA",
-              say: function () {
-                if (txt.length < 20)
-                  return "Panie oskarżycielu, proszę mówić głośniej. Czego dotyczy sprawa?";
-                if (found.length > 3)
-                  return "Rozumiem sytuację. Kto według Pana jest sprawcą?";
-                return "Proszę doprecyzować - jakie są szczegóły tej sprawy?";
-              },
-            },
-            {
-              who: "you",
-              icon: "🔍 TY",
-              say: "(Kto jest podejrzany? Opisz sprawcę)",
-            },
-            {
-              who: "judge",
-              icon: "⚖️ SĘDZIA",
-              say: function () {
-                if (mentionedSuspect)
-                  return (
-                    "Dobrze, mamy podejrzanego: " +
-                    c.suspect.split("-")[0] +
-                    ". Jakie ma Pan dowody?"
-                  );
-                if (
-                  txt.indexOf("nie wiem") >= 0 ||
-                  txt.indexOf("nie znam") >= 0
-                )
-                  return "Nie zna Pan sprawcy? Trudno będzie prowadzić sprawę. A dowody?";
-                return "Rozumiem. Proszę teraz przedstawić dowody.";
-              },
-            },
-            {
-              who: "you",
-              icon: "🔍 TY",
-              say: "(Jakie masz dowody? Co wykazała analiza?)",
-            },
-            {
-              who: "defense",
-              icon: "👔 OBROŃCA",
-              say: function () {
-                if (mentionedEvidence && found.length > 4)
-                  return 'Wysoki Sądzie! Te tak zwane "dowody" można sfabrykować! Żądam ich odrzucenia!';
-                if (mentionedEvidence)
-                  return "Sprzeciw! Skąd wiemy że te dowody są prawdziwe?";
-                return "Wysoki Sądzie, oskarżyciel nie przedstawił ŻADNYCH konkretnych dowodów!";
-              },
-            },
-            {
-              who: "judge",
-              icon: "⚖️ SĘDZIA",
-              say:
-                "W analizie zaznaczył Pan że dowód jest " +
-                verdictWord +
-                ". Czy podtrzymuje Pan tę ocenę? Proszę wyjaśnić.",
-            },
-            {
-              who: "you",
-              icon: "🔍 TY",
-              say: "(Powiedz czy dowód jest fałszywy czy prawdziwy i DLACZEGO - musi się zgadzać z tym co zaznaczyłeś!)",
-            },
-            {
-              who: "judge",
-              icon: "⚖️ SĘDZIA",
-              say: function () {
-                var saidFake =
-                  txt.indexOf("fałsz") >= 0 || txt.indexOf("sfałsz") >= 0;
-                var saidReal =
-                  txt.indexOf("prawdzi") >= 0 || txt.indexOf("autentycz") >= 0;
-                if ((playerVerdict && saidReal) || (!playerVerdict && saidFake))
-                  return "Chwileczkę... Pan mówi co innego niż zaznaczył w analizie! To poważna sprzeczność!";
-                if ((playerVerdict && saidFake) || (!playerVerdict && saidReal))
-                  return "Dobrze, zeznania zgadzają się z analizą. Ostatnie słowo.";
-                return "Proszę jasno powiedzieć - dowód FAŁSZYWY czy PRAWDZIWY?";
-              },
-            },
-            {
-              who: "you",
-              icon: "🔍 TY",
-              say: "(Podsumuj - kto winny i dlaczego)",
-            },
-            {
-              who: "judge",
-              icon: "⚖️ SĘDZIA",
-              say: "Dziękuję. Sąd wyda teraz wyrok...",
-              verdict: true,
-            },
+        // WYKRYWANIE CZY GRACZ MÓWI O FAŁSZYWYCH DOWODACH czy o czymś innym
+        function saidVerdictFake() {
+          var fakePatterns = [
+            "dowod.*fałsz",
+            "fałszyw.*dowod",
+            "screen.*sfałsz",
+            "sfałszow",
+            "fabryko",
+            "podrobion.*dowod",
+            "zmanipulow",
+            "dowod.*nieprawdzi",
+            "analiza.*fałsz",
+            "to fake",
+            "to podróbka",
+            "klient.*skłamał",
+            "klient.*fałsz",
           ];
-        } else {
-          var phases = [
-            {
-              who: "police",
-              icon: "🚔 OFICER",
-              say:
-                "Dzień dobry. Przyjmuję zgłoszenie. " +
-                c.name +
-                " - " +
-                c.type +
-                ". Co się stało?",
-            },
-            {
-              who: "you",
-              icon: "🔍 TY",
-              say: "(Opisz sytuację - co się wydarzyło?)",
-            },
-            {
-              who: "police",
-              icon: "🚔 OFICER",
-              say: function () {
-                if (txt.length < 20)
-                  return "Proszę mówić wyraźniej. Co dokładnie się stało?";
-                if (found.length > 2)
-                  return "Rozumiem. Kto jest podejrzany o to przestępstwo?";
-                return "Potrzebuję więcej szczegółów. Kto jest sprawcą?";
-              },
-            },
-            {
-              who: "you",
-              icon: "🔍 TY",
-              say: "(Kto to zrobił? Masz podejrzenia?)",
-            },
-            {
-              who: "police",
-              icon: "🚔 OFICER",
-              say: function () {
-                if (mentionedSuspect)
-                  return (
-                    "Mamy namiar: " +
-                    c.suspect.split("-")[0] +
-                    ". Jakie masz dowody przeciwko tej osobie?"
-                  );
-                if (txt.indexOf("nie wiem") >= 0)
-                  return "Nie znasz sprawcy? Będzie trudniej. A dowody jakieś masz?";
-                return "OK. Jakie masz dowody?";
-              },
-            },
-            {
-              who: "you",
-              icon: "🔍 TY",
-              say: "(Jakie masz dowody? Screeny, maile, nagrania?)",
-            },
-            {
-              who: "police",
-              icon: "🚔 OFICER",
-              say:
-                "W analizie zaznaczyłeś że dowód jest " +
-                verdictWord +
-                ". Czy to na pewno? Co dokładnie wykazała analiza?",
-            },
-            {
-              who: "you",
-              icon: "🔍 TY",
-              say: "(Potwierdź - dowód FAŁSZYWY czy PRAWDZIWY? Musi się zgadzać z zaznaczeniem!)",
-            },
-            {
-              who: "police",
-              icon: "🚔 OFICER",
-              say: function () {
-                var saidFake =
-                  txt.indexOf("fałsz") >= 0 || txt.indexOf("sfałsz") >= 0;
-                var saidReal =
-                  txt.indexOf("prawdzi") >= 0 || txt.indexOf("autentycz") >= 0;
-                if ((playerVerdict && saidReal) || (!playerVerdict && saidFake))
-                  return "Zaraz, zaraz... Mówisz co innego niż masz w dokumentach! To się nie zgadza!";
-                if (c.type == "GROŹBY" || c.type == "STALKING")
-                  return "OK. Czy ofiara jest bezpieczna?";
-                return "Rozumiem. Mam wystarczająco informacji.";
-              },
-            },
-            { who: "you", icon: "🔍 TY", say: "(Ostatnie informacje)" },
-            {
-              who: "police",
-              icon: "🚔 OFICER",
-              say: "Dobrze, mam pełny obraz. Podejmuję decyzję...",
-              verdict: true,
-            },
+          for (var i = 0; i < fakePatterns.length; i++) {
+            if (txt.match(new RegExp(fakePatterns[i]))) return true;
+          }
+          // Ale NIE jeśli mówi o "fałszywym linku", "fałszywej stronie" itp.
+          var falsePositives = [
+            "fałszyw.*link",
+            "fałszyw.*stron",
+            "fałszyw.*mail",
+            "fałszyw.*kont",
+            "fałszyw.*profil",
+            "fałszyw.*wiadomo",
           ];
+          var hasFalsePositive = false;
+          for (var i = 0; i < falsePositives.length; i++) {
+            if (lastTxt.match(new RegExp(falsePositives[i])))
+              hasFalsePositive = true;
+          }
+          if (
+            hasFalsePositive &&
+            !lastTxt.match(/dowod.*fałsz|fałsz.*dowod|screen.*fałsz/)
+          )
+            return false;
+          return (
+            txt.indexOf("fałsz") >= 0 &&
+            (txt.indexOf("dowod") >= 0 || txt.indexOf("screen") >= 0)
+          );
         }
+        function saidVerdictReal() {
+          var realPatterns = [
+            "dowod.*prawdzi",
+            "prawdzi.*dowod",
+            "autentyczn",
+            "oryginaln",
+            "screen.*prawdzi",
+            "analiza.*potwierdz",
+            "dowod.*ok",
+            "wiarygod",
+          ];
+          for (var i = 0; i < realPatterns.length; i++) {
+            if (txt.match(new RegExp(realPatterns[i]))) return true;
+          }
+          return (
+            txt.indexOf("prawdzi") >= 0 &&
+            (txt.indexOf("dowod") >= 0 || txt.indexOf("screen") >= 0)
+          );
+        }
+
+        // DYNAMICZNE PYTANIA per typ sprawy
+        var typeQuestions = {
+          GROŹBY: {
+            q1: [
+              "Jakie groźby otrzymała ofiara?",
+              "Co dokładnie napisał sprawca?",
+              "Jak groził?",
+            ],
+            q2: [
+              "Czy ofiara jest teraz bezpieczna?",
+              "Czy sprawca wie gdzie mieszka ofiara?",
+              "Jak często przychodzą groźby?",
+            ],
+            q3: [
+              "Czy zgłoszono to wcześniej?",
+              "Czy są świadkowie?",
+              "Jak długo to trwa?",
+            ],
+          },
+          STALKING: {
+            q1: [
+              "Jak długo trwa to nękanie?",
+              "W jaki sposób sprawca śledzi ofiarę?",
+              "Ile wiadomości dziennie?",
+            ],
+            q2: [
+              "Czy sprawca zna miejsce zamieszkania ofiary?",
+              "Czy ofiara czuje się zagrożona?",
+              "Czy były próby kontaktu osobistego?",
+            ],
+            q3: [
+              "Czy sprawca groził przemocą?",
+              "Czy ofiara zmieniała numery/konta?",
+              "Czy są inne ofiary?",
+            ],
+          },
+          HACKING: {
+            q1: [
+              "Jak doszło do włamania?",
+              "Czy klikał w jakieś podejrzane linki?",
+              "Co zostało skradzione?",
+            ],
+            q2: [
+              "Czy zmieniono hasła po incydencie?",
+              "Skąd było logowanie - z jakiego IP?",
+              "Jakie straty finansowe?",
+            ],
+            q3: [
+              "Czy bank został powiadomiony?",
+              "Czy są inne konta zagrożone?",
+              "Czy zachował maile phishingowe?",
+            ],
+          },
+          OSZUSTWO: {
+            q1: [
+              "Na jaką kwotę było oszustwo?",
+              "Jak oszust nawiązał kontakt?",
+              "Co obiecał sprawca?",
+            ],
+            q2: [
+              "Czy pieniądze można odzyskać?",
+              "Czy są dane sprawcy?",
+              "Jak dokonano płatności?",
+            ],
+            q3: [
+              "Czy są inni poszkodowani?",
+              "Czy sprawca nadal jest aktywny?",
+              "Czy bank był powiadomiony?",
+            ],
+          },
+          ZNIESŁAWIENIE: {
+            q1: [
+              "Co dokładnie napisano o kliencie?",
+              "Gdzie opublikowano te treści?",
+              "Ile osób to widziało?",
+            ],
+            q2: [
+              "Czy to wpłynęło na reputację zawodową?",
+              "Czy autor się podpisał?",
+              "Czy treści zostały usunięte?",
+            ],
+            q3: [
+              "Czy klient żąda przeprosin czy odszkodowania?",
+              "Czy są świadkowie szkody?",
+              "Jak długo treści były widoczne?",
+            ],
+          },
+          PODSZYWANIE: {
+            q1: [
+              "Pod kogo się podszywano?",
+              "Na jakiej platformie?",
+              "Co robił fałszywy profil?",
+            ],
+            q2: [
+              "Czy oszukano jakieś osoby trzecie?",
+              "Czy wyłudzono pieniądze?",
+              "Czy profil został zgłoszony?",
+            ],
+            q3: [
+              "Czy są podejrzenia kto to zrobił?",
+              "Jak długo profil istniał?",
+              "Czy platforma reagowała?",
+            ],
+          },
+          SZANTAŻ: {
+            q1: [
+              "Czym szantażuje sprawca?",
+              "Jakiej kwoty żąda?",
+              "Jakie materiały posiada?",
+            ],
+            q2: [
+              "Czy ofiara zapłaciła już cokolwiek?",
+              "Skąd sprawca ma te materiały?",
+              "Czy groził publikacją?",
+            ],
+            q3: [
+              "Czy ktoś jeszcze wie o szantażu?",
+              "Czy materiały są prawdziwe?",
+              "Czy był kontakt z policją?",
+            ],
+          },
+        };
+        var tq = typeQuestions[c.type] || {
+          q1: ["Co się stało?"],
+          q2: ["Kto jest podejrzany?"],
+          q3: ["Jakie masz dowody?"],
+        };
+        function pickQ(arr) {
+          return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        // FAZY - różne dla sądu i policji
+        if (d.type == "Sad") {
+          // Generuj fazy dynamicznie
+          if (!d.phases) {
+            d.phases = [
+              {
+                who: "judge",
+                icon: "⚖️ SĘDZIA",
+                say:
+                  "Rozprawa w sprawie " +
+                  c.name +
+                  ". Zarzut: " +
+                  c.type +
+                  ". Oskarżycielu, proszę przedstawić sprawę.",
+              },
+              {
+                who: "you",
+                icon: "🔍 TY",
+                say:
+                  "(Opisz co się stało - użyj słów związanych ze sprawą: " +
+                  typeKw.slice(0, 4).join(", ") +
+                  "...)",
+              },
+              {
+                who: "judge",
+                icon: "⚖️ SĘDZIA",
+                say: function () {
+                  if (txt.length < 15)
+                    return "Panie oskarżycielu, proszę mówić głośniej i wyraźniej!";
+                  if (mentionedDetails)
+                    return "Rozumiem sytuację. Kogo oskarżamy?";
+                  return pickQ(tq.q1);
+                },
+              },
+              {
+                who: "you",
+                icon: "🔍 TY",
+                say: mentionedSuspect
+                  ? "(Już podałeś sprawcę - co jeszcze chcesz dodać?)"
+                  : "(Kto jest sprawcą? Podaj imię lub opis)",
+              },
+              {
+                who: "judge",
+                icon: "⚖️ SĘDZIA",
+                say: function () {
+                  if (mentionedSuspect && mentionedEvidence)
+                    return "Mamy sprawcę i dowody. Proszę o szczegóły analizy.";
+                  if (mentionedSuspect)
+                    return (
+                      "Oskarżony: " +
+                      c.suspect.split("-")[0] +
+                      ". " +
+                      pickQ(tq.q2)
+                    );
+                  return pickQ(tq.q2);
+                },
+              },
+              {
+                who: "you",
+                icon: "🔍 TY",
+                say: mentionedEvidence
+                  ? "(Już wspomniałeś o dowodach - opisz analizę)"
+                  : "(Jakie masz dowody? Co wykazała analiza?)",
+              },
+              {
+                who: "defense",
+                icon: "👔 OBROŃCA",
+                say: function () {
+                  if (mentionedEvidence && foundContext > 3)
+                    return "Wysoki Sądzie! Żądam weryfikacji tych rzekomych dowodów!";
+                  if (!mentionedEvidence)
+                    return "Wysoki Sądzie, oskarżyciel nie przedstawił żadnych konkretnych dowodów!";
+                  return "Sprzeciw! Skąd pewność że dowody nie są sfabrykowane?";
+                },
+              },
+              {
+                who: "judge",
+                icon: "⚖️ SĘDZIA",
+                say:
+                  "Oskarżycielu, zaznaczył Pan w analizie że dowód jest " +
+                  verdictWord +
+                  ". Czy to Pana ostateczna ocena?",
+              },
+              {
+                who: "you",
+                icon: "🔍 TY",
+                say:
+                  "(Potwierdź: dowód " +
+                  verdictWord +
+                  " - i wyjaśnij DLACZEGO tak oceniłeś)",
+              },
+              {
+                who: "judge",
+                icon: "⚖️ SĘDZIA",
+                say: function () {
+                  var sf = saidVerdictFake(),
+                    sr = saidVerdictReal();
+                  if (playerVerdict && sr)
+                    return "SPRZECZNOŚĆ! Zaznaczył Pan FAŁSZYWY ale mówi że prawdziwy!";
+                  if (!playerVerdict && sf)
+                    return "SPRZECZNOŚĆ! Zaznaczył Pan PRAWDZIWY ale mówi że fałszywy!";
+                  if (sf || sr)
+                    return "Zeznania zgodne z dokumentacją. " + pickQ(tq.q3);
+                  return "Proszę jasno: dowód jest FAŁSZYWY czy PRAWDZIWY według analizy?";
+                },
+              },
+              {
+                who: "you",
+                icon: "🔍 TY",
+                say: "(Ostatnie słowo - podsumuj sprawę)",
+              },
+              {
+                who: "judge",
+                icon: "⚖️ SĘDZIA",
+                say: "Dziękuję. Sąd wyda wyrok...",
+                verdict: true,
+              },
+            ];
+          }
+        } else {
+          // POLICJA - inne pytania
+          if (!d.phases) {
+            d.phases = [
+              {
+                who: "police",
+                icon: "🚔 OFICER",
+                say:
+                  "Dzień dobry. Zgłoszenie: " +
+                  c.type +
+                  ". Proszę opisać sytuację.",
+              },
+              {
+                who: "you",
+                icon: "🔍 TY",
+                say: "(Opisz zdarzenie - " + c.type.toLowerCase() + ")",
+              },
+              {
+                who: "police",
+                icon: "🚔 OFICER",
+                say: function () {
+                  if (txt.length < 15)
+                    return "Proszę mówić konkretniej. Co dokładnie się stało?";
+                  if (mentionedDetails)
+                    return "OK, rozumiem. Kto jest podejrzany?";
+                  return pickQ(tq.q1);
+                },
+              },
+              {
+                who: "you",
+                icon: "🔍 TY",
+                say: mentionedSuspect
+                  ? "(Sprawca już podany - dodaj szczegóły)"
+                  : "(Kto to zrobił? Podejrzenia?)",
+              },
+              {
+                who: "police",
+                icon: "🚔 OFICER",
+                say: function () {
+                  if (mentionedSuspect && mentionedEvidence)
+                    return "Mamy podejrzanego i dowody. Co wykazała analiza?";
+                  if (mentionedSuspect)
+                    return (
+                      "Namierzamy: " +
+                      c.suspect.split("-")[0] +
+                      ". " +
+                      pickQ(tq.q2)
+                    );
+                  return pickQ(tq.q2);
+                },
+              },
+              {
+                who: "you",
+                icon: "🔍 TY",
+                say: mentionedEvidence
+                  ? "(Dowody już podane - opisz wyniki analizy)"
+                  : "(Jakie dowody? Screeny, maile?)",
+              },
+              {
+                who: "police",
+                icon: "🚔 OFICER",
+                say:
+                  "W dokumentach masz że dowód jest " +
+                  verdictWord +
+                  ". Potwierdzasz?",
+              },
+              {
+                who: "you",
+                icon: "🔍 TY",
+                say: "(Powiedz czy dowód PRAWDZIWY czy FAŁSZYWY - musi się zgadzać!)",
+              },
+              {
+                who: "police",
+                icon: "🚔 OFICER",
+                say: function () {
+                  var sf = saidVerdictFake(),
+                    sr = saidVerdictReal();
+                  if (playerVerdict && sr)
+                    return "Halo! W papierach masz FAŁSZYWY a mówisz prawdziwy?!";
+                  if (!playerVerdict && sf)
+                    return "Moment! W dokumentach PRAWDZIWY a ty że fałszywy?!";
+                  if (c.type == "GROŹBY" || c.type == "STALKING")
+                    return "Czy ofiara jest teraz bezpieczna?";
+                  return pickQ(tq.q3);
+                },
+              },
+              { who: "you", icon: "🔍 TY", say: "(Ostatnie informacje)" },
+              {
+                who: "police",
+                icon: "🚔 OFICER",
+                say: "Mam wszystko. Podejmuję decyzję...",
+                verdict: true,
+              },
+            ];
+          }
+        }
+        var phases = d.phases;
         var ph = phases[d.phase];
         if (!ph) {
           showSceneVerdict();
@@ -5701,6 +6038,7 @@
           document.getElementById("scene-input").style.display = "none";
           if (!sceneData.allTexts) sceneData.allTexts = "";
           sceneData.allTexts += " " + txt;
+          sceneData.lastAnswer = txt;
           document.getElementById("scene-text").textContent =
             txt.length > 0
               ? '"' +

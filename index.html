@@ -1103,16 +1103,56 @@
           <div class="visitor-avatar" id="v-avatar">👤</div>
           <div>
             <h3 id="v-name" style="color: #fff">Klient</h3>
-            <p style="color: #0f8">Opłata: <span id="v-fee">100</span>💰</p>
+            <p style="color: #0f8">
+              Bazowa opłata: <span id="v-fee">100</span>💰
+            </p>
           </div>
         </div>
         <div id="visitor-complaint"></div>
         <p style="color: #f90; font-size: 12px">
           ⏰ Termin: <span id="v-deadline">3</span> dni | Kara:
-          <span id="v-penalty">200</span>💰
+          <span id="v-penalty">200</span>💰 (stała)
         </p>
+        <div
+          style="
+            margin: 15px 0;
+            padding: 10px;
+            background: #1a1a2e;
+            border-radius: 8px;
+          "
+        >
+          <p style="color: #0ff; font-size: 12px; margin-bottom: 8px">
+            💰 NEGOCJUJ CENĘ:
+          </p>
+          <div style="display: flex; gap: 10px; align-items: center">
+            <input
+              type="number"
+              id="price-input"
+              style="
+                flex: 1;
+                padding: 10px;
+                background: #0a0a12;
+                border: 1px solid #0ff;
+                color: #fff;
+                border-radius: 5px;
+                font-size: 16px;
+              "
+              placeholder="Wpisz kwotę..."
+            /><span style="color: #fff">💰</span>
+          </div>
+          <p
+            id="price-response"
+            style="
+              color: #888;
+              font-size: 11px;
+              margin-top: 8px;
+              font-style: italic;
+            "
+          ></p>
+        </div>
         <div class="visitor-btns" style="margin-top: 15px">
-          <button id="btn-accept">✓ PRZYJMIJ</button
+          <button id="btn-accept">
+            ✓ PRZYJMIJ ZA <span id="agreed-price">100</span>💰</button
           ><button id="btn-reject">✕ ODRZUĆ</button>
         </div>
       </div>
@@ -1571,7 +1611,7 @@
               id: "e4",
               tp: "TWITTER",
               fake: true,
-              txt: "Imigranci won z Polski! Polska dla prawdziwych Polaków! 🇵🇱 #wypierpol",
+              txt: "Imigranci won z Polski! Polska dla prawdziwych Polaków! 🇵🇱 #wyp****ol",
               ind: {
                 meta: { s: 1, i: "Zrzut edytowany - Photoshop" },
                 ela: { s: 1, i: "Avatar wklejony z innego źródła" },
@@ -1660,7 +1700,7 @@
               id: "e6",
               tp: "SMS",
               fake: false,
-              txt: "Zabiję cię i całą twoją rodzinę skurwysynu. Wiem gdzie pracujesz. Uważaj jak wychodzisz z roboty.",
+              txt: "Zabiję cię i całą twoją rodzinę s********u. Wiem gdzie pracujesz. Uważaj jak wychodzisz z roboty.",
               ind: {
                 meta: { s: 0, i: "Zrzut Samsung - oryginalny" },
                 ela: { s: 0, i: "Brak modyfikacji" },
@@ -1920,7 +1960,7 @@
               id: "e12",
               tp: "INSTAGRAM DM",
               fake: true,
-              txt: "Wiem gdzie mieszkasz suko. Obserwuję cię codziennie. Niedługo cię dorwę i zabiję!!! 🔪",
+              txt: "Wiem gdzie mieszkasz s**o. Obserwuję cię codziennie. Niedługo cię dorwę i zabiję!!! 🔪",
               ind: {
                 meta: { s: 1, i: "Screenshot utworzony w Photoshop" },
                 ela: { s: 1, i: "Interfejs IG niezgodny z wersją" },
@@ -2322,15 +2362,19 @@
       }
       function renderCase() {
         if (!G.activeCases.length)
-          return '<div class="panel"><h2>📋 Brak Spraw</h2><p style="color:#888">Idź do DRZWI aby przyjąć klienta.</p></div>';
+          return '<div class="panel"><h2>📋 Brak Spraw</h2><p style="color:#888">Idz do DRZWI aby przyjac klienta.</p></div>';
         var h =
           '<div class="panel"><h2>📋 Aktywne Sprawy (' +
           G.activeCases.length +
           ")</h2>";
         for (var i = 0; i < G.activeCases.length; i++) {
           var c = G.activeCases[i],
-            left = c.days - (G.day - c.startDay),
-            ready = c.evidence[0].verified;
+            left = c.days - (G.day - c.startDay);
+          var done = 0;
+          for (var j = 0; j < c.evidence.length; j++) {
+            if (c.evidence[j].verified) done++;
+          }
+          var ready = done == c.evidence.length;
           h +=
             '<div class="case-card' +
             (G.selectedCase == i ? " active" : "") +
@@ -2345,7 +2389,7 @@
             " | ⏰" +
             left +
             " dni | " +
-            (ready ? "✅ Gotowe" : "🔍 Analizuj") +
+            (ready ? "✅ Gotowe" : "🔍 " + done + "/" + c.evidence.length) +
             "</p></div>";
         }
         h += "</div>";
@@ -2362,7 +2406,9 @@
             c.fullStory +
             '</p><button class="chat-client-btn" data-cidx="' +
             G.selectedCase +
-            '" style="background:#0ff;color:#000;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;margin-bottom:15px">💬 Napisz do klienta</button><h4 style="color:#0ff;margin-bottom:10px">📎 Dowody:</h4><div class="evidence-grid">';
+            '" style="background:#0ff;color:#000;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;margin-bottom:15px">💬 Napisz do klienta (popros o wiecej screenow!)</button><h4 style="color:#0ff;margin-bottom:10px">📎 Dowody (' +
+            c.evidence.length +
+            '/4 max):</h4><div class="evidence-grid">';
           for (var j = 0; j < c.evidence.length; j++) {
             var e = c.evidence[j];
             h +=
@@ -2379,7 +2425,7 @@
               '">' +
               (e.verified
                 ? e.verdict
-                  ? "⚠️ FAŁSZ"
+                  ? "⚠️ FALSZ"
                   : "✅ OK"
                 : "❓ Analizuj") +
               "</span></div>";
@@ -2390,12 +2436,39 @@
       }
       function renderSend() {
         var ready = G.activeCases.filter(function (c) {
-          return c.evidence[0].verified;
+          for (var i = 0; i < c.evidence.length; i++) {
+            if (!c.evidence[i].verified) return false;
+          }
+          return true;
         });
-        if (!ready.length)
-          return '<div class="panel"><h2>📤 Wyślij</h2><p style="color:#f90">Przeanalizuj dowody!</p></div>';
+        var partial = G.activeCases.filter(function (c) {
+          var done = 0;
+          for (var i = 0; i < c.evidence.length; i++) {
+            if (c.evidence[i].verified) done++;
+          }
+          return done > 0 && done < c.evidence.length;
+        });
+        if (!ready.length) {
+          var msg = "Przeanalizuj dowody!";
+          if (partial.length)
+            msg =
+              "Przeanalizuj WSZYSTKIE dowody! (" +
+              partial[0].name +
+              ": " +
+              partial[0].evidence.filter(function (e) {
+                return e.verified;
+              }).length +
+              "/" +
+              partial[0].evidence.length +
+              ")";
+          return (
+            '<div class="panel"><h2>📤 Wyslij</h2><p style="color:#f90">' +
+            msg +
+            "</p></div>"
+          );
+        }
         var h =
-          '<div class="panel"><h2>📤 Wyślij</h2><select id="case-sel" style="width:100%;padding:10px;background:#1a1a2e;border:1px solid #2a2a4e;color:#fff;border-radius:5px;margin-bottom:10px">';
+          '<div class="panel"><h2>📤 Wyslij</h2><select id="case-sel" style="width:100%;padding:10px;background:#1a1a2e;border:1px solid #2a2a4e;color:#fff;border-radius:5px;margin-bottom:10px">';
         for (var i = 0; i < ready.length; i++) {
           var idx = G.activeCases.indexOf(ready[i]);
           h +=
@@ -2405,10 +2478,12 @@
             ready[i].name +
             " (" +
             ready[i].type +
-            ")</option>";
+            ") - " +
+            ready[i].evidence.length +
+            " dowodow</option>";
         }
         h +=
-          '</select><p style="color:#f90;font-size:11px;margin-bottom:5px">⚠️ Błędne wnioski = GRZYWNA lub ZAWIESZENIE!</p><button id="mediator-btn" style="width:100%;background:linear-gradient(135deg,#fc0,#f90);color:#000;border:none;padding:10px;font-family:Orbitron;cursor:pointer;border-radius:8px;margin-bottom:15px;font-size:12px">🤵 ZAPYTAJ POŚREDNIKA</button><div class="recipient-grid"><div class="recipient-opt" data-r="Policja"><div class="icon">🚔</div><div class="name">Policja</div></div><div class="recipient-opt" data-r="Sąd"><div class="icon">⚖️</div><div class="name">Sąd</div></div></div><button class="send-btn" id="send-btn" disabled>📤 WYŚLIJ</button></div>';
+          '</select><p style="color:#f90;font-size:11px;margin-bottom:5px">⚠️ Bledne wnioski = GRZYWNA lub ZAWIESZENIE!</p><button id="mediator-btn" style="width:100%;background:linear-gradient(135deg,#fc0,#f90);color:#000;border:none;padding:10px;font-family:Orbitron;cursor:pointer;border-radius:8px;margin-bottom:15px;font-size:12px">🤵 ZAPYTAJ POSREDNIKA</button><div class="recipient-grid"><div class="recipient-opt" data-r="Policja"><div class="icon">🚔</div><div class="name">Policja</div></div><div class="recipient-opt" data-r="Sad"><div class="icon">⚖️</div><div class="name">Sad</div></div></div><button class="send-btn" id="send-btn" disabled>📤 WYSLIJ</button></div>';
         return h;
       }
       function renderInbox() {
@@ -2729,16 +2804,31 @@
         var h =
           '<div class="chat-msg client">' +
           c.avatar +
-          ": Cześć! Dziękuję że Pan/Pani zajmuje się moją sprawą. Jeśli ma Pan pytania - proszę pisać!</div>";
+          ": Dzien dobry! Dziekuje ze sie Pan/Pani zajmuje moja sprawa. Jesli potrzeba wiecej screenow - prosze pisac!</div>";
         if (c.chatHistory) {
           for (var i = 0; i < c.chatHistory.length; i++) {
             var m = c.chatHistory[i];
+            var txt = m.text;
+            var imgHtml = "";
+            if (txt.indexOf("__IMG__") >= 0 && txt.indexOf("__ENDIMG__") >= 0) {
+              var imgStart = txt.indexOf("__IMG__") + 7;
+              var imgEnd = txt.indexOf("__ENDIMG__");
+              var imgSrc = txt.substring(imgStart, imgEnd);
+              imgHtml =
+                '<div style="background:#0a0a15;padding:8px;border-radius:8px;margin:8px 0"><img src="' +
+                imgSrc +
+                '" style="max-width:100%;border-radius:5px;border:2px solid #0ff"><p style="color:#0ff;font-size:10px;margin-top:5px">📎 NOWY DOWOD - sprawdz w SPRAWY</p></div>';
+              txt = txt.substring(imgEnd + 10);
+            }
             h +=
               '<div class="chat-msg ' +
               m.from +
-              '">' +
-              (m.from == "you" ? "Ty: " : c.avatar + ": ") +
-              m.text +
+              '" style="margin-bottom:12px">' +
+              (m.from == "you"
+                ? '<b style="color:#0ff">Ty:</b> '
+                : "<b>" + c.avatar + ":</b> ") +
+              txt +
+              imgHtml +
               "</div>";
           }
         }
@@ -2748,41 +2838,119 @@
       }
       function getClientResponse(c, msg) {
         var m = msg.toLowerCase();
-        if (m.indexOf("policj") >= 0 || m.indexOf("zgłosi") >= 0)
-          return "Czy to znaczy że sprawa idzie do policji? Proszę mi powiedzieć co mam robić!";
-        if (m.indexOf("sąd") >= 0 || m.indexOf("rozprawa") >= 0)
-          return "Sąd? Będę musiał(a) zeznawać? Trochę się boję ale zrobię co trzeba.";
-        if (
-          m.indexOf("fałsz") >= 0 ||
-          m.indexOf("fake") >= 0 ||
-          m.indexOf("sfabrykowan") >= 0
-        )
-          return "Wiedziałem(am)! To było podrobione! Czy to znaczy że mogę wygrać sprawę?";
-        if (m.indexOf("prawdzi") >= 0 || m.indexOf("autentyczn") >= 0)
-          return "Czyli te dowody są prawdziwe? To dobrze czy źle dla mojej sprawy?";
-        if (
-          m.indexOf("dowod") >= 0 ||
+        var wantsScreens =
           m.indexOf("screen") >= 0 ||
-          m.indexOf("więcej") >= 0
-        )
-          return "Mam jeszcze trochę screenów i zapisanych wiadomości. Czy potrzebuje Pan/Pani więcej materiałów?";
-        if (m.indexOf("spokojnie") >= 0 || m.indexOf("nie martw") >= 0)
-          return "Dziękuję bardzo. Staram się nie panikować ale to naprawdę stresująca sytuacja...";
-        if (m.indexOf("aresztow") >= 0 || m.indexOf("zatrzym") >= 0)
-          return "Naprawdę go aresztują?! Nie wierzę! Dziękuję za pomoc!!!";
-        if (m.indexOf("nic") >= 0 && m.indexOf("zrobić") >= 0)
-          return "Jak to nic? Czyli nie ma żadnej nadziei? Proszę, musi być jakiś sposób...";
-        if (m.indexOf("czekaj") >= 0 || m.indexOf("cierpliw") >= 0)
-          return "Rozumiem, postaram się czekać. Ile to może potrwać?";
-        if (m.indexOf("pytanie") >= 0 || m.indexOf("?") >= 0)
-          return "Tak, słucham? O co chodzi?";
-        if (m.indexOf("dzięk") >= 0 || m.indexOf("super") >= 0)
-          return "To ja dziękuję! Bardzo się cieszę że ktoś mi pomaga!";
-        if (m.indexOf("podejrzew") >= 0 || m.indexOf("kto to") >= 0)
-          return "Mam pewne podejrzenia kto za tym stoi, ale nie mam 100% pewności. Wolę nie rzucać oskarżeń bez dowodów.";
-        if (m.indexOf("bezpiecz") >= 0 || m.indexOf("ochrona") >= 0)
-          return "Czy mogę liczyć na jakąś ochronę? Trochę się boję co będzie dalej...";
-        return "Rozumiem. Proszę dać mi znać jak tylko będzie coś nowego w sprawie. Czekam na informacje!";
+          (m.indexOf("dowod") >= 0 && m.indexOf("wiecej") >= 0) ||
+          (m.indexOf("wyslij") >= 0 && m.indexOf("wiecej") >= 0) ||
+          m.indexOf("przeslij") >= 0 ||
+          (m.indexOf("pokaz") >= 0 && m.indexOf("wiecej") >= 0) ||
+          (m.indexOf("jeszcze") >= 0 &&
+            (m.indexOf("dowod") >= 0 || m.indexOf("screen") >= 0));
+        if (wantsScreens) {
+          if (!c.extraScreensSent) c.extraScreensSent = 0;
+          if (c.extraScreensSent >= 3)
+            return (
+              "Niestety, to wszystkie screeny jakie mam. Te " +
+              c.evidence.length +
+              " dowody to wszystko co posiadam. Więcej nie mam."
+            );
+          c.extraScreensSent++;
+          var baseEv = c.evidence[0];
+          var extraTexts = [
+            "To kolejna wiadomość od sprawcy...",
+            "Mam jeszcze ten screen...",
+            "I jeszcze to znalazłem/am...",
+          ];
+          var extraTxt =
+            extraTexts[Math.min(c.extraScreensSent - 1, extraTexts.length - 1)];
+          var newEv = {
+            id: "e" + c.id + "_" + c.extraScreensSent,
+            tp: baseEv.tp + " #" + (c.evidence.length + 1),
+            fake: baseEv.fake,
+            txt: extraTxt + " " + baseEv.txt.substring(0, 25) + "...",
+            verified: false,
+            verdict: null,
+            ind: {
+              meta: {
+                s: baseEv.fake ? 1 : 0,
+                i: baseEv.fake
+                  ? "Edytowany - " +
+                    ["GIMP", "Photoshop", "Paint.NET"][c.extraScreensSent % 3]
+                  : "Oryginalny plik",
+              },
+              ela: {
+                s: baseEv.fake ? 1 : 0,
+                i: baseEv.fake
+                  ? "Widoczne ślady edycji"
+                  : "Brak śladów manipulacji",
+              },
+              font: {
+                s: baseEv.fake ? 1 : 0,
+                i: baseEv.fake
+                  ? "Czcionka niezgodna z aplikacją"
+                  : "Czcionka prawidłowa",
+              },
+              time: {
+                s: baseEv.fake ? 1 : 0,
+                i: baseEv.fake
+                  ? "Timestamp podejrzany"
+                  : "Znaczniki czasowe spójne",
+              },
+              ai: {
+                s: baseEv.fake ? 1 : 0,
+                i: baseEv.fake
+                  ? 80 +
+                    Math.floor(Math.random() * 15) +
+                    "% - prawdopodobnie sfałszowany"
+                  : 2 +
+                    Math.floor(Math.random() * 8) +
+                    "% - wygląda autentycznie",
+              },
+            },
+          };
+          newEv.img = genImg(newEv);
+          c.evidence.push(newEv);
+          if (!G.results[c.id]) G.results[c.id] = {};
+          G.results[c.id][newEv.id] = {};
+          saveGame();
+          setTimeout(function () {
+            notify("📎 Nowy dowód!", "Dodano screen #" + c.evidence.length);
+          }, 500);
+          return (
+            "__IMG__" +
+            newEv.img +
+            "__ENDIMG__📎 Wysylam screen #" +
+            c.evidence.length +
+            "! Zostalo " +
+            (3 - c.extraScreensSent) +
+            ". Znajdziesz go w SPRAWY - DOWODY."
+          );
+        }
+        if (c.type == "STALKING") {
+          if (m.indexOf("ile") >= 0 && m.indexOf("wiadomo") >= 0)
+            return "Dostaje kilkanascie wiadomosci dziennie.";
+          if (m.indexOf("gdzie") >= 0)
+            return "W kawiarni, przy pracy, wszedzie mnie sledzi.";
+          if (m.indexOf("blokow") >= 0)
+            return "Blokowalam go ale zaklada nowe konta.";
+        }
+        if (c.type == "GROZY") {
+          if (m.indexOf("ile") >= 0) return "Kilkanascie grozb juz dostalem.";
+          if (m.indexOf("grupa") >= 0) return "To 5-6 osob w grupie.";
+        }
+        if (m.indexOf("policj") >= 0)
+          return "Sprawa idzie do policji? Co mam robic?";
+        if (m.indexOf("sad") >= 0) return "Sad? Bede musial zeznawac?";
+        if (m.indexOf("falsz") >= 0) return "To bylo podrobione! Moge wygrac?";
+        if (m.indexOf("prawdzi") >= 0) return "Dowody sa prawdziwe?";
+        if (m.indexOf("dziek") >= 0) return "Dziekuje za pomoc!";
+        if (m.indexOf("podejrzew") >= 0)
+          return c.suspect ? "Podejrzewam: " + c.suspect : "Nie wiem kto to.";
+        return (
+          "Rozumiem. Mam jeszcze " +
+          (3 - (c.extraScreensSent || 0)) +
+          " screenow jesli potrzeba."
+        );
       }
       document.getElementById("chat-close").onclick = function () {
         document.getElementById("client-chat").style.display = "none";
@@ -2807,7 +2975,88 @@
         }, 1000 + Math.random() * 1000);
       };
       var currentVisitor = null;
+      var agreedPrice = 0;
+      function negotiatePrice(offered) {
+        if (!currentVisitor) return;
+        var base = currentVisitor.fee;
+        var max = Math.floor(base * 2.5);
+        var min = Math.floor(base * 0.5);
+        var resp = document.getElementById("price-response");
+        var priceBtn = document.getElementById("agreed-price");
+        var isMale =
+          currentVisitor.avatar.indexOf("👨") >= 0 ||
+          currentVisitor.avatar.indexOf("🧑") >= 0;
+        var honorific = isMale ? "Panie" : "Pani";
+        if (offered <= 0 || isNaN(offered)) {
+          resp.textContent = "Proszę wpisać konkretną kwotę.";
+          resp.style.color = "#f90";
+          return;
+        }
+        if (offered < min) {
+          resp.textContent =
+            '"' +
+            honorific +
+            ", to stanowczo za mało. Nie mogę się na to zgodzić. Minimum to " +
+            min +
+            '💰."';
+          resp.style.color = "#f36";
+          agreedPrice = 0;
+          priceBtn.textContent = "---";
+        } else if (offered <= base) {
+          resp.textContent =
+            '"Zgadzam się na ' + offered + '💰. To uczciwa cena."';
+          resp.style.color = "#0f8";
+          agreedPrice = offered;
+          priceBtn.textContent = offered;
+        } else if (offered <= Math.floor(base * 1.5)) {
+          resp.textContent =
+            '"Hmm... ' +
+            offered +
+            '💰 to trochę dużo, ale zgoda. Zależy mi na rozwiązaniu sprawy."';
+          resp.style.color = "#0f8";
+          agreedPrice = offered;
+          priceBtn.textContent = offered;
+        } else if (offered <= max) {
+          var chance = Math.random();
+          if (chance > 0.4) {
+            resp.textContent =
+              '"' +
+              offered +
+              '💰? *westchnienie* No dobrze, zgadzam się. Ale liczę na wyniki!"';
+            resp.style.color = "#fc0";
+            agreedPrice = offered;
+            priceBtn.textContent = offered;
+          } else {
+            var counter = Math.floor(base * 1.3);
+            resp.textContent =
+              '"' +
+              honorific +
+              ", " +
+              offered +
+              "💰 to za dużo. Mogę dać maksymalnie " +
+              counter +
+              '💰."';
+            resp.style.color = "#f90";
+            agreedPrice = counter;
+            priceBtn.textContent = counter;
+          }
+        } else {
+          resp.textContent =
+            '"' +
+            honorific +
+            "! " +
+            offered +
+            '💰?! To jakiś żart? Znajdę kogoś innego!"';
+          resp.style.color = "#f36";
+          agreedPrice = 0;
+          priceBtn.textContent = "---";
+        }
+      }
       function spawnVisitor() {
+        if (currentVisitor) {
+          document.getElementById("visitor").style.display = "flex";
+          return;
+        }
         var avail = CASES.filter(function (c) {
           return (
             !G.completed.find(function (x) {
@@ -2839,28 +3088,40 @@
           '"</em>';
         document.getElementById("v-deadline").textContent = c.days;
         document.getElementById("v-penalty").textContent = c.pen;
+        document.getElementById("price-input").value = c.fee;
+        document.getElementById("price-response").textContent = "";
+        document.getElementById("agreed-price").textContent = c.fee;
+        agreedPrice = c.fee;
         document.getElementById("visitor").style.display = "flex";
+        document.getElementById("price-input").oninput = function () {
+          negotiatePrice(parseInt(this.value) || 0);
+        };
       }
       document.getElementById("btn-accept").onclick = function () {
-        if (!currentVisitor) return;
+        if (!currentVisitor || agreedPrice <= 0) return;
         var c = currentVisitor;
-        G.credits += c.fee;
+        G.credits += agreedPrice;
         var nc = JSON.parse(JSON.stringify(c));
         nc.startDay = G.day;
+        nc.agreedFee = agreedPrice;
         nc.evidence[0].verified = false;
         nc.evidence[0].verdict = null;
         nc.evidence[0].img = genImg(nc.evidence[0]);
+        nc.extraScreens = 0;
+        nc.chatHistory = [];
         G.results[nc.id] = {};
         G.activeCases.push(nc);
         G.selectedCase = G.activeCases.length - 1;
         currentVisitor = null;
+        agreedPrice = 0;
         document.getElementById("visitor").style.display = "none";
         updateHUD();
         saveGame();
-        notify("Przyjęto!", "+" + c.fee + "💰");
+        notify("Przyjęto!", "+" + nc.agreedFee + "💰");
       };
       document.getElementById("btn-reject").onclick = function () {
         currentVisitor = null;
+        agreedPrice = 0;
         document.getElementById("visitor").style.display = "none";
       };
       function finishCase(idx, to) {
@@ -3812,131 +4073,11 @@
           renderer.setSize(innerWidth, innerHeight);
         }
       };
-      var chatClientIdx = null;
-      function openClientChat(idx) {
-        chatClientIdx = idx;
-        var c = G.activeCases[idx];
-        if (!c.chatHistory) c.chatHistory = [];
-        document.getElementById("chat-client-name").textContent =
-          "💬 " + c.name;
-        renderChatMessages();
-        document.getElementById("client-chat").style.display = "flex";
-      }
-      function renderChatMessages() {
-        var c = G.activeCases[chatClientIdx];
-        var h = "";
-        if (!c.chatHistory.length)
-          h =
-            '<p style="color:#666;text-align:center;font-style:italic">Rozpocznij rozmowę z klientem...</p>';
-        for (var i = 0; i < c.chatHistory.length; i++) {
-          var m = c.chatHistory[i];
-          h +=
-            '<div style="margin-bottom:10px;text-align:' +
-            (m.from == "ty" ? "right" : "left") +
-            '"><div style="display:inline-block;background:' +
-            (m.from == "ty" ? "#0ff" : "#2a2a4e") +
-            ";color:" +
-            (m.from == "ty" ? "#000" : "#fff") +
-            ';padding:8px 12px;border-radius:10px;max-width:80%;font-size:13px">' +
-            m.txt +
-            "</div></div>";
-        }
-        document.getElementById("chat-messages").innerHTML = h;
-        document.getElementById("chat-messages").scrollTop = 9999;
-      }
-      function getClientResponse(msg, c) {
-        var m = msg.toLowerCase();
-        if (m.indexOf("jak się czujesz") >= 0 || m.indexOf("jak się masz") >= 0)
-          return "Szczerze? Okropnie. Ta sytuacja mnie wykańcza. Dziękuję że pan pyta.";
-        if (
-          m.indexOf("policja") >= 0 ||
-          m.indexOf("zgłosiłem") >= 0 ||
-          m.indexOf("zgłosiłam") >= 0
-        )
-          return "Policja? Mam nadzieję że pomoże. Proszę mnie informować o postępach!";
-        if (m.indexOf("sąd") >= 0)
-          return "Sąd brzmi poważnie... Czy będę musiał/a zeznawać?";
-        if (m.indexOf("dowody") >= 0 || m.indexOf("screeny") >= 0)
-          return "Mam wszystko zapisane. Mogę przesłać więcej jeśli trzeba.";
-        if (
-          m.indexOf("podejrzany") >= 0 ||
-          m.indexOf("sprawca") >= 0 ||
-          m.indexOf("kto to") >= 0
-        )
-          return c.fullStory.indexOf("Podejrzewam") >= 0
-            ? "Jak mówiłem/am, mam podejrzenia kto za tym stoi. Ale nie mam 100% pewności."
-            : "Nie wiem dokładnie kto to. Dlatego proszę o pomoc.";
-        if (
-          m.indexOf("bezpiecz") >= 0 ||
-          m.indexOf("boisz") >= 0 ||
-          m.indexOf("grozi") >= 0
-        )
-          return c.type == "GROŹBY" || c.type == "STALKING"
-            ? "Tak, boję się. Czy mogę liczyć na jakąś ochronę?"
-            : "Na razie jest OK, ale sytuacja jest stresująca.";
-        if (
-          m.indexOf("spokojnie") >= 0 ||
-          m.indexOf("pomogę") >= 0 ||
-          m.indexOf("pomożemy") >= 0
-        )
-          return "Dziękuję bardzo. To dużo dla mnie znaczy.";
-        if (
-          m.indexOf("pieniąd") >= 0 ||
-          m.indexOf("koszt") >= 0 ||
-          m.indexOf("zapłac") >= 0
-        )
-          return "Jestem w stanie zapłacić ile trzeba, żeby to rozwiązać.";
-        if (
-          m.indexOf("deadline") >= 0 ||
-          m.indexOf("termin") >= 0 ||
-          m.indexOf("czas") >= 0
-        )
-          return "Proszę się nie spieszyć, ale... im szybciej tym lepiej. Ta sytuacja mnie dobija.";
-        if (
-          m.indexOf("więcej") >= 0 ||
-          m.indexOf("szczegóły") >= 0 ||
-          m.indexOf("opowiedz") >= 0
-        )
-          return c.fullStory;
-        if (
-          m.indexOf("sukces") >= 0 ||
-          m.indexOf("wygrał") >= 0 ||
-          m.indexOf("udało") >= 0
-        )
-          return "To wspaniała wiadomość! Dziękuję za pomoc!";
-        if (
-          m.indexOf("przegra") >= 0 ||
-          m.indexOf("nie udało") >= 0 ||
-          m.indexOf("przepraszam") >= 0
-        )
-          return "Rozumiem... Dziękuję że pan próbował. Może uda się inaczej.";
-        if (m.length < 5) return "Słucham?";
-        return "Rozumiem. Czy jest coś jeszcze co powinienem/powinnam wiedzieć? Proszę mnie informować o sprawie.";
-      }
-      document.getElementById("close-chat").onclick = function () {
-        document.getElementById("client-chat").style.display = "none";
-        chatClientIdx = null;
-      };
-      document.getElementById("chat-send").onclick = document.getElementById(
-        "chat-send"
-      ).ontouchend = function (e) {
+      document.oncontextmenu = function (e) {
         e.preventDefault();
-        var input = document.getElementById("chat-input");
-        var txt = input.value.trim();
-        if (!txt) return;
-        var c = G.activeCases[chatClientIdx];
-        if (!c.chatHistory) c.chatHistory = [];
-        c.chatHistory.push({ from: "ty", txt: txt });
-        var resp = getClientResponse(txt, c);
-        setTimeout(function () {
-          c.chatHistory.push({ from: "klient", txt: resp });
-          renderChatMessages();
-          saveGame();
-        }, 800);
-        input.value = "";
-        renderChatMessages();
-        saveGame();
+        return false;
       };
+      var chatClientIdx = null;
       var mediatorHistory = [];
       var mediatorCaseIdx = null;
       function openMediatorChat() {

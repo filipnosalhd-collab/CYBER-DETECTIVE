@@ -468,6 +468,11 @@
       .tool-btn.locked {
         opacity: 0.4;
       }
+      .tool-btn.blocked {
+        opacity: 0.3;
+        background: #333 !important;
+        cursor: not-allowed;
+      }
       .tool-btn.active {
         border-color: #0f8;
         color: #0f8;
@@ -1093,7 +1098,33 @@
         <button id="close-analysis">✕</button>
       </div>
       <div id="analysis-body">
-        <div id="img-viewer"><img id="analysis-img" src="" /></div>
+        <div id="img-viewer">
+          <img id="analysis-img" src="" />
+          <div
+            id="compare-panel"
+            style="
+              display: none;
+              position: absolute;
+              right: 0;
+              top: 0;
+              width: 45%;
+              height: 100%;
+              background: #0a0a15;
+              border-left: 2px solid #0ff;
+              padding: 10px;
+              overflow: hidden;
+            "
+          >
+            <h4 style="color: #0ff; font-size: 11px; margin-bottom: 5px">
+              📋 ORYGINAŁ (do porównania)
+            </h4>
+            <img
+              id="compare-img"
+              src=""
+              style="width: 100%; border-radius: 5px; cursor: zoom-in"
+            />
+          </div>
+        </div>
         <div id="tools-panel"></div>
       </div>
     </div>
@@ -2044,6 +2075,91 @@
         x.fillText(l, 10, y);
         return c.toDataURL();
       }
+      function genCompareImg(appType) {
+        var c = document.createElement("canvas");
+        c.width = 300;
+        c.height = 150;
+        var x = c.getContext("2d");
+        var apps = {
+          MESSENGER: {
+            bg: "#0084ff",
+            header: "Messenger",
+            font: "Helvetica",
+            headerH: 30,
+            msgBg: "#e4e6eb",
+            msgColor: "#000",
+          },
+          WHATSAPP: {
+            bg: "#075e54",
+            header: "WhatsApp",
+            font: "Segoe UI",
+            headerH: 28,
+            msgBg: "#dcf8c6",
+            msgColor: "#000",
+          },
+          SMS: {
+            bg: "#2a2a4e",
+            header: "Wiadomości SMS",
+            font: "Roboto",
+            headerH: 25,
+            msgBg: "#3a3a5e",
+            msgColor: "#fff",
+          },
+          TWITTER: {
+            bg: "#1da1f2",
+            header: "X (Twitter)",
+            font: "Chirp",
+            headerH: 30,
+            msgBg: "#192734",
+            msgColor: "#fff",
+          },
+          "INSTAGRAM DM": {
+            bg: "linear-gradient",
+            header: "Instagram",
+            font: "Proxima Nova",
+            headerH: 30,
+            msgBg: "#262626",
+            msgColor: "#fff",
+          },
+          EMAIL: {
+            bg: "#c71610",
+            header: "Gmail",
+            font: "Google Sans",
+            headerH: 35,
+            msgBg: "#fff",
+            msgColor: "#000",
+          },
+          FACEBOOK: {
+            bg: "#1877f2",
+            header: "Facebook",
+            font: "Helvetica",
+            headerH: 30,
+            msgBg: "#f0f2f5",
+            msgColor: "#000",
+          },
+        };
+        var app = apps[appType] || apps["SMS"];
+        x.fillStyle = app.bg == "linear-gradient" ? "#833ab4" : app.bg;
+        x.fillRect(0, 0, 300, app.headerH);
+        x.fillStyle = "#fff";
+        x.font = "bold 12px " + app.font + ", Arial";
+        x.fillText(app.header, 10, app.headerH - 8);
+        x.fillStyle = "#0a0a15";
+        x.fillRect(0, app.headerH, 300, 150 - app.headerH);
+        x.fillStyle = app.msgBg;
+        x.beginPath();
+        x.roundRect(10, app.headerH + 10, 200, 60, 8);
+        x.fill();
+        x.fillStyle = app.msgColor;
+        x.font = "12px " + app.font + ", Arial";
+        x.fillText("Przykładowa wiadomość w", 20, app.headerH + 30);
+        x.fillText("oryginalnym formacie " + app.header, 20, app.headerH + 45);
+        x.fillStyle = "#888";
+        x.font = "9px Arial";
+        x.fillText("Czcionka: " + app.font, 20, app.headerH + 60);
+        x.fillText("⬆️ PORÓWNAJ z dowodem ⬆️", 10, 140);
+        return c.toDataURL();
+      }
       function saveGame() {
         try {
           localStorage.setItem(
@@ -2678,19 +2794,31 @@
       };
       function renderTools() {
         var res = G.results[curCase.id][curEv.id] || {};
+        var usedCount = 0;
+        for (var k in res) {
+          if (res[k] && k != "zoom") usedCount++;
+        }
+        var toolUsedThisRound = usedCount > 0;
         var h =
-          '<div style="padding:5px"><h4 style="color:#0ff;margin-bottom:8px">NARZĘDZIA</h4>';
+          '<div style="padding:5px"><h4 style="color:#0ff;margin-bottom:5px">NARZĘDZIA</h4>';
+        if (toolUsedThisRound)
+          h +=
+            '<p style="color:#f90;font-size:9px;margin-bottom:5px">⚠️ Użyto narzędzia - oceń dowód!</p>';
         for (var k in TOOLS) {
           var t = TOOLS[k],
             have = G.tools[k],
             used = res[k];
+          var blocked = toolUsedThisRound && !used && k != "zoom";
           h +=
             '<button class="tool-btn' +
             (have ? "" : " locked") +
             (used ? " active" : "") +
+            (blocked ? " blocked" : "") +
             '" data-t="' +
             k +
-            '">' +
+            '" ' +
+            (blocked ? "disabled" : "") +
+            ">" +
             t.n +
             " " +
             (have ? (used ? "✓" : "") : t.p + "💰") +
@@ -2711,7 +2839,7 @@
             "</p>";
         }
         h +=
-          '</div><div id="verdict-btns"><button class="verdict-btn v-ok" id="v-ok">✓ OK</button><button class="verdict-btn v-fake" id="v-fake">✗ FAŁSZ</button></div>';
+          '</div><div id="verdict-btns"><button class="verdict-btn v-ok" id="v-ok">✓ PRAWDZIWY</button><button class="verdict-btn v-fake" id="v-fake">✗ FAŁSZYWY</button></div>';
         document.getElementById("tools-panel").innerHTML = h;
         var btns = document.querySelectorAll(".tool-btn");
         for (var i = 0; i < btns.length; i++) {
@@ -2722,24 +2850,54 @@
               notify("Brak!", "Kup w sklepie");
               return;
             }
+            if (this.classList.contains("blocked")) {
+              notify("Zablokowane!", "1 narzędzie na dowód");
+              return;
+            }
             if (t == "zoom") {
               var img = document.getElementById("analysis-img");
+              var compare = document.getElementById("compare-panel");
+              var compareImg = document.getElementById("compare-img");
               if (!img.dataset.zoomed || img.dataset.zoomed == "false") {
-                img.style.transform = "scale(2.5)";
+                img.style.width = "50%";
+                img.style.transform = "scale(2)";
                 img.style.cursor = "zoom-out";
                 img.dataset.zoomed = "true";
-                notify("🔍 Lupa", "Powiększono 2.5x");
+                compare.style.display = "block";
+                var appType = curEv.tp.split(" ")[0].split("#")[0].trim();
+                compareImg.src = genCompareImg(appType);
+                compareImg.style.cursor = "zoom-in";
+                compareImg.onclick = function () {
+                  if (this.style.transform == "scale(2)") {
+                    this.style.transform = "scale(1)";
+                    this.style.cursor = "zoom-in";
+                  } else {
+                    this.style.transform = "scale(2)";
+                    this.style.cursor = "zoom-out";
+                  }
+                };
                 G.results[curCase.id][curEv.id]["zoom"] = {
                   s: 0,
-                  i: "Powiększenie aktywne",
+                  i: "Porównaj czcionkę i układ z oryginałem →",
                 };
+                notify("🔍 Lupa+Porównanie", "Oryginał po prawej!");
               } else {
+                img.style.width = "100%";
                 img.style.transform = "scale(1)";
                 img.style.cursor = "zoom-in";
                 img.dataset.zoomed = "false";
-                notify("🔍 Lupa", "Normalny rozmiar");
+                compare.style.display = "none";
               }
               renderTools();
+              return;
+            }
+            var resObj = G.results[curCase.id][curEv.id];
+            var alreadyUsed = false;
+            for (var kk in resObj) {
+              if (resObj[kk] && kk != "zoom") alreadyUsed = true;
+            }
+            if (alreadyUsed) {
+              notify("Limit!", "1 narzędzie na dowód");
               return;
             }
             if (!curEv.ind || !curEv.ind[t]) return;

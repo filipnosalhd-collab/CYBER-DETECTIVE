@@ -3053,137 +3053,189 @@
           c.extraScreensSent++;
           var baseEv = c.evidence[0];
           var isFake = baseEv.fake;
-          var screenTexts = {
-            STALKING: [
-              "Widziałem cię dzisiaj w Żabce o 17:23. Kupiłaś mleko i bułki.",
-              "Ładna ta czerwona kurtka. Pasuje ci.",
-              "Twoja koleżanka z pracy ma na imię Asia, prawda? Często razem jecie lunch.",
-              "Wczoraj wróciłaś do domu o 21:37. Późno.",
-              "Wiem że byłaś u fryzjera. Nowa fryzura ci pasuje.",
-              "Twój samochód stał dzisiaj pod galerią handlową od 14:00 do 16:30.",
-              "Widziałem jak rozmawiałaś z tym facetem. Kto to był?",
-              "Nie ignoruj mnie. Wiem gdzie jesteś.",
-              "Dlaczego nie odpisujesz? Widzę że czytasz.",
-              "Twoje okno było otwarte wczoraj w nocy. Niebezpiecznie.",
-              "Ten facet co cię odwiedził w sobotę - to twój brat czy ktoś inny?",
-              "Lubisz tę kawiarnię przy rynku, prawda? Często tam chodzisz.",
-              "Widziałem cię na siłowni. Ćwiczysz w poniedziałki i środy.",
-              "Ślicznie wyglądasz w tej niebieskiej sukience.",
-              "Zauważyłem że zmieniłaś trasę do pracy. Dlaczego?",
-            ],
-            GROŹBY: [
-              "Znajdę cię i pożałujesz że się urodziłeś.",
-              "Wiem gdzie mieszkasz. Wiem gdzie pracujesz. Uważaj.",
-              "Ty i twoja rodzina zapłacicie za to co zrobiłeś.",
-              "Lepiej oglądaj się za siebie jak wychodzisz z domu.",
-              "To ostrzeżenie. Następnym razem nie będę taki miły.",
-              "Zniszczę ci życie. Pożałujesz.",
-              "Masz 24h żeby przeprosić. Potem będzie źle.",
-              "Wiem gdzie chodzi twoje dziecko do szkoły.",
-              "Twój samochód ładnie wygląda. Szkoda jakby mu się coś stało.",
-              "Nie śpij spokojnie. Nigdy nie wiesz kiedy przyjdę.",
-              "Zabiję cię sk***synu. To nie jest groźba, to obietnica.",
-              "Lepiej się wyprowadź z miasta. Dla twojego dobra.",
-              "Mam znajomych którzy chętnie cię odwiedzą.",
-              "Pamiętaj - zawsze cię znajdę.",
-              "To dopiero początek. Będzie gorzej.",
-            ],
-            ZNIESŁAWIENIE: [
-              "UWAGA! Ta osoba to oszust! Nie róbcie z nią interesów!",
-              "Oficjalnie informuję że [imię] kradnie pieniądze klientom.",
-              "Mam dowody że ta osoba jest pedofilem. Udostępniajcie!",
-              "[imię] zdradza żonę/męża z wieloma osobami. Mam zdjęcia.",
-              "Ta osoba rozprowadza narkotyki. Każdy w mieście wie.",
-              "SKANDAL! [imię] brał łapówki gdy pracował w urzędzie!",
-              "Ostrzegam wszystkich - ta osoba ma AIDS i tego nie mówi.",
-              "[imię] to złodziej! Ukradł mi 10000 zł! Uwaga na niego!",
-              "Mam nagranie jak [imię] bije swoją żonę. Potwór!",
-              "Ta osoba była w więzieniu za gwałt. Sprawdźcie sami.",
-              "[imię] oszukuje na wadze produktów w swoim sklepie!",
-              "UWAGA NA OSZUSTA! Sprzedaje podróbki jako oryginały!",
-              "Ta osoba to alkoholik który bije swoje dzieci.",
-              "[imię] wyłudza pieniądze od starszych osób! Przekręt!",
-              "Mam dowody na defraudację w firmie [imię]. Złodziej!",
-            ],
-            OSZUSTWO: [
-              "Przelej 500 zł na weryfikację konta, potem zwrócę 5000 zł.",
-              "Gratulacje! Wygrałeś iPhone! Wpłać tylko 99 zł za wysyłkę.",
-              "Jestem z banku, proszę podać kod BLIK do weryfikacji.",
-              "Sprzedam tanio - PlayStation 5 za 800 zł, nowe w folii!",
-              "Mama, zgubiłam telefon, to mój nowy numer. Pożycz 2000 zł pilnie.",
-              "Twoja paczka czeka, dopłać 12 zł cła klikając w link.",
-              "Pilne! Twoje konto zostanie zablokowane. Zaloguj się tutaj.",
-              "Oferuję pracę zdalną - 500 zł dziennie! Wpłać 200 zł na start.",
-              "Sprzedam samochód, wyjazd za granicę, cena do negocjacji.",
-              "Zainwestuj 1000 zł, zarobisz 10000 zł w tydzień! Gwarancja!",
-              "Kup kryptowalutę XYZ zanim eksploduje! Zostaw mi pieniądze.",
-              "Loteria wybrała twój numer! Wpłać podatek 300 zł po odbiór.",
-              "Sprzedam bilety na koncert - tańsze niż w kasie!",
-              "Twój komputer ma wirusa! Zadzwoń pod ten numer natychmiast.",
-              "Jestem prawnikiem, masz spadek do odebrania. Opłata 500 zł.",
-            ],
-            HACKING: [
-              "Mamy dostęp do twojego konta. Wpłać 2 BTC lub wszystko ujawnimy.",
-              "Twoje hasło to [hasło]. Widzimy wszystko co robisz.",
-              "Nagraliśmy cię przez kamerkę. Mamy wszystko. Płać albo publikujemy.",
-              "Włamaliśmy się na twoje social media. Wszystkie hasła mamy.",
-              "Twoje zdjęcia i dokumenty są nasze. Szyfrujemy dysk.",
-              "Zmieniliśmy ci hasła wszędzie. Chcesz odzyskać dostęp? Płać.",
-              "Mamy twoje dane bankowe. Współpracuj albo je wykorzystamy.",
-              "Właśnie przelaliśmy 5000 zł z twojego konta. Dzięki za hasło.",
-              "Twoja poczta należy teraz do nas. Widzimy wszystkie maile.",
-              "Admin panel twojej strony jest nasz. Płać albo kasujemy.",
-              "Wykradliśmy bazę danych klientów. Masz 48h.",
-              "Twój telefon jest zhakowany. Widzimy wszystko w czasie rzeczywistym.",
-              "Mamy dostęp do twojego dysku Google. Wszystkie pliki nasze.",
-              "Keylogger zainstalowany. Widzimy każde naciśnięcie klawisza.",
-              "Twoja sieć WiFi jest nasza. Monitorujemy cały ruch.",
-            ],
-            SZANTAŻ: [
-              "Mam twoje prywatne zdjęcia. Wpłać 5000 zł albo wyślę wszystkim.",
-              "Nagrałem naszą rozmowę wideo. Chcesz żeby rodzina zobaczyła?",
-              "Wiem o twojej zdradzie. Mam dowody. Płać albo żona się dowie.",
-              "Znam twój sekret. 3000 zł i zapomnę o wszystkim.",
-              "Mam screeny twoich rozmów. Wyobraź sobie co powiedzą w pracy.",
-              "Twoje prywatne filmy są bezpieczne. Na razie. Płać co miesiąc.",
-              "Opublikuję wszystko na Facebooku jeśli nie prześlesz pieniędzy.",
-              "Mam zdjęcia których nie chcesz żeby ktoś zobaczył. Dogadajmy się.",
-              "Twoi znajomi na FB dostaną ciekawy materiał. Chyba że...",
-              "Wiem gdzie pracujesz. Szef na pewno chciałby to zobaczyć.",
-              "Mam nagranie z kamery. Wiesz o czym mówię. 10000 zł.",
-              "Wszystkie twoje sekrety mogą wyjść na jaw. Cena: 8000 zł.",
-              "To byłaby szkoda gdyby dzieci zobaczyły te zdjęcia mamy/taty.",
-              "Media społecznościowe to potężna broń. Mam amunicję.",
-              "Możemy to załatwić po cichu. Albo wszyscy się dowiedzą.",
-            ],
-            PODSZYWANIE: [
-              "[Fałszywy profil] Sprzedaję oryginalne produkty Apple 50% taniej!",
-              "[Fałszywy profil] Polacy to najgorszy naród! Won z imigrantami!",
-              "[Fałszywy profil] Oszukuję klientów od lat i nic mi nie zrobicie.",
-              "[Fałszywy profil] Moja firma to ściema, nie kupujcie u mnie.",
-              "[Fałszywy profil] Zdradzam partnera z wieloma osobami hehe.",
-              "[Fałszywy profil] Jestem za legalizacją wszystkich narkotyków!",
-              "[Fałszywy profil] Nienawidzę swojej pracy i klientów.",
-              "[Fałszywy profil] Kradnę pomysły od innych i podaję jako swoje.",
-              "[Fałszywy profil] Moje produkty są podrabiane ale sprzedaję drogo.",
-              "[Fałszywy profil] Głosowałem na [kontrowersyjna partia] i jestem dumny!",
-              "[Fałszywy profil] Płacę pracownikom grosze a sam mam Porsche.",
-              "[Fałszywy profil] Wyrzuciłem pracownika bo mi się nie podobał.",
-              "[Fałszywy profil] Kłamię w CV i oszukuję pracodawców od lat.",
-              "[Fałszywy profil] Moja firma nie płaci podatków. I co mi zrobicie?",
-              "[Fałszywy profil] Zaczynam nowy biznes - piramida finansowa!",
-            ],
-          };
-          var typeKey = c.type;
-          var textsForType = screenTexts[typeKey] || screenTexts["GROŹBY"];
-          if (!c.usedScreenTexts) c.usedScreenTexts = [];
-          var availableTexts = textsForType.filter(function (t) {
-            return c.usedScreenTexts.indexOf(t) < 0;
-          });
-          if (availableTexts.length == 0) availableTexts = textsForType;
-          var randomText =
-            availableTexts[Math.floor(Math.random() * availableTexts.length)];
-          c.usedScreenTexts.push(randomText);
+          function generateScreenText(c, num) {
+            var baseEv = c.evidence[0];
+            var name = c.name.split(" ")[0];
+            var isFemale =
+              c.avatar.indexOf("👩") >= 0 ||
+              c.avatar.indexOf("🧑‍🦰") >= 0 ||
+              c.avatar.indexOf("👧") >= 0;
+            var suspect = c.suspect || "nieznany sprawca";
+
+            if (c.type == "STALKING") {
+              var texts = [
+                "Widziałem cię dzisiaj na mieście. " +
+                  (isFemale
+                    ? "Ładnie wyglądałaś."
+                    : "Wyglądałeś na zmęczonego."),
+                "Dlaczego mnie ignorujesz? Wiem że czytasz moje wiadomości.",
+                "Zauważyłem że " +
+                  (isFemale ? "zmieniłaś" : "zmieniłeś") +
+                  " trasę. Myślisz że to pomoże?",
+                isFemale
+                  ? "Widziałem cię z tą koleżanką. Kim ona jest?"
+                  : "Widziałem cię z tym kolegą. Kim on jest?",
+                "Nie uciekniesz przede mną. Zawsze cię znajdę.",
+                "Twoje okno było otwarte wczoraj wieczorem.",
+                "Wiem o której wychodzisz z domu i o której wracasz.",
+                isFemale ? "Ta nowa fryzura ci pasuje." : "Nowa kurtka? Ładna.",
+                "Widzę wszystko co robisz. Nie możesz się przede mną schować.",
+                "Dlaczego nie odbierasz telefonów? Wiem że masz przy sobie komórkę.",
+              ];
+              return texts[num % texts.length];
+            }
+
+            if (c.type == "GROŹBY") {
+              var isGroup =
+                c.fullStory.indexOf("grupa") >= 0 ||
+                c.fullStory.indexOf("koleżank") >= 0;
+              var isChild =
+                c.fullStory.indexOf("córk") >= 0 ||
+                c.fullStory.indexOf("13") >= 0 ||
+                c.fullStory.indexOf("12") >= 0 ||
+                c.fullStory.indexOf("nastolatk") >= 0;
+              if (isChild || isGroup) {
+                var texts = [
+                  "Lepiej nie przychodź jutro do szkoły.",
+                  "Wszyscy wiedzą że jesteś dziwna. Nikt cię nie lubi.",
+                  "Jak przyjdziesz to pożałujesz. Ostrzegamy.",
+                  "Twoje zdjęcie krąży po całej szkole haha.",
+                  "Czekamy na ciebie po lekcjach.",
+                  "Myślisz że jesteś lepsza? Pokażemy ci.",
+                  "Nie masz żadnych prawdziwych przyjaciół.",
+                  "Wszyscy się z ciebie śmieją za plecami.",
+                  "Lepiej się wyprowadź z miasta.",
+                  "To dopiero początek. Będzie gorzej.",
+                ];
+                return texts[num % texts.length];
+              } else {
+                var texts = [
+                  "Znajdę cię i pożałujesz.",
+                  "Wiem gdzie mieszkasz. Uważaj.",
+                  "Ty i twoja rodzina zapłacicie za to.",
+                  "Lepiej oglądaj się za siebie.",
+                  "To ostrzeżenie. Następnym razem będzie gorzej.",
+                  "Zniszczę ci życie.",
+                  "Masz 24h żeby przeprosić.",
+                  "Twój samochód ładnie wygląda. Szkoda jakby coś mu się stało.",
+                  "Nie śpij spokojnie.",
+                  "Pamiętaj - zawsze cię znajdę.",
+                ];
+                return texts[num % texts.length];
+              }
+            }
+
+            if (c.type == "ZNIESŁAWIENIE") {
+              var texts = [
+                "UWAGA! " +
+                  name +
+                  " to oszust! Nie wierzcie " +
+                  (isFemale ? "jej" : "mu") +
+                  "!",
+                "Mam dowody że " + name + " oszukuje ludzi!",
+                name + " kradnie od swoich klientów! Udostępniajcie!",
+                "SKANDAL! " +
+                  name +
+                  " " +
+                  (isFemale ? "brała" : "brał") +
+                  " łapówki!",
+                name +
+                  " to " +
+                  (isFemale ? "złodziejka" : "złodziej") +
+                  "! Każdy w mieście wie!",
+                "Ta osoba jest niebezpieczna! Ostrzegam wszystkich!",
+                name + " oszukuje na każdym kroku! Mam nagrania!",
+                "Nie róbcie interesów z " +
+                  name +
+                  "! " +
+                  (isFemale ? "Oszukała" : "Oszukał") +
+                  " mnie na tysiące!",
+                "UWAGA NA OSZUSTA! " +
+                  name +
+                  " " +
+                  (isFemale ? "zniszczyła" : "zniszczył") +
+                  " mi życie!",
+                "Wszyscy muszą wiedzieć prawdę o " + name + "!",
+              ];
+              return texts[num % texts.length];
+            }
+
+            if (c.type == "OSZUSTWO") {
+              var texts = [
+                "Przelej jeszcze 200 zł na dokończenie transakcji.",
+                "Twoja paczka czeka, dopłać 15 zł cła.",
+                "To ja, twój kuzyn. Potrzebuję pilnie 500 zł.",
+                "Wygrałeś nagrodę! Wpłać podatek żeby odebrać.",
+                "Jestem z banku, proszę potwierdzić dane.",
+                "Sprzedam taniej niż w sklepie! Przedpłata 50%.",
+                "Ostatnia szansa! Promocja kończy się za godzinę!",
+                "Zainwestuj teraz, zysk gwarantowany!",
+                "Twoje konto zostanie zablokowane. Kliknij link.",
+                "Mama, zmieniłam numer. Pożycz mi pilnie pieniądze.",
+              ];
+              return texts[num % texts.length];
+            }
+
+            if (c.type == "HACKING") {
+              var texts = [
+                "Mamy dostęp do twoich danych. Płać albo publikujemy.",
+                "Twoje hasła są nasze. Wszystkie konta przejęte.",
+                "Nagraliśmy cię przez kamerkę. Mamy materiał.",
+                "Szyfrujemy twój dysk. 48h na zapłatę.",
+                "Twoja poczta należy do nas. Widzimy wszystko.",
+                "Mamy twoje dane bankowe. Współpracuj.",
+                "Keylogger aktywny. Widzimy wszystko co piszesz.",
+                "Twój telefon jest pod kontrolą.",
+                "Wykradliśmy wszystkie twoje zdjęcia.",
+                "Zapłać albo twoi znajomi zobaczą ciekawe rzeczy.",
+              ];
+              return texts[num % texts.length];
+            }
+
+            if (c.type == "SZANTAŻ") {
+              var texts = [
+                "Mam twoje prywatne zdjęcia. Wpłać albo wyślę wszystkim.",
+                "Wiem o twojej tajemnicy. Możemy się dogadać.",
+                "Mam screeny rozmów. Wyobraź sobie co powiedzą w pracy.",
+                "Twoje sekrety są bezpieczne. Na razie.",
+                "Opublikuję wszystko jeśli nie zapłacisz.",
+                "Mam materiały których nie chcesz żeby ktoś widział.",
+                "Twoi znajomi chętnie zobaczą co mam.",
+                "Możemy to załatwić po cichu. Albo wszyscy się dowiedzą.",
+                "Płać co miesiąc albo zaczynam wysyłać.",
+                "To byłaby szkoda gdyby rodzina zobaczyła...",
+              ];
+              return texts[num % texts.length];
+            }
+
+            if (c.type == "PODSZYWANIE") {
+              var texts = [
+                "[Fałszywy profil " +
+                  name +
+                  "] Oszukuję klientów i nic mi nie zrobicie!",
+                "[Fałszywy profil " + name + "] Moja firma to ściema!",
+                "[Fałszywy profil " + name + "] Kradnę pomysły od innych!",
+                "[Fałszywy profil " + name + "] Nienawidzę swoich klientów!",
+                "[Fałszywy profil " +
+                  name +
+                  "] Sprzedaję podróbki jako oryginały!",
+                "[Fałszywy profil " + name + "] Nie płacę podatków haha!",
+                "[Fałszywy profil " +
+                  name +
+                  "] Wyrzucam pracowników bez powodu!",
+                "[Fałszywy profil " +
+                  name +
+                  "] Moje produkty są bezwartościowe!",
+                "[Fałszywy profil " + name + "] Oszukuję na wadze!",
+                "[Fałszywy profil " + name + "] Zaczynam piramidę finansową!",
+              ];
+              return texts[num % texts.length];
+            }
+
+            return baseEv.txt;
+          }
+
+          var randomText = generateScreenText(c, c.extraScreensSent);
           var newEv = {
             id: "e" + c.id + "_" + c.extraScreensSent,
             tp: baseEv.tp + " #" + (c.evidence.length + 1),
@@ -3196,10 +3248,10 @@
                 s: isFake ? 1 : 0,
                 i: isFake
                   ? "Plik edytowany w " +
-                    ["Photoshop", "GIMP", "Paint.NET", "Canva", "Pixlr"][
-                      Math.floor(Math.random() * 5)
+                    ["Photoshop", "GIMP", "Paint.NET", "Canva"][
+                      c.extraScreensSent % 4
                     ]
-                  : "Oryginalny plik - brak edycji",
+                  : "Oryginalny plik",
               },
               ela: {
                 s: isFake ? 1 : 0,
